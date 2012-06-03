@@ -14,6 +14,7 @@ public class RSSHandler extends DefaultHandler {
     private ArrayList<Article> articleList;
     private StringBuffer mSb;
 
+    private boolean isGuid = false;
     private boolean isArticle = false;
     private boolean isTitle = false;
     private boolean isContent = false;
@@ -40,6 +41,10 @@ public class RSSHandler extends DefaultHandler {
             isContent = true;
         }
 
+        else if ((localName.equalsIgnoreCase("GUID") || localName.equalsIgnoreCase("ID")) && isArticle == true) {
+            isGuid = true;
+        }        
+        
         else if (localName.equalsIgnoreCase("ITEM") || localName.equalsIgnoreCase("ENTRY")) {
             a = new Article();
             isArticle = true;
@@ -62,12 +67,17 @@ public class RSSHandler extends DefaultHandler {
             } 
             
             else if (isSummary) {
-                a.setText(mSb.toString().trim());
+                a.setSummary(mSb.toString().trim());
                 isSummary = false;
             } 
+
+            else if (isGuid) {
+                a.setGuid(mSb.toString().trim());
+                isGuid = false;
+            }             
             
             else if (isContent) {
-                a.setFull(mSb.toString().trim());
+                a.setContent(mSb.toString().trim());
                 isContent = false;
             }
 
@@ -77,7 +87,7 @@ public class RSSHandler extends DefaultHandler {
 
     public void characters(char[] ch, int start, int length) throws SAXException {
 
-        if (isArticle && (isTitle || isContent || isSummary)) {
+        if (isArticle && (isTitle || isContent || isSummary || isGuid)) {
             mSb.append(new String(ch, start, length));
         }
 

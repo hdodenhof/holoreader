@@ -12,6 +12,7 @@ import org.xml.sax.XMLReader;
 
 import de.hdodenhof.feedreader.DisplayArticleActivity;
 import de.hdodenhof.feedreader.adapter.ArticleAdapter;
+import de.hdodenhof.feedreader.dao.ArticlesDataSource;
 import de.hdodenhof.feedreader.dao.FeedsDataSource;
 import de.hdodenhof.feedreader.handler.RSSHandler;
 import de.hdodenhof.feedreader.model.Article;
@@ -36,7 +37,8 @@ public class DisplayFeedFragment extends Fragment {
     private ProgressDialog spinner;
 
     private ArticleAdapter articleAdapter;
-    private FeedsDataSource datasource;
+    private FeedsDataSource feedsdatasource;
+    private ArticlesDataSource articlesdatasource;
     private ListView articlelistview;
     private Feed feed;
 
@@ -46,15 +48,16 @@ public class DisplayFeedFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View contentView = inflater.inflate(R.layout.feed_fragment, container, false);
 
-        datasource = new FeedsDataSource(getActivity());
+        feedsdatasource = new FeedsDataSource(getActivity());
         try {
-            datasource.open();
+            feedsdatasource.open();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         long b = getActivity().getIntent().getLongExtra("feedid", -1);
-        feed = datasource.getFeed(b);
+        feed = feedsdatasource.getFeed(b);
+        feedsdatasource.close();
 
         articleAdapter = new ArticleAdapter(getActivity(), new ArrayList<Article>());
 
@@ -69,8 +72,8 @@ public class DisplayFeedFragment extends Fragment {
                 if (mDualPane) {
                     
                     DisplayArticleFragment articleFragment = (DisplayArticleFragment) getFragmentManager().findFragmentById(R.id.article_fragment);
-                    if (articleFragment == null || articleFragment.getShownIndex() != article) {
-                        articleFragment = DisplayArticleFragment.newInstance(article);
+                    if (articleFragment == null || articleFragment.getShownIndex() != article.getId()) {
+                        articleFragment = DisplayArticleFragment.newInstance(article.getId());
 
                         FragmentTransaction ft = getFragmentManager().beginTransaction();
                         ft.replace(R.id.article_fragment, articleFragment);
@@ -81,8 +84,7 @@ public class DisplayFeedFragment extends Fragment {
                 } else {
                     Intent intent = new Intent(getActivity().getApplicationContext(), DisplayArticleActivity.class);
 
-                    intent.putExtra("article", article);
-                    intent.putExtra("feedname", feed.getName());
+                    intent.putExtra("articleid", article.getId());
                     intent.putExtra("feedid", feed.getId());
                     startActivity(intent);
                 }
@@ -146,10 +148,19 @@ public class DisplayFeedFragment extends Fragment {
         }
 
         protected void onPostExecute(ArrayList<Article> al) {
+            articlesdatasource = new ArticlesDataSource(getActivity());
+            try {
+                articlesdatasource.open();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }            
+            
+            articlesdatasource.deleteArticles(feed.getId());
             articleAdapter.clear();
 
             for (Article article : al) {
-
+                
+                article = articlesdatasource.createArticle(feed.getId(), article.getGuid(), article.getTitle(), article.getSummary(), article.getContent());
                 articleAdapter.add(article);
             }
             spinner.dismiss();

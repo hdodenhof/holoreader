@@ -1,4 +1,4 @@
-package de.hdodenhof.playground.controller;
+package de.hdodenhof.feedreader.controller;
 
 public class ProfileController {
     

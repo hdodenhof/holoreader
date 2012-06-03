@@ -1,10 +1,10 @@
-package de.hdodenhof.playground.adapter;
+package de.hdodenhof.feedreader.adapter;
 
 import java.util.ArrayList;
 
-import de.hdodenhof.playground.R;
+import de.hdodenhof.feedreader.model.Article;
+import de.hdodenhof.feedreader.R;
 
-import de.hdodenhof.playground.model.Article;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;

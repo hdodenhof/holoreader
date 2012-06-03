@@ -1,23 +1,18 @@
-package de.hdodenhof.playground;
+package de.hdodenhof.feedreader;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
 
-import de.hdodenhof.playground.adapter.ArticleAdapter;
-import de.hdodenhof.playground.adapter.FeedAdapter;
-import de.hdodenhof.playground.controller.ProfileController;
-import de.hdodenhof.playground.dao.FeedsDataSource;
-import de.hdodenhof.playground.model.Article;
-import de.hdodenhof.playground.model.Feed;
+import de.hdodenhof.feedreader.adapter.FeedAdapter;
+import de.hdodenhof.feedreader.controller.ProfileController;
+import de.hdodenhof.feedreader.dao.FeedsDataSource;
+import de.hdodenhof.feedreader.model.Feed;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;

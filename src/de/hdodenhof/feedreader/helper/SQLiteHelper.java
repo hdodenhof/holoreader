@@ -1,4 +1,4 @@
-package de.hdodenhof.playground.helper;
+package de.hdodenhof.feedreader.helper;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

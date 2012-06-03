@@ -1,4 +1,4 @@
-package de.hdodenhof.playground.model;
+package de.hdodenhof.feedreader.model;
 
 public class Feed {
     private long id;

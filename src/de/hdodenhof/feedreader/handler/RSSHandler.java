@@ -1,4 +1,4 @@
-package de.hdodenhof.playground.handler;
+package de.hdodenhof.feedreader.handler;
 
 import java.util.ArrayList;
 
@@ -6,7 +6,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.hdodenhof.playground.model.Article;
+import de.hdodenhof.feedreader.model.Article;
 
 public class RSSHandler extends DefaultHandler {
     private Article a = null;

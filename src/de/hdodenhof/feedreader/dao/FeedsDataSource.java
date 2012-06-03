@@ -1,11 +1,11 @@
-package de.hdodenhof.playground.dao;
+package de.hdodenhof.feedreader.dao;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.hdodenhof.playground.helper.SQLiteHelper;
-import de.hdodenhof.playground.model.Feed;
+import de.hdodenhof.feedreader.helper.SQLiteHelper;
+import de.hdodenhof.feedreader.model.Feed;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;

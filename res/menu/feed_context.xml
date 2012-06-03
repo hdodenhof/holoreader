@@ -3,6 +3,8 @@
 
     <item
         android:id="@+id/item_delete"
+        android:icon="@drawable/discard"
+        android:showAsAction="always|withText"
         android:title="Delete"/>
     
 </menu>

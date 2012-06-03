@@ -4,6 +4,8 @@ import de.hdodenhof.feedreader.R;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 public class DisplayFeedActivity extends FragmentActivity {
@@ -25,5 +27,12 @@ public class DisplayFeedActivity extends FragmentActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
-    }    
+    }   
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.app, menu);
+        return true;
+    }
 }

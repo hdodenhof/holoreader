@@ -5,6 +5,8 @@ import de.hdodenhof.feedreader.model.Article;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 public class DisplayArticleActivity extends FragmentActivity {
@@ -18,7 +20,8 @@ public class DisplayArticleActivity extends FragmentActivity {
         Article article = b.getParcelable("article");        
         
         if (savedInstanceState == null) {
-            DisplayArticleFragment articleFragment = new DisplayArticleFragment().newInstance(article);
+            new DisplayArticleFragment();
+            DisplayArticleFragment articleFragment = DisplayArticleFragment.newInstance(article);
             articleFragment.setArguments(b);
             getSupportFragmentManager().beginTransaction().add(android.R.id.content, articleFragment).commit();
         }        
@@ -37,5 +40,12 @@ public class DisplayArticleActivity extends FragmentActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+    
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.app, menu);
+        return true;
     }
 }

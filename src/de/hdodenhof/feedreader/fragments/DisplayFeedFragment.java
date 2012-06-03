@@ -18,7 +18,6 @@ import de.hdodenhof.feedreader.model.Article;
 import de.hdodenhof.feedreader.model.Feed;
 import de.hdodenhof.feedreader.R;
 
-import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;

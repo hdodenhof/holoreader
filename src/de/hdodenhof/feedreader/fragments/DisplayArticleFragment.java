@@ -3,8 +3,11 @@ package de.hdodenhof.feedreader.fragments;
 import java.sql.SQLException;
 
 import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.dao.ArticlesDataSource;
+import de.hdodenhof.feedreader.controller.ArticleController;
+import de.hdodenhof.feedreader.dao.FeedsDataSource;
 import de.hdodenhof.feedreader.model.Article;
+import de.hdodenhof.feedreader.model.Feed;
+import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.method.LinkMovementMethod;
@@ -15,8 +18,8 @@ import android.widget.TextView;
 
 public class DisplayArticleFragment extends Fragment {
 
-    private ArticlesDataSource articlesdatasource;
-    
+    ArticleController articleController;
+
     public static DisplayArticleFragment newInstance(Long articleid) {
         DisplayArticleFragment f = new DisplayArticleFragment();
 
@@ -34,19 +37,14 @@ public class DisplayArticleFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View contentView = inflater.inflate(R.layout.article_fragment, container, false);
-        
+
         if (getArguments() != null) {
 
             Long articleid = getArguments().getLong("articleid");
+            articleController = new ArticleController(getActivity());
 
-            articlesdatasource = new ArticlesDataSource(getActivity());
-            try {
-                articlesdatasource.open();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            
-            Article article = articlesdatasource.getArticle(articleid);
+            Article article = articleController.getArticle(articleid);
+
 
             TextView header = (TextView) contentView.findViewById(R.id.article_header);
             header.setText(article.getTitle());
@@ -55,14 +53,35 @@ public class DisplayArticleFragment extends Fragment {
             text.setMovementMethod(LinkMovementMethod.getInstance());
             text.setText(article.getFormatedContent());
         }
-        
+
         return contentView;
 
     }
-    
+
     @Override
-    public void onActivityCreated(Bundle savedState){
+    public void onActivityCreated(Bundle savedState) {
         super.onActivityCreated(savedState);
+
+        View feedFragment = getActivity().findViewById(R.id.feed_fragment);
+        boolean mDualPane = feedFragment != null;
+
+        if (!mDualPane) {
+            long feedId = getActivity().getIntent().getLongExtra("feedid", -1);
+            FeedsDataSource fds = new FeedsDataSource(getActivity());
+            try {
+                fds.open();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            Feed feed = fds.getFeed(feedId);
+
+            fds.close();
+
+            ActionBar actionBar = getActivity().getActionBar();
+            actionBar.setTitle(feed.getName());
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
 }

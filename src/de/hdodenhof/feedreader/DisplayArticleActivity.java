@@ -1,11 +1,10 @@
 package de.hdodenhof.feedreader;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Vector;
 
 import de.hdodenhof.feedreader.adapter.ArticlePagerAdapter;
-import de.hdodenhof.feedreader.dao.ArticlesDataSource;
+import de.hdodenhof.feedreader.controller.ArticleController;
 import de.hdodenhof.feedreader.fragments.DisplayArticleFragment;
 import de.hdodenhof.feedreader.model.Article;
 import android.content.Intent;
@@ -47,17 +46,12 @@ public class DisplayArticleActivity extends FragmentActivity {
     
     private void initialisePaging() {
 
-        ArticlesDataSource articlesdatasource;
+        ArticleController articleController = new ArticleController(this);
+        
         List<Fragment> fragments = new Vector<Fragment>();
         List<String> titles = new Vector<String>();
-        articlesdatasource = new ArticlesDataSource(this);
-        try {
-            articlesdatasource.open();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }            
         
-        List<Article> articles = articlesdatasource.getAllArticles(feedId);
+        List<Article> articles = articleController.getAllArticles(feedId);
         int pos = 0;
         int curr = 0;
         

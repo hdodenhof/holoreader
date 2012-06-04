@@ -1,11 +1,9 @@
 package de.hdodenhof.feedreader;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import de.hdodenhof.feedreader.adapter.FeedAdapter;
 import de.hdodenhof.feedreader.controller.FeedController;
-import de.hdodenhof.feedreader.dao.FeedsDataSource;
 import de.hdodenhof.feedreader.model.Feed;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -27,7 +25,6 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class HomeActivity extends Activity implements OnItemClickListener {
 
-    private FeedsDataSource datasource;
     private FeedController feedcontroller;
 
     private ArrayAdapter<Feed> adapter;
@@ -42,18 +39,12 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         Uri uri = intent.getData();
 
         feedcontroller = new FeedController(this);
-        datasource = new FeedsDataSource(this);
-        try {
-            datasource.open();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
 
         if (Intent.ACTION_VIEW.equals(action) && uri != null) {
-            datasource.createFeed(uri.toString(), uri.toString());
+            feedcontroller.addFeed(uri.toString());
         }
 
-        ArrayList<Feed> values = (ArrayList<Feed>) datasource.getAllFeeds();
+        ArrayList<Feed> values = feedcontroller.getAllFeeds();
 
         adapter = new FeedAdapter(this, values);
 
@@ -85,7 +76,7 @@ public class HomeActivity extends Activity implements OnItemClickListener {
             case R.id.item_delete:
 
                 for (Feed feed : toDelete) {
-                    datasource.deleteFeed(feed);
+                    feedcontroller.deleteFeed(feed);
                     adapter.remove(feed);
                 }
 

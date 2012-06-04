@@ -25,7 +25,7 @@ import de.hdodenhof.feedreader.model.Feed;
 public class FeedController {
     private FeedsDataSource datasource;
     private ArrayList<Feed> feeds;
-    private HomeActivity context;
+    private Context context;
     private ProgressDialog spinner;
     private ProgressDialog progressDialog;
     private Feed newFeed;
@@ -33,15 +33,44 @@ public class FeedController {
     private boolean isRefreshing = false;
     
     public FeedController(Context context){
-        this.context = (HomeActivity) context;
+        this.context = context;
         
         datasource = new FeedsDataSource(this.context);
+        connect();
+        this.feeds = (ArrayList<Feed>) datasource.getAllFeeds();
+        disconnect();
+    }
+    
+    private void connect(){
         try {
             datasource.open();
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        this.feeds = (ArrayList<Feed>) datasource.getAllFeeds();
+    }
+    
+    private void disconnect(){
+        datasource.close();
+    }
+    
+    public Feed getFeed(long feedid){
+        connect();
+        Feed feed = datasource.getFeed(feedid);
+        disconnect();
+        return feed;
+    }
+    
+    public ArrayList<Feed> getAllFeeds(){
+        connect();
+        ArrayList<Feed> feeds = (ArrayList<Feed>) datasource.getAllFeeds();
+        disconnect();
+        return feeds;        
+    }
+    
+    public void deleteFeed(Feed feed){
+        connect();
+        datasource.deleteFeed(feed);
+        disconnect();       
     }
     
     public void addFeed(String url){
@@ -57,7 +86,9 @@ public class FeedController {
     
     public void finishAddFeed(String name){
         newFeed.setName(name);
+        connect();
         newFeed = datasource.createFeed(newFeed.getName(), newFeed.getUrl());
+        disconnect();
         feeds.add(newFeed);
         this.update(newFeed);
     }
@@ -78,7 +109,7 @@ public class FeedController {
             }
         } else {
         spinner.dismiss();
-        context.addFeed(newFeed);
+        ((HomeActivity) context).addFeed(newFeed);
         }
     }
     

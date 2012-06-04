@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import de.hdodenhof.feedreader.adapter.FeedAdapter;
+import de.hdodenhof.feedreader.controller.FeedController;
 import de.hdodenhof.feedreader.dao.FeedsDataSource;
 import de.hdodenhof.feedreader.model.Feed;
 import android.app.Activity;
@@ -27,6 +28,7 @@ import android.widget.AdapterView.OnItemClickListener;
 public class HomeActivity extends Activity implements OnItemClickListener {
 
     private FeedsDataSource datasource;
+    private FeedController feedcontroller;
 
     private ArrayAdapter<Feed> adapter;
 
@@ -39,6 +41,7 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         String action = intent.getAction();
         Uri uri = intent.getData();
 
+        feedcontroller = new FeedController(this);
         datasource = new FeedsDataSource(this);
         try {
             datasource.open();
@@ -62,7 +65,7 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         feedlistview.setMultiChoiceModeListener(new MyMultiChoiceModeListener());
 
     }
-
+    
     private class MyMultiChoiceModeListener implements MultiChoiceModeListener {
 
         private ArrayList<Feed> toDelete;
@@ -123,6 +126,9 @@ public class HomeActivity extends Activity implements OnItemClickListener {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+        case R.id.item_refresh:
+            feedcontroller.refresh();
+            return true;
         case R.id.item_add:
             showDialog();
             return true;
@@ -131,6 +137,12 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         }
     }
 
+    public void addFeed(Feed feed){
+        adapter.add(feed);
+        adapter.notifyDataSetChanged();       
+    }
+    
+    
     private void showDialog() {
         AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
@@ -145,13 +157,7 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
                 String value = input.getText().toString();
-
-                Feed feed = null;
-                feed = datasource.createFeed(value, value);
-                adapter.add(feed);
-
-                adapter.notifyDataSetChanged();
-
+                feedcontroller.addFeed(value);
             }
         });
 

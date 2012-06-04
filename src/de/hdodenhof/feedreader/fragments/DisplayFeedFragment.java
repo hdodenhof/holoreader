@@ -1,27 +1,17 @@
 package de.hdodenhof.feedreader.fragments;
 
-import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
 
 import de.hdodenhof.feedreader.DisplayArticleActivity;
 import de.hdodenhof.feedreader.adapter.ArticleAdapter;
 import de.hdodenhof.feedreader.dao.ArticlesDataSource;
 import de.hdodenhof.feedreader.dao.FeedsDataSource;
-import de.hdodenhof.feedreader.handler.RSSHandler;
 import de.hdodenhof.feedreader.model.Article;
 import de.hdodenhof.feedreader.model.Feed;
 import de.hdodenhof.feedreader.R;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -34,7 +24,6 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class DisplayFeedFragment extends Fragment {
     public String rssResult = "";
-    private ProgressDialog spinner;
 
     private ArticleAdapter articleAdapter;
     private FeedsDataSource feedsdatasource;
@@ -93,10 +82,20 @@ public class DisplayFeedFragment extends Fragment {
 
         });
 
-        spinner = ProgressDialog.show(getActivity(), "", "Please wait...", true);
-        RssTask fetcharticletask = new RssTask();
-        fetcharticletask.execute(feed.getUrl());
+        articlesdatasource = new ArticlesDataSource(getActivity());
+        try {
+            articlesdatasource.open();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }            
+        
+        ArrayList<Article> al = (ArrayList<Article>) articlesdatasource.getAllArticles(feed.getId());
+        articleAdapter.clear();
 
+        for (Article article : al) {
+            articleAdapter.add(article);        
+        
+        }
         return contentView;
 
     }
@@ -115,57 +114,6 @@ public class DisplayFeedFragment extends Fragment {
 //        ActionBar actionBar = getActivity().getActionBar();
 //        actionBar.setTitle(feed.getName());
 //        actionBar.setDisplayHomeAsUpEnabled(true);         
-    }
-
-    private class RssTask extends AsyncTask<String, Void, ArrayList<Article>> {
-
-        protected ArrayList<Article> doInBackground(String... params) {
-
-            ArrayList<Article> al = new ArrayList<Article>();
-
-            try {
-
-                URL rssUrl = new URL(params[0]);
-                SAXParserFactory factory = SAXParserFactory.newInstance();
-                SAXParser saxParser = factory.newSAXParser();
-                XMLReader xmlReader = saxParser.getXMLReader();
-                RSSHandler rssHandler = new RSSHandler(al);
-                xmlReader.setContentHandler(rssHandler);
-                InputSource inputSource = new InputSource(rssUrl.openStream());
-                xmlReader.parse(inputSource);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return al;
-
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        protected void onPostExecute(ArrayList<Article> al) {
-            articlesdatasource = new ArticlesDataSource(getActivity());
-            try {
-                articlesdatasource.open();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }            
-            
-            articlesdatasource.deleteArticles(feed.getId());
-            articleAdapter.clear();
-
-            for (Article article : al) {
-                
-                article = articlesdatasource.createArticle(feed.getId(), article.getGuid(), article.getTitle(), article.getSummary(), article.getContent());
-                articleAdapter.add(article);
-            }
-            spinner.dismiss();
-
-        }
     }
 
 }

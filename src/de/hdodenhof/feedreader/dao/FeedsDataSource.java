@@ -45,7 +45,8 @@ public class FeedsDataSource {
 
         return newFeed;
     }
-
+  
+    
     public void deleteFeed(Feed feed) {
         long id = feed.getId();
 

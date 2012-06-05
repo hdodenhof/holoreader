@@ -2,6 +2,7 @@ package de.hdodenhof.feedreader.controller;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 
 import android.content.Context;
 import de.hdodenhof.feedreader.dao.ArticlesDataSource;
@@ -46,9 +47,9 @@ public class ArticleController {
         disconnect();        
     }
     
-    public void createArticle(long feedId, String guid, String title, String summary, String content){
+    public void createArticle(long feedId, String guid, Date date, String title, String summary, String content){
         connect();
-        datasource.createArticle(feedId, guid, title, summary, content);
+        datasource.createArticle(feedId, guid, date, title, summary, content);
         disconnect();
     }
     

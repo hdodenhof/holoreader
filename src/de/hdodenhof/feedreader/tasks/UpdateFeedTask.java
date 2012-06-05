@@ -32,12 +32,12 @@ public class UpdateFeedTask extends AsyncTask<Feed, Void, Void> {
         ArticleController articleController = new ArticleController(applicationContext);
 
         try {
-            SAXHelper saxHelper = new SAXHelper(new ArticleHandler(), feed.getUrl());
+            SAXHelper saxHelper = new SAXHelper(feed.getUrl(), new ArticleHandler());
             al = (ArrayList<Article>) saxHelper.parse();
             
             articleController.deleteArticles(feed.getId());
             for (Article article : al) {
-                articleController.createArticle(feed.getId(), article.getGuid(), article.getTitle(), article.getSummary(), article.getContent());
+                articleController.createArticle(feed.getId(), article.getGuid(), article.getPubDate(), article.getTitle(), article.getSummary(), article.getContent());
             }            
             
         } catch (Exception e) {

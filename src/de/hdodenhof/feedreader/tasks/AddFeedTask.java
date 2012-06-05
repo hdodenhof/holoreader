@@ -26,7 +26,7 @@ public class AddFeedTask extends AsyncTask<String, Void, Void> {
         FeedController feedController = new FeedController(applicationContext);
 
         try {
-            SAXHelper saxHelper = new SAXHelper(new FeedHandler(), feed.getUrl());
+            SAXHelper saxHelper = new SAXHelper(feed.getUrl(), new FeedHandler());
             String name = (String) saxHelper.parse();
             
             feed.setName(name);

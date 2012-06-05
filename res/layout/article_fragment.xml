@@ -27,9 +27,15 @@
             <View
                 android:layout_width="fill_parent"
                 android:layout_height="1dip"
-                android:layout_marginBottom="10dip"
                 android:layout_marginTop="5dip"
                 android:background="#000000" />
+            
+            <TextView
+                android:id="@+id/article_pubdate"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dip"
+                android:textAppearance="?android:attr/textAppearanceSmall" />            
 
             <TextView
                 android:id="@+id/article_text"

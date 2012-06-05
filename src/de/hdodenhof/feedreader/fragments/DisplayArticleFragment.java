@@ -10,6 +10,7 @@ import de.hdodenhof.feedreader.model.Feed;
 import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.format.DateFormat;
 import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,13 +46,17 @@ public class DisplayArticleFragment extends Fragment {
 
             Article article = articleController.getArticle(articleid);
 
-
             TextView header = (TextView) contentView.findViewById(R.id.article_header);
             header.setText(article.getTitle());
 
+            TextView pubDate = (TextView) contentView.findViewById(R.id.article_pubdate);
+            CharSequence formattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", article.getPubDate());
+            pubDate.setText(formattedPubdate);            
+            
             TextView text = (TextView) contentView.findViewById(R.id.article_text);
-            text.setMovementMethod(LinkMovementMethod.getInstance());
             text.setText(article.getFormatedContent());
+            text.setMovementMethod(LinkMovementMethod.getInstance());
+            
         }
 
         return contentView;

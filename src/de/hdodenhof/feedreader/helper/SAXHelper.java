@@ -20,33 +20,15 @@ public class SAXHelper {
     SAXParser saxParser;
     XMLReader xmlReader;
     InputSource inputSource;
-    
-    public SAXHelper(GenericHandler handler) throws ParserConfigurationException, SAXException{
-        this.handler = handler;
-        setup();    
-    }
 
-    public SAXHelper(GenericHandler handler, String url) throws ParserConfigurationException, SAXException, IOException{
+    public SAXHelper(String url, GenericHandler handler) throws ParserConfigurationException, SAXException, IOException{
         this.handler = handler;
-        setup();
-        setUrl(url);
-    }  
-    
-    private void setup() throws ParserConfigurationException, SAXException{
         this.factory = SAXParserFactory.newInstance();
         this.saxParser = factory.newSAXParser();
         this.xmlReader = saxParser.getXMLReader();
-        setHandler();         
-    }
-    
-    public void setUrl(String url) throws IOException{
-        URL rssUrl = new URL(url);
-        inputSource = new InputSource(rssUrl.openStream());        
-    }
-    
-    public void setHandler() {
-        this.xmlReader.setContentHandler((DefaultHandler) handler);   
-    }    
+        this.xmlReader.setContentHandler((DefaultHandler) handler);    
+        this.inputSource = new InputSource((new URL(url)).openStream());       
+    }  
     
     public Object parse() throws IOException, SAXException{
         xmlReader.parse(inputSource);

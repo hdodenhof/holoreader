@@ -1,7 +1,10 @@
 package de.hdodenhof.feedreader.dao;
 
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import de.hdodenhof.feedreader.helper.SQLiteHelper;
@@ -16,7 +19,9 @@ public class ArticlesDataSource {
     private SQLiteDatabase database;
     private SQLiteHelper dbHelper;
     private String[] allColumns = { SQLiteHelper.ARTICLE_TABLE_COLUMN_ID, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID, SQLiteHelper.ARTICLE_TABLE_COLUMN_GUID,
-            SQLiteHelper.ARTICLE_TABLE_COLUMN_TITLE, SQLiteHelper.ARTICLE_TABLE_COLUMN_SUMMARY, SQLiteHelper.ARTICLE_TABLE_COLUMN_CONTENT };
+            SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE, SQLiteHelper.ARTICLE_TABLE_COLUMN_TITLE, SQLiteHelper.ARTICLE_TABLE_COLUMN_SUMMARY,
+            SQLiteHelper.ARTICLE_TABLE_COLUMN_CONTENT };
+    private SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public ArticlesDataSource(Context context) {
         dbHelper = new SQLiteHelper(context);
@@ -30,26 +35,27 @@ public class ArticlesDataSource {
         dbHelper.close();
     }
 
-    public void createArticle(long feedId, String guid, String title, String summary, String content) {
+    public void createArticle(long feedId, String guid, Date pubDate, String title, String summary, String content) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID, feedId);
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_GUID, guid);
+        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE, fromDate(pubDate));
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_TITLE, title);
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_SUMMARY, summary);
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_CONTENT, content);
 
         database.insert(SQLiteHelper.ARTICLE_TABLE_NAME, null, values);
     }
-    
-    public void createArticles(long feedId, ArrayList<Article> articles){
+
+    public void createArticles(long feedId, ArrayList<Article> articles) {
         database.beginTransaction();
         try {
             for (Article article : articles) {
-                createArticle(feedId, article.getGuid(), article.getTitle(), article.getSummary(), article.getContent());
-            } 
+                createArticle(feedId, article.getGuid(), article.getPubDate(), article.getTitle(), article.getSummary(), article.getContent());
+            }
             database.setTransactionSuccessful();
         } finally {
-            database.endTransaction();            
+            database.endTransaction();
         }
 
     }
@@ -60,8 +66,8 @@ public class ArticlesDataSource {
 
     public void deleteArticles(long feedid) {
         database.delete(SQLiteHelper.ARTICLE_TABLE_NAME, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID + " = " + feedid, null);
-    }    
-    
+    }
+
     public Article getArticle(long b) {
         Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + b, null, null, null, null);
 
@@ -75,7 +81,8 @@ public class ArticlesDataSource {
     public List<Article> getAllArticles(long feedid) {
         List<Article> articles = new ArrayList<Article>();
 
-        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID + " = " + feedid, null, null, null, null);
+        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID + " = " + feedid, null, null,
+                null, null);
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -84,8 +91,22 @@ public class ArticlesDataSource {
             cursor.moveToNext();
         }
         cursor.close();
-        
+
         return articles;
+    }
+
+    private String fromDate(Date date) {
+        return iso8601Format.format(date);
+    }
+
+    private Date toDate(String date) {
+        try {
+            return iso8601Format.parse(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return new Date();
+        }
+
     }
 
     private Article cursorToArticle(Cursor cursor) {
@@ -93,9 +114,10 @@ public class ArticlesDataSource {
         article.setId(cursor.getLong(0));
         article.setFeedId(cursor.getLong(1));
         article.setGuid(cursor.getString(2));
-        article.setTitle(cursor.getString(3));
-        article.setSummary(cursor.getString(4));
-        article.setContent(cursor.getString(5));
+        article.setPubDate(toDate(cursor.getString(3)));
+        article.setTitle(cursor.getString(4));
+        article.setSummary(cursor.getString(5));
+        article.setContent(cursor.getString(6));
         return article;
     }
 }

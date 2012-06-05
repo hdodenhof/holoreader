@@ -1,5 +1,7 @@
 package de.hdodenhof.feedreader.model;
 
+import java.util.Date;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -11,6 +13,7 @@ public class Article {
 
     private long id;
     private long feedId;
+    private Date pubDate;
     private String guid;
     private String title;
     private String summary;
@@ -58,6 +61,14 @@ public class Article {
 
     public void setGuid(String guid) {
         this.guid = guid;
+    }
+
+    public Date getPubDate() {
+        return pubDate;
+    }
+
+    public void setPubDate(Date pubDate) {
+        this.pubDate = pubDate;
     }
 
     public Spanned getFormatedContent() {

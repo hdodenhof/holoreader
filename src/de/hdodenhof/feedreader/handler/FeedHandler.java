@@ -4,7 +4,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-public class FeedHandler extends DefaultHandler {
+public class FeedHandler extends DefaultHandler implements GenericHandler {
 
     private String name;
     private StringBuffer mSb;
@@ -12,13 +12,8 @@ public class FeedHandler extends DefaultHandler {
     private boolean isFound = false;
     private boolean isTitle = false;
 
-    public FeedHandler(String name) {
+    public FeedHandler() {
         super();
-        this.name = name;
-    }
-    
-    public String getName(){
-        return this.name;
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException {
@@ -47,5 +42,9 @@ public class FeedHandler extends DefaultHandler {
             mSb.append(new String(ch, start, length));
         }
 
+    }
+
+    public Object getResult() {
+        return this.name;
     }
 }

@@ -13,7 +13,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 public class ArticlesDataSource {
 
-    // Database fields
     private SQLiteDatabase database;
     private SQLiteHelper dbHelper;
     private String[] allColumns = { SQLiteHelper.ARTICLE_TABLE_COLUMN_ID, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID, SQLiteHelper.ARTICLE_TABLE_COLUMN_GUID,
@@ -31,7 +30,7 @@ public class ArticlesDataSource {
         dbHelper.close();
     }
 
-    public Article createArticle(long feedId, String guid, String title, String summary, String content) {
+    public void createArticle(long feedId, String guid, String title, String summary, String content) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID, feedId);
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_GUID, guid);
@@ -39,21 +38,24 @@ public class ArticlesDataSource {
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_SUMMARY, summary);
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_CONTENT, content);
 
-        long insertId = database.insert(SQLiteHelper.ARTICLE_TABLE_NAME, null, values);
+        database.insert(SQLiteHelper.ARTICLE_TABLE_NAME, null, values);
+    }
+    
+    public void createArticles(long feedId, ArrayList<Article> articles){
+        database.beginTransaction();
+        try {
+            for (Article article : articles) {
+                createArticle(feedId, article.getGuid(), article.getTitle(), article.getSummary(), article.getContent());
+            } 
+            database.setTransactionSuccessful();
+        } finally {
+            database.endTransaction();            
+        }
 
-        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + insertId, null, null, null, null);
-
-        cursor.moveToFirst();
-        Article newArticle = cursorToArticle(cursor);
-        cursor.close();
-
-        return newArticle;
     }
 
     public void deleteArticle(Article article) {
-        long id = article.getId();
-
-        database.delete(SQLiteHelper.ARTICLE_TABLE_NAME, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + id, null);
+        database.delete(SQLiteHelper.ARTICLE_TABLE_NAME, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + article.getId(), null);
     }
 
     public void deleteArticles(long feedid) {
@@ -81,8 +83,8 @@ public class ArticlesDataSource {
             articles.add(article);
             cursor.moveToNext();
         }
-        // Make sure to close the cursor
         cursor.close();
+        
         return articles;
     }
 

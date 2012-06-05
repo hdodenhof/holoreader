@@ -9,12 +9,9 @@ import de.hdodenhof.feedreader.model.Article;
 
 public class ArticleController {
     private ArticlesDataSource datasource;
-    private Context context;
     
     public ArticleController(Context context){
-        this.context = context;
-        
-        datasource = new ArticlesDataSource(this.context);
+        datasource = new ArticlesDataSource(context);
     }
     
     private void connect(){
@@ -41,6 +38,24 @@ public class ArticleController {
         Article article = datasource.getArticle(id);
         disconnect();
         return article;         
+    }
+    
+    public void deleteArticles(long feedId){
+        connect();
+        datasource.deleteArticles(feedId);
+        disconnect();        
+    }
+    
+    public void createArticle(long feedId, String guid, String title, String summary, String content){
+        connect();
+        datasource.createArticle(feedId, guid, title, summary, content);
+        disconnect();
+    }
+    
+    public void createArticles(long feedId, ArrayList<Article> articles){
+        connect();
+        datasource.createArticles(feedId, articles);
+        disconnect();
     }
     
 }

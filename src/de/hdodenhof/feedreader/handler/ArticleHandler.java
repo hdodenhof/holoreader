@@ -8,7 +8,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import de.hdodenhof.feedreader.model.Article;
 
-public class ArticleHandler extends DefaultHandler {
+public class ArticleHandler extends DefaultHandler implements GenericHandler {
     private Article a = null;
 
     private ArrayList<Article> articleList;
@@ -20,13 +20,9 @@ public class ArticleHandler extends DefaultHandler {
     private boolean isContent = false;
     private boolean isSummary = false;
 
-    public ArticleHandler(ArrayList<Article> articles) {
+    public ArticleHandler() {
         super();
-        this.articleList = articles;
-    }
-    
-    public ArrayList<Article> getArticles(){
-        return this.articleList;
+        articleList = new ArrayList<Article>();
     }
 
     public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException {
@@ -95,5 +91,9 @@ public class ArticleHandler extends DefaultHandler {
             mSb.append(new String(ch, start, length));
         }
 
+    }
+
+    public Object getResult() {
+        return this.articleList;
     }
 }

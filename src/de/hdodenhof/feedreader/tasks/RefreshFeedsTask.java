@@ -13,7 +13,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 
-public class RefreshFeedsTask extends AsyncTask<Void, Void, Void> {
+public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
 
     Handler mainUIHandler;
     Context applicationContext;
@@ -32,13 +32,16 @@ public class RefreshFeedsTask extends AsyncTask<Void, Void, Void> {
         ArticleController articleController = new ArticleController(applicationContext);
 
         try {
-             
+            
+            int n = 0;
             feeds = feedController.getAllFeeds();
             for (Feed feed : feeds) {
+                n++;
                 SAXHelper saxHelper = new SAXHelper(feed.getUrl(), new ArticleHandler());
                 articles = (ArrayList<Article>) saxHelper.parse(); 
                 articleController.deleteArticles(feed.getId());
                 articleController.createArticles(feed.getId(), articles);
+                publishProgress(n);
             }
             
         } catch (Exception e) {
@@ -50,6 +53,14 @@ public class RefreshFeedsTask extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
+    protected void onProgressUpdate(Integer... values) {
+        Message msg = Message.obtain();
+        msg.what = 9;
+        msg.arg1 = values[0];
+        mainUIHandler.sendMessage(msg);         
+    }
+
+    @Override
     protected void onPreExecute() {
         super.onPreExecute();
     }
@@ -57,9 +68,8 @@ public class RefreshFeedsTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void result) {
         Message msg = Message.obtain();
-        msg.what = 2;
+        msg.what = 3;
         mainUIHandler.sendMessage(msg);        
-
     }
 
 }

@@ -33,6 +33,7 @@ public class HomeActivity extends Activity implements OnItemClickListener {
     private FeedController feedcontroller;
     private ArrayAdapter<Feed> adapter;
     private ProgressDialog spinner;
+    private ProgressDialog progressDialog;
 
     Handler asyncHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -51,7 +52,10 @@ public class HomeActivity extends Activity implements OnItemClickListener {
                 break;
             case 3:
                 // refreshed feeds
-                spinner.dismiss();
+                progressDialog.dismiss();
+            case 9:
+                // refresh progress bar
+                progressDialog.setProgress(msg.arg1);
             default:
                 break;
             }
@@ -91,14 +95,22 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         addFeedTask.execute(feedUrl);
     }
 
-//    private void updateFeed(Feed feed) {
-//        spinner = ProgressDialog.show(this, "", "Please wait...", true);
-//        UpdateFeedTask updateFeedTask = new UpdateFeedTask(asyncHandler, this);
-//        updateFeedTask.execute(feed);
-//    }
+    // private void updateFeed(Feed feed) {
+    // spinner = ProgressDialog.show(this, "", "Please wait...", true);
+    // UpdateFeedTask updateFeedTask = new UpdateFeedTask(asyncHandler, this);
+    // updateFeedTask.execute(feed);
+    // }
 
     private void refreshFeeds() {
-        spinner = ProgressDialog.show(this, "", "Please wait...", true);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setMessage("Loading...");
+        progressDialog.setCancelable(false);
+        progressDialog.setProgress(0);
+        progressDialog.setMax(adapter.getCount());
+        progressDialog.show();
+
         RefreshFeedsTask refreshFeedsTask = new RefreshFeedsTask(asyncHandler, this);
         refreshFeedsTask.execute();
     }
@@ -110,7 +122,7 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         alert.setMessage("Input Feed URL");
 
         final EditText input = new EditText(this);
-        input.setText("http://www.gruenderszene.de/feed/");
+        input.setText("http://t3n.de/news/feed");
         alert.setView(input);
 
         alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {

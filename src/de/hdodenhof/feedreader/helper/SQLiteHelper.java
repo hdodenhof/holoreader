@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class SQLiteHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "feedreader";
 
     public static final String FEED_TABLE_NAME = "feeds";
@@ -23,6 +23,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String ARTICLE_TABLE_COLUMN_TITLE = "title";
     public static final String ARTICLE_TABLE_COLUMN_SUMMARY = "summary";
     public static final String ARTICLE_TABLE_COLUMN_CONTENT = "content";
+    public static final String ARTICLE_TABLE_COLUMN_READ = "read";
 
     private String dummydata[][] = { { "t3n News", "http://t3n.de/news/feed" },
             { "Gründerszene.de - Infos für Gründer, Unternehmer, StartUps | Gründerszene", "http://www.gruenderszene.de/feed/" },
@@ -34,7 +35,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String ARTICLE_TABLE_CREATE = "CREATE TABLE " + ARTICLE_TABLE_NAME + " (" + ARTICLE_TABLE_COLUMN_ID
             + " integer primary key autoincrement, " + ARTICLE_TABLE_COLUMN_FEEDID + " integer , " + ARTICLE_TABLE_COLUMN_GUID + " TEXT , "
             + ARTICLE_TABLE_COLUMN_PUBDATE + " TEXT , " + ARTICLE_TABLE_COLUMN_TITLE + " TEXT , " + ARTICLE_TABLE_COLUMN_SUMMARY + " TEXT , "
-            + ARTICLE_TABLE_COLUMN_CONTENT + " TEXT);";
+            + ARTICLE_TABLE_COLUMN_CONTENT + " TEXT , " + ARTICLE_TABLE_COLUMN_READ + " INTEGER);";
 
     public SQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

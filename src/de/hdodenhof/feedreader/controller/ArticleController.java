@@ -5,58 +5,65 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import android.content.Context;
+
 import de.hdodenhof.feedreader.dao.ArticlesDataSource;
 import de.hdodenhof.feedreader.model.Article;
 
 public class ArticleController {
     private ArticlesDataSource datasource;
-    
-    public ArticleController(Context context){
+
+    public ArticleController(Context context) {
         datasource = new ArticlesDataSource(context);
     }
-    
-    private void connect(){
+
+    private void connect() {
         try {
             datasource.open();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-    
-    private void disconnect(){
+
+    private void disconnect() {
         datasource.close();
-    }    
-    
-    public ArrayList<Article> getAllArticles(long feedid){
+    }
+
+    public ArrayList<Article> getAllArticles(long feedid) {
         connect();
         ArrayList<Article> articles = (ArrayList<Article>) datasource.getAllArticles(feedid);
         disconnect();
-        return articles;        
+        return articles;
     }
-    
-    public Article getArticle(long id){
+
+    public Article getArticle(long id) {
         connect();
         Article article = datasource.getArticle(id);
         disconnect();
-        return article;         
+        return article;
     }
-    
-    public void deleteArticles(long feedId){
+
+    public void deleteArticles(long feedId) {
         connect();
         datasource.deleteArticles(feedId);
-        disconnect();        
-    }
-    
-    public void createArticle(long feedId, String guid, Date date, String title, String summary, String content){
-        connect();
-        datasource.createArticle(feedId, guid, date, title, summary, content);
         disconnect();
     }
-    
-    public void createArticles(long feedId, ArrayList<Article> articles){
+
+    public void createArticle(long feedId, String guid, Date date, String title, String summary, String content) {
+        connect();
+        datasource.createArticle(feedId, guid, date, title, summary, content, false);
+        disconnect();
+    }
+
+    public void createArticles(long feedId, ArrayList<Article> articles) {
         connect();
         datasource.createArticles(feedId, articles);
         disconnect();
     }
-    
+
+    public void setRead(long id) {
+        connect();
+        datasource.setRead(id);
+        disconnect();
+    }
+
 }

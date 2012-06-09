@@ -6,7 +6,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import android.text.Html;
-
 import android.text.Spanned;
 
 public class Article {
@@ -18,6 +17,7 @@ public class Article {
     private String title;
     private String summary;
     private String content;
+    private boolean read;
 
     public void setTitle(String title) {
         this.title = title;
@@ -85,6 +85,14 @@ public class Article {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public boolean isRead() {
+        return read;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
     }
 
     public String toString() {

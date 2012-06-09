@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import android.content.Context;
+
 import de.hdodenhof.feedreader.dao.FeedsDataSource;
 import de.hdodenhof.feedreader.model.Feed;
 

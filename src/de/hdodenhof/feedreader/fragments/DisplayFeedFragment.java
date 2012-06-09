@@ -2,25 +2,26 @@ package de.hdodenhof.feedreader.fragments;
 
 import java.util.ArrayList;
 
-import de.hdodenhof.feedreader.DisplayArticleActivity;
-import de.hdodenhof.feedreader.adapter.ArticleAdapter;
-import de.hdodenhof.feedreader.controller.ArticleController;
-import de.hdodenhof.feedreader.controller.FeedController;
-import de.hdodenhof.feedreader.model.Article;
-import de.hdodenhof.feedreader.model.Feed;
-import de.hdodenhof.feedreader.R;
-
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ListView;
+
+import de.hdodenhof.feedreader.DisplayArticleActivity;
+import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.adapter.ArticleAdapter;
+import de.hdodenhof.feedreader.controller.ArticleController;
+import de.hdodenhof.feedreader.controller.FeedController;
+import de.hdodenhof.feedreader.model.Article;
+import de.hdodenhof.feedreader.model.Feed;
 
 public class DisplayFeedFragment extends Fragment {
     public String rssResult = "";
@@ -34,14 +35,18 @@ public class DisplayFeedFragment extends Fragment {
     boolean mDualPane;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View contentView = inflater.inflate(R.layout.feed_fragment, container, false);
-
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         feedController = new FeedController(getActivity());
         articleController = new ArticleController(getActivity());
-        
+    }    
+    
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.v("FR", "onCreateView");
+        View contentView = inflater.inflate(R.layout.feed_fragment, container, false);
+
         long b = getActivity().getIntent().getLongExtra("feedid", -1);
-        
         feed = feedController.getFeed(b);
 
         articleAdapter = new ArticleAdapter(getActivity(), new ArrayList<Article>());
@@ -61,7 +66,6 @@ public class DisplayFeedFragment extends Fragment {
 
         for (Article article : al) {
             articleAdapter.add(article);
-
         }
         return contentView;
 
@@ -69,7 +73,7 @@ public class DisplayFeedFragment extends Fragment {
 
     private void showDetails(int index) {
         Article article = (Article) articlelistview.getItemAtPosition(index);
-
+        
         if (mDualPane) {
 
             articlelistview.setItemChecked(index, true);
@@ -77,7 +81,7 @@ public class DisplayFeedFragment extends Fragment {
             DisplayArticleFragment articleFragment = (DisplayArticleFragment) getFragmentManager().findFragmentById(R.id.article_fragment);
             if (articleFragment == null || articleFragment.getShownIndex() != article.getId()) {
                 articleFragment = DisplayArticleFragment.newInstance(article.getId());
-
+                
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.replace(R.id.article_fragment, articleFragment);
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);

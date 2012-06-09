@@ -21,21 +21,21 @@ public class SAXHelper {
     XMLReader xmlReader;
     InputSource inputSource;
 
-    public SAXHelper(String url, GenericHandler handler) throws ParserConfigurationException, SAXException, IOException{
+    public SAXHelper(String url, GenericHandler handler) throws ParserConfigurationException, SAXException, IOException {
         this.handler = handler;
         this.factory = SAXParserFactory.newInstance();
         this.saxParser = factory.newSAXParser();
         this.xmlReader = saxParser.getXMLReader();
-        this.xmlReader.setContentHandler((DefaultHandler) handler);    
-        this.inputSource = new InputSource((new URL(url)).openStream());       
-    }  
-    
-    public Object parse() throws IOException, SAXException{
+        this.xmlReader.setContentHandler((DefaultHandler) handler);
+        this.inputSource = new InputSource((new URL(url)).openStream());
+    }
+
+    public Object parse() throws IOException, SAXException {
         xmlReader.parse(inputSource);
         return getHandlerResult();
     }
-    
-    public Object getHandlerResult(){
+
+    public Object getHandlerResult() {
         return handler.getResult();
     }
 

@@ -4,12 +4,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.hdodenhof.feedreader.helper.SQLiteHelper;
-import de.hdodenhof.feedreader.model.Feed;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+
+import de.hdodenhof.feedreader.helper.SQLiteHelper;
+import de.hdodenhof.feedreader.model.Feed;
 
 public class FeedsDataSource {
 

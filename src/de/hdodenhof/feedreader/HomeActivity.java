@@ -2,11 +2,6 @@ package de.hdodenhof.feedreader;
 
 import java.util.ArrayList;
 
-import de.hdodenhof.feedreader.adapter.FeedAdapter;
-import de.hdodenhof.feedreader.controller.FeedController;
-import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
-import de.hdodenhof.feedreader.tasks.AddFeedTask;
-import de.hdodenhof.feedreader.model.Feed;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -23,10 +18,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.AdapterView.OnItemClickListener;
+
+import de.hdodenhof.feedreader.adapter.FeedAdapter;
+import de.hdodenhof.feedreader.controller.FeedController;
+import de.hdodenhof.feedreader.model.Feed;
+import de.hdodenhof.feedreader.tasks.AddFeedTask;
+import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
 
 public class HomeActivity extends Activity implements OnItemClickListener {
 

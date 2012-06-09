@@ -2,11 +2,6 @@ package de.hdodenhof.feedreader.fragments;
 
 import java.sql.SQLException;
 
-import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.controller.ArticleController;
-import de.hdodenhof.feedreader.dao.FeedsDataSource;
-import de.hdodenhof.feedreader.model.Article;
-import de.hdodenhof.feedreader.model.Feed;
 import android.app.ActionBar;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,6 +11,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.controller.ArticleController;
+import de.hdodenhof.feedreader.dao.FeedsDataSource;
+import de.hdodenhof.feedreader.model.Article;
+import de.hdodenhof.feedreader.model.Feed;
 
 public class DisplayArticleFragment extends Fragment {
 
@@ -36,14 +37,18 @@ public class DisplayArticleFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        articleController = new ArticleController(getActivity());
+    }
+    
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View contentView = inflater.inflate(R.layout.article_fragment, container, false);
 
         if (getArguments() != null) {
 
             Long articleid = getArguments().getLong("articleid");
-            articleController = new ArticleController(getActivity());
-
             Article article = articleController.getArticle(articleid);
 
             TextView header = (TextView) contentView.findViewById(R.id.article_header);
@@ -56,7 +61,7 @@ public class DisplayArticleFragment extends Fragment {
             TextView text = (TextView) contentView.findViewById(R.id.article_text);
             text.setText(article.getFormatedContent());
             text.setMovementMethod(LinkMovementMethod.getInstance());
-            
+
         }
 
         return contentView;
@@ -88,5 +93,4 @@ public class DisplayArticleFragment extends Fragment {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
-
 }

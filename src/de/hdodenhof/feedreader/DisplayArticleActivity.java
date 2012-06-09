@@ -3,6 +3,7 @@ package de.hdodenhof.feedreader;
 import java.util.List;
 import java.util.Vector;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -13,29 +14,37 @@ import android.view.MenuItem;
 
 import de.hdodenhof.feedreader.adapter.ArticlePagerAdapter;
 import de.hdodenhof.feedreader.controller.ArticleController;
+import de.hdodenhof.feedreader.controller.FeedController;
 import de.hdodenhof.feedreader.fragments.DisplayArticleFragment;
 import de.hdodenhof.feedreader.model.Article;
+import de.hdodenhof.feedreader.model.Feed;
 
-public class DisplayArticleActivity extends FragmentActivity {
-    Bundle b;
-    Long articleId;
-    Long feedId;
+public class DisplayArticleActivity extends FragmentActivity implements DisplayArticleFragment.ParameterProvider {
+
+    private Long articleId;
+    private Long feedId;
 
     private ArticlePagerAdapter mPagerAdapter;
-    ArticleController articleController;
+    private ArticleController articleController;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.setContentView(R.layout.viewpager);
+        super.setContentView(R.layout.activity_article);
 
         articleController = new ArticleController(this);
 
-        b = getIntent().getExtras();
         articleId = getIntent().getLongExtra("articleid", -1);
-        feedId = getIntent().getLongExtra("feedid", -1);
+        feedId = articleController.getArticle(articleId).getFeedId();
 
         this.initialisePaging();
+        
+        FeedController feedController = new FeedController(this);
+        Feed feed = feedController.getFeed(feedId);
+        
+        ActionBar actionBar = getActionBar();
+        actionBar.setTitle(feed.getName());
+        actionBar.setDisplayHomeAsUpEnabled(true);        
 
     }
 
@@ -70,7 +79,7 @@ public class DisplayArticleActivity extends FragmentActivity {
         case android.R.id.home:
             Intent intent = new Intent(this, DisplayFeedActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("feedid", b.getLong("feedid"));
+            intent.putExtra("feedid", feedId);
             startActivity(intent);
             return true;
         default:
@@ -83,5 +92,9 @@ public class DisplayArticleActivity extends FragmentActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.app, menu);
         return true;
+    }
+
+    public long getArticleId() {
+        return this.articleId;
     }
 }

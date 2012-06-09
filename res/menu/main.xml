@@ -9,7 +9,7 @@
     <item
         android:id="@+id/item_add"
         android:icon="@drawable/add"
-        android:showAsAction="always|withText"
+        android:showAsAction="always"
         android:title="Add"/>
     <item
         android:id="@+id/item_settings"

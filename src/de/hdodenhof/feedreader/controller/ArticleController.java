@@ -34,6 +34,13 @@ public class ArticleController {
         disconnect();
         return articles;
     }
+    
+    public ArrayList<Article> getAllArticles() {
+        connect();
+        ArrayList<Article> articles = (ArrayList<Article>) datasource.getAllArticles();
+        disconnect();
+        return articles;
+    }
 
     public Article getArticle(long id) {
         connect();

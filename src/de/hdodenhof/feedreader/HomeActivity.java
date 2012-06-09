@@ -1,40 +1,37 @@
 package de.hdodenhof.feedreader;
 
-import java.util.ArrayList;
-
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.ActionMode;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
 
-import de.hdodenhof.feedreader.adapter.FeedAdapter;
-import de.hdodenhof.feedreader.controller.FeedController;
+import de.hdodenhof.feedreader.controller.ArticleController;
+import de.hdodenhof.feedreader.fragments.DisplayArticlesFragment;
+import de.hdodenhof.feedreader.fragments.DisplayFeedsFragment;
+import de.hdodenhof.feedreader.model.Article;
 import de.hdodenhof.feedreader.model.Feed;
 import de.hdodenhof.feedreader.tasks.AddFeedTask;
 import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
 
-public class HomeActivity extends Activity implements OnItemClickListener {
+public class HomeActivity extends FragmentActivity implements OnItemClickListener, DisplayArticlesFragment.OnArticleSelectedListener,
+        DisplayArticlesFragment.ParameterProvider {
 
-    private FeedController feedcontroller;
-    private ArrayAdapter<Feed> adapter;
+    private boolean mDualFragments = false;
     private ProgressDialog spinner;
     private ProgressDialog progressDialog;
+    private DisplayFeedsFragment feedsFragment;
+    private DisplayArticlesFragment articlesFragment;
 
     Handler asyncHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -42,9 +39,10 @@ public class HomeActivity extends Activity implements OnItemClickListener {
             switch (msg.what) {
             case 1:
                 // added feed
-                adapter.clear();
-                adapter.addAll(feedcontroller.getAllFeeds());
-                adapter.notifyDataSetChanged();
+                feedsFragment.updateFeeds();
+                if(mDualFragments){
+                    articlesFragment.updateContent(null);
+                }
                 spinner.dismiss();
                 break;
             case 2:
@@ -53,6 +51,9 @@ public class HomeActivity extends Activity implements OnItemClickListener {
                 break;
             case 3:
                 // refreshed feeds
+                if(mDualFragments){
+                    articlesFragment.updateContent(null);
+                }                
                 progressDialog.dismiss();
             case 9:
                 // refresh progress bar
@@ -66,41 +67,30 @@ public class HomeActivity extends Activity implements OnItemClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
 
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        Uri uri = intent.getData();
+        if (savedInstanceState != null) {
 
-        feedcontroller = new FeedController(this);
-
-        if (Intent.ACTION_VIEW.equals(action) && uri != null) {
-            addFeed(uri.toString());
         }
 
-        ArrayList<Feed> values = feedcontroller.getAllFeeds();
-        adapter = new FeedAdapter(this, values);
+        setContentView(R.layout.activity_home);
 
-        ListView feedlistview = (ListView) findViewById(R.id.feed_listView);
-        feedlistview.setAdapter(adapter);
-        feedlistview.setOnItemClickListener(this);
-
-        feedlistview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        feedlistview.setMultiChoiceModeListener(new MyMultiChoiceModeListener());
+        feedsFragment = (DisplayFeedsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feeds);
+        articlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articles);
+        if (articlesFragment != null) {
+            mDualFragments = true;
+        }
 
     }
+
+    public long getFeedId() {
+        return -1;
+    }    
 
     private void addFeed(String feedUrl) {
         spinner = ProgressDialog.show(this, "", "Please wait...", true);
         AddFeedTask addFeedTask = new AddFeedTask(asyncHandler, this);
         addFeedTask.execute(feedUrl);
     }
-
-    // private void updateFeed(Feed feed) {
-    // spinner = ProgressDialog.show(this, "", "Please wait...", true);
-    // UpdateFeedTask updateFeedTask = new UpdateFeedTask(asyncHandler, this);
-    // updateFeedTask.execute(feed);
-    // }
 
     private void refreshFeeds() {
 
@@ -109,7 +99,7 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         progressDialog.setMessage("Loading...");
         progressDialog.setCancelable(false);
         progressDialog.setProgress(0);
-        progressDialog.setMax(adapter.getCount());
+        progressDialog.setMax(feedsFragment.getListLength());
         progressDialog.show();
 
         RefreshFeedsTask refreshFeedsTask = new RefreshFeedsTask(asyncHandler, this);
@@ -143,10 +133,16 @@ public class HomeActivity extends Activity implements OnItemClickListener {
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Feed feed = (Feed) parent.getItemAtPosition(position);
-        Intent intent = new Intent(getApplicationContext(), DisplayFeedActivity.class);
 
-        intent.putExtra("feedid", feed.getId());
-        startActivity(intent);
+        if (!mDualFragments) {
+            Intent intent = new Intent(this, DisplayFeedActivity.class);
+            intent.putExtra("feedid", feed.getId());
+            startActivity(intent);
+        } else {
+            DisplayArticlesFragment articlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articles);
+            articlesFragment.updateContent(feed.getId());
+        }
+
     }
 
     @Override
@@ -154,6 +150,18 @@ public class HomeActivity extends Activity implements OnItemClickListener {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
         return true;
+    }
+
+    public void articleSelected(int index, Article article) {
+
+        ArticleController articleController = new ArticleController(this);
+        long feedId = articleController.getArticle(article.getId()).getFeedId();
+
+        Intent intent = new Intent(this, DisplayFeedActivity.class);
+        intent.putExtra("articleid", article.getId());
+        intent.putExtra("feedid", feedId);
+        startActivity(intent);
+
     }
 
     @Override
@@ -167,53 +175,6 @@ public class HomeActivity extends Activity implements OnItemClickListener {
             return true;
         default:
             return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private class MyMultiChoiceModeListener implements MultiChoiceModeListener {
-
-        private ArrayList<Feed> toDelete;
-
-        public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            Feed feed = (Feed) adapter.getItem(position);
-
-            if (checked) {
-                toDelete.add(feed);
-            } else {
-                toDelete.remove(feed);
-            }
-        }
-
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-            case R.id.item_delete:
-
-                for (Feed feed : toDelete) {
-                    feedcontroller.deleteFeed(feed);
-                    adapter.remove(feed);
-                }
-
-                adapter.notifyDataSetChanged();
-                mode.finish();
-                return true;
-            default:
-                return false;
-            }
-        }
-
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.feed_context, menu);
-
-            toDelete = new ArrayList<Feed>();
-            return true;
-        }
-
-        public void onDestroyActionMode(ActionMode mode) {
-        }
-
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
         }
     }
 

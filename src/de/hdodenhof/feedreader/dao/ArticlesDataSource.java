@@ -96,6 +96,23 @@ public class ArticlesDataSource {
 
         return articles;
     }
+
+    public List<Article> getAllArticles() {
+        List<Article> articles = new ArrayList<Article>();
+
+        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, null, null, null,
+                null, null);
+
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()) {
+            Article article = cursorToArticle(cursor);
+            articles.add(article);
+            cursor.moveToNext();
+        }
+        cursor.close();
+
+        return articles;
+    }    
     
     public void setRead(long id){
         ContentValues values = new ContentValues();

@@ -5,16 +5,10 @@
     android:orientation="horizontal" >
 
     <fragment
-        android:id="@+id/feed_fragment"
-        android:name="de.hdodenhof.feedreader.fragments.DisplayFeedFragment"
+        android:id="@+id/articles_fragment"
+        android:name="de.hdodenhof.feedreader.fragments.DisplayArticlesFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />
-
-    <FrameLayout
-        android:id="@+id/article_fragment"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="3" />
 
 </LinearLayout>

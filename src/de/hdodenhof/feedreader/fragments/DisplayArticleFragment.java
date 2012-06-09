@@ -1,8 +1,6 @@
 package de.hdodenhof.feedreader.fragments;
 
-import java.sql.SQLException;
-
-import android.app.ActionBar;
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
@@ -14,54 +12,67 @@ import android.widget.TextView;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.controller.ArticleController;
-import de.hdodenhof.feedreader.dao.FeedsDataSource;
 import de.hdodenhof.feedreader.model.Article;
-import de.hdodenhof.feedreader.model.Feed;
 
 public class DisplayArticleFragment extends Fragment {
 
-    ArticleController articleController;
+    private ArticleController articleController;
+    private long articleId;
+    private ParameterProvider mParameterProvider;
 
-    public static DisplayArticleFragment newInstance(Long articleid) {
-        DisplayArticleFragment f = new DisplayArticleFragment();
+    public interface ParameterProvider {
+        public long getArticleId();
+    }        
+    
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        
+        mParameterProvider = (ParameterProvider) activity;
+    }       
+    
+    public static DisplayArticleFragment newInstance(Long articleId) {
+        DisplayArticleFragment instance = new DisplayArticleFragment();
+        instance.articleId = articleId;
 
-        Bundle args = new Bundle();
-        args.putLong("articleid", articleid);
-        f.setArguments(args);
+        return instance;
+    }
 
-        return f;
+    public DisplayArticleFragment() {
+        this.articleId = -1;
     }
 
     public Long getShownIndex() {
-        return getArguments().getLong("articleid");
+        return this.articleId;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         articleController = new ArticleController(getActivity());
+        
+        if(this.articleId == -1){
+            this.articleId = mParameterProvider.getArticleId();
+        }
     }
-    
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View contentView = inflater.inflate(R.layout.article_fragment, container, false);
+        View contentView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
 
-        if (getArguments() != null) {
-
-            Long articleid = getArguments().getLong("articleid");
-            Article article = articleController.getArticle(articleid);
+        if (articleId != -1) {
+            Article article = articleController.getArticle(articleId);
 
             TextView header = (TextView) contentView.findViewById(R.id.article_header);
             header.setText(article.getTitle());
 
             TextView pubDate = (TextView) contentView.findViewById(R.id.article_pubdate);
             CharSequence formattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", article.getPubDate());
-            pubDate.setText(formattedPubdate);            
-            
+            pubDate.setText(formattedPubdate);
+
             TextView text = (TextView) contentView.findViewById(R.id.article_text);
             text.setText(article.getFormatedContent());
             text.setMovementMethod(LinkMovementMethod.getInstance());
-
         }
 
         return contentView;
@@ -71,26 +82,5 @@ public class DisplayArticleFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedState) {
         super.onActivityCreated(savedState);
-
-        View feedFragment = getActivity().findViewById(R.id.feed_fragment);
-        boolean mDualPane = feedFragment != null;
-
-        if (!mDualPane) {
-            long feedId = getActivity().getIntent().getLongExtra("feedid", -1);
-            FeedsDataSource fds = new FeedsDataSource(getActivity());
-            try {
-                fds.open();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-
-            Feed feed = fds.getFeed(feedId);
-
-            fds.close();
-
-            ActionBar actionBar = getActivity().getActionBar();
-            actionBar.setTitle(feed.getName());
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
     }
 }

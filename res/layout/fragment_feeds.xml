@@ -5,12 +5,12 @@
     android:orientation="horizontal" >
 
     <LinearLayout
-        android:id="@+id/article_wrapper"
+        android:id="@+id/feeds_wrapper"
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
         <ListView
-            android:id="@+id/article_listview"
+            android:id="@+id/feeds_listview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" >
         </ListView>

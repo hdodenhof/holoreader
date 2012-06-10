@@ -35,6 +35,7 @@ public class DisplayArticlesFragment extends ListFragment {
 
     public interface ParameterProvider {
         public long getFeedId();
+
         public int getArticlePosition();
     }
 
@@ -68,8 +69,8 @@ public class DisplayArticlesFragment extends ListFragment {
     public void setChoiceModeSingle() {
         this.choiceModeSingle = true;
     }
-    
-    public void highlight(int position){
+
+    public void highlight(int position) {
         articleslistview.setItemChecked(position, true);
     }
 
@@ -119,11 +120,11 @@ public class DisplayArticlesFragment extends ListFragment {
         });
 
         updateContent(feedId);
-        
-        if (mParameterProvider.getArticlePosition() != -1){
+
+        if (mParameterProvider.getArticlePosition() != -1) {
             highlight(mParameterProvider.getArticlePosition());
         }
-        
+
     }
 
 }

@@ -3,6 +3,7 @@ package de.hdodenhof.feedreader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import android.app.ActionBar;
@@ -11,6 +12,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -171,6 +173,18 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
             DisplayArticlesFragment displayArticlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feed);
             displayArticlesFragment.highlight(position);
         }
+        
+        ArticleController articleController = new ArticleController(this);
+        articleController.setRead(getKeyByValue(articleMap, position));
+        Log.v("FR", "setRead()");
     }
 
+    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Entry<T, E> entry : map.entrySet()) {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
 }

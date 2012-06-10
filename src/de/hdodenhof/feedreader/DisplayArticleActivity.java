@@ -1,6 +1,9 @@
 package de.hdodenhof.feedreader;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Vector;
 
 import android.app.ActionBar;
@@ -8,6 +11,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,13 +24,14 @@ import de.hdodenhof.feedreader.fragments.DisplayArticleFragment;
 import de.hdodenhof.feedreader.model.Article;
 import de.hdodenhof.feedreader.model.Feed;
 
-public class DisplayArticleActivity extends FragmentActivity implements DisplayArticleFragment.ParameterProvider {
+public class DisplayArticleActivity extends FragmentActivity implements DisplayArticleFragment.ParameterProvider, OnPageChangeListener {
 
     private Long articleId;
     private Long feedId;
 
     private ArticlePagerAdapter mPagerAdapter;
     private ArticleController articleController;
+    private Map<Long, Integer> articleMap;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -38,13 +44,13 @@ public class DisplayArticleActivity extends FragmentActivity implements DisplayA
         feedId = articleController.getArticle(articleId).getFeedId();
 
         this.initialisePaging();
-        
+
         FeedController feedController = new FeedController(this);
         Feed feed = feedController.getFeed(feedId);
-        
+
         ActionBar actionBar = getActionBar();
         actionBar.setTitle(feed.getName());
-        actionBar.setDisplayHomeAsUpEnabled(true);        
+        actionBar.setDisplayHomeAsUpEnabled(true);
 
     }
 
@@ -56,6 +62,7 @@ public class DisplayArticleActivity extends FragmentActivity implements DisplayA
         List<Article> articles = articleController.getAllArticles(feedId);
         int pos = 0;
         int curr = 0;
+        articleMap = new HashMap<Long, Integer>();
 
         for (Article article : articles) {
             fragments.add(DisplayArticleFragment.newInstance(article.getId()));
@@ -63,6 +70,7 @@ public class DisplayArticleActivity extends FragmentActivity implements DisplayA
             if (article.getId() == articleId) {
                 curr = pos;
             }
+            articleMap.put(article.getId(), pos);
             pos++;
         }
 
@@ -70,6 +78,7 @@ public class DisplayArticleActivity extends FragmentActivity implements DisplayA
 
         ViewPager pager = (ViewPager) super.findViewById(R.id.viewpager);
         pager.setAdapter(this.mPagerAdapter);
+        pager.setOnPageChangeListener(this);
         pager.setCurrentItem(curr);
     }
 
@@ -96,5 +105,26 @@ public class DisplayArticleActivity extends FragmentActivity implements DisplayA
 
     public long getArticleId() {
         return this.articleId;
+    }
+
+    public void onPageScrollStateChanged(int state) {
+    }
+
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    }
+
+    public void onPageSelected(int position) {
+        ArticleController articleController = new ArticleController(this);
+        articleController.setRead(getKeyByValue(articleMap, position));
+        Log.v("FR", "setRead()");
+    }
+
+    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Entry<T, E> entry : map.entrySet()) {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }

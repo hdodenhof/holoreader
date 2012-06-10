@@ -22,7 +22,11 @@ public class DisplayArticleFragment extends Fragment {
 
     public interface ParameterProvider {
         public long getArticleId();
-    }        
+    }
+    
+    public interface UpdateHandler {
+        public void handleUpdate(int articleId);
+    }
     
     @Override
     public void onAttach(Activity activity) {

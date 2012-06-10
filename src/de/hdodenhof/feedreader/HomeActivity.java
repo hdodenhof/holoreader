@@ -168,7 +168,6 @@ public class HomeActivity extends FragmentActivity implements OnItemClickListene
         intent.putExtra("articleid", article.getId());
         intent.putExtra("feedid", feedId);
         startActivity(intent);
-
     }
 
     @Override

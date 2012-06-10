@@ -11,6 +11,11 @@
         android:layout_height="match_parent"
         android:layout_weight="1" />
     
+    <View
+        android:layout_width="1dip"
+        android:layout_height="fill_parent"
+        android:background="#808080" />    
+    
     <android.support.v4.view.ViewPager
         android:id="@+android:id/viewpager"
         android:layout_width="0dp"

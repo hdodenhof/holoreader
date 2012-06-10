@@ -79,6 +79,10 @@ public class HomeActivity extends FragmentActivity implements OnItemClickListene
         if (articlesFragment != null) {
             mDualFragments = true;
         }
+        
+        if (mDualFragments){
+            feedsFragment.setChoiceModeSingle();
+        }
 
     }
 
@@ -139,7 +143,6 @@ public class HomeActivity extends FragmentActivity implements OnItemClickListene
             intent.putExtra("feedid", feed.getId());
             startActivity(intent);
         } else {
-            DisplayArticlesFragment articlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articles);
             articlesFragment.updateContent(feed.getId());
         }
 

@@ -2,16 +2,12 @@ package de.hdodenhof.feedreader.fragments;
 
 import java.util.ArrayList;
 
-import android.app.ActionBar;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
 import android.view.ActionMode;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -23,30 +19,17 @@ import de.hdodenhof.feedreader.controller.ArticleController;
 import de.hdodenhof.feedreader.controller.FeedController;
 import de.hdodenhof.feedreader.model.Feed;
 
-public class DisplayFeedsFragment extends Fragment {
-    
-    private View feedsView;
+public class DisplayFeedsFragment extends ListFragment {
+
     private ListView feedslistview;
     private ArrayAdapter<Feed> feedAdapter;
     private FeedController feedController;
     private ArticleController articleController;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        feedsView = inflater.inflate(R.layout.fragment_feeds, null);
-        feedslistview = (ListView) feedsView.findViewById(R.id.feeds_listview);
-
-        return feedsView;
-    }
+    private boolean choiceModeSingle = false;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        ActionBar bar = getActivity().getActionBar();
-        bar.setDisplayHomeAsUpEnabled(false);
-
-        setHasOptionsMenu(true);
 
         if (savedInstanceState != null) {
 
@@ -56,23 +39,33 @@ public class DisplayFeedsFragment extends Fragment {
         feedController = new FeedController(getActivity());
         feedAdapter = new FeedAdapter(getActivity(), feedController.getAllFeeds());
 
-        feedslistview.setAdapter(feedAdapter);
+        this.setEmptyText("No feeds");
+        this.setListAdapter(feedAdapter);
+        feedslistview = getListView();
+
         feedslistview.setOnItemClickListener((OnItemClickListener) getActivity());
 
-        feedslistview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-        feedslistview.setMultiChoiceModeListener(new FeedsMultiChoiceModeListener());
+        if (choiceModeSingle) {
+            feedslistview.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        } else {
+            feedslistview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+            feedslistview.setMultiChoiceModeListener(new FeedsMultiChoiceModeListener());
+        }
 
     }
-    
-    
-    public int getListLength(){
+
+    public void setChoiceModeSingle() {
+        this.choiceModeSingle = true;
+    }
+
+    public int getListLength() {
         return feedAdapter.getCount();
-    } 
-    
-    public void updateFeeds(){
+    }
+
+    public void updateFeeds() {
         feedAdapter.clear();
         feedAdapter.addAll(feedController.getAllFeeds());
-        feedAdapter.notifyDataSetChanged();        
+        feedAdapter.notifyDataSetChanged();
     }
 
     private class FeedsMultiChoiceModeListener implements MultiChoiceModeListener {

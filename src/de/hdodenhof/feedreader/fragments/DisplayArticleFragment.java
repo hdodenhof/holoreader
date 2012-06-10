@@ -79,8 +79,4 @@ public class DisplayArticleFragment extends Fragment {
 
     }
 
-    @Override
-    public void onActivityCreated(Bundle savedState) {
-        super.onActivityCreated(savedState);
-    }
 }

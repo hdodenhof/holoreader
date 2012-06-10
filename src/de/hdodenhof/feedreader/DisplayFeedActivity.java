@@ -8,6 +8,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 
 import de.hdodenhof.feedreader.controller.FeedController;
 import de.hdodenhof.feedreader.fragments.DisplayArticleFragment;
@@ -15,7 +16,8 @@ import de.hdodenhof.feedreader.fragments.DisplayArticlesFragment;
 import de.hdodenhof.feedreader.model.Article;
 import de.hdodenhof.feedreader.model.Feed;
 
-public class DisplayFeedActivity extends FragmentActivity implements DisplayArticlesFragment.OnArticleSelectedListener, DisplayArticlesFragment.ParameterProvider, DisplayArticleFragment.ParameterProvider {
+public class DisplayFeedActivity extends FragmentActivity implements DisplayArticlesFragment.OnArticleSelectedListener,
+        DisplayArticlesFragment.ParameterProvider, DisplayArticleFragment.ParameterProvider {
 
     private boolean mDualFragments = false;
     private long feedId;
@@ -32,25 +34,38 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
         if (!getIntent().hasExtra("feedid")) {
             Intent intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);           
+            startActivity(intent);
         } else {
             feedId = getIntent().getLongExtra("feedid", -1);
         }
-        
+
         if (getIntent().hasExtra("articleid")) {
-            articleId = getIntent().getLongExtra("articleid", -1);       
+            articleId = getIntent().getLongExtra("articleid", -1);
         }
 
         setContentView(R.layout.activity_feed);
 
-        DisplayArticleFragment articleFragment = (DisplayArticleFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_article);
+        View articleFragment = findViewById(R.id.fragment_article);
         if (articleFragment != null) {
             mDualFragments = true;
+        }
+
+        if (mDualFragments) {
+            DisplayArticleFragment newArticleFragment = DisplayArticleFragment.newInstance(articleId);
+
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+            ft.replace(R.id.fragment_article, newArticleFragment);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.commit();
+            
+            DisplayArticlesFragment displayArticlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feed);
+            displayArticlesFragment.setChoiceModeSingle();
         }
         
         FeedController feedController = new FeedController(this);
         Feed feed = feedController.getFeed(feedId);
-        
+
         ActionBar actionBar = getActionBar();
         actionBar.setTitle(feed.getName());
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -80,21 +95,22 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
     public long getFeedId() {
         return this.feedId;
     }
-    
+
     public long getArticleId() {
         return this.articleId;
     }
-    
 
     public void articleSelected(int index, Article article) {
 
         if (mDualFragments) {
-            DisplayArticleFragment articleFragment = (DisplayArticleFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_article);
-            if (articleFragment == null || articleFragment.getShownIndex() != article.getId()) {
-                articleFragment = DisplayArticleFragment.newInstance(article.getId());
+            DisplayArticleFragment currentArticleFragment = (DisplayArticleFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_article);
+
+            if (currentArticleFragment == null || currentArticleFragment.getShownIndex() != article.getId()) {
+                DisplayArticleFragment newArticleFragment = DisplayArticleFragment.newInstance(article.getId());
 
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-                ft.replace(R.id.fragment_article, articleFragment);
+
+                ft.replace(R.id.fragment_article, newArticleFragment);
                 ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
                 ft.commit();
             }

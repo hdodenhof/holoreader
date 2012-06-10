@@ -5,10 +5,8 @@ import java.util.ArrayList;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
+import android.support.v4.app.ListFragment;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
@@ -20,33 +18,33 @@ import de.hdodenhof.feedreader.controller.FeedController;
 import de.hdodenhof.feedreader.model.Article;
 import de.hdodenhof.feedreader.model.Feed;
 
-public class DisplayArticlesFragment extends Fragment {
+public class DisplayArticlesFragment extends ListFragment {
 
     private boolean mDualFragments = false;
-    private View articlesView;
     private ListView articleslistview;
     private FeedController feedController;
     private ArticleController articleController;
     private ArticleAdapter articleAdapter;
     private ParameterProvider mParameterProvider;
     private OnArticleSelectedListener mOnArticleSelectedListener;
+    private boolean choiceModeSingle = false;
 
     public interface OnArticleSelectedListener {
         public void articleSelected(int index, Article article);
     }
-    
+
     public interface ParameterProvider {
         public long getFeedId();
-    }    
+    }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        
+
         mParameterProvider = (ParameterProvider) activity;
         mOnArticleSelectedListener = (OnArticleSelectedListener) activity;
-    }    
-    
+    }
+
     public void updateContent(Long id) {
         ArrayList<Article> articleList;
 
@@ -66,19 +64,15 @@ public class DisplayArticlesFragment extends Fragment {
 
     }
 
+    public void setChoiceModeSingle() {
+        this.choiceModeSingle = true;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         feedController = new FeedController(getActivity());
         articleController = new ArticleController(getActivity());
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        articlesView = inflater.inflate(R.layout.fragment_articles, null);
-        articleslistview = (ListView) articlesView.findViewById(R.id.articles_listview);
-
-        return articlesView;
     }
 
     @Override
@@ -91,9 +85,9 @@ public class DisplayArticlesFragment extends Fragment {
             mDualFragments = true;
         }
 
-        if (!mDualFragments){
-             ActionBar actionBar = getActivity().getActionBar();
-             actionBar.setDisplayHomeAsUpEnabled(true);       
+        if (!mDualFragments) {
+            ActionBar actionBar = getActivity().getActionBar();
+            actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
         if (savedInstanceState != null) {
@@ -104,20 +98,23 @@ public class DisplayArticlesFragment extends Fragment {
 
         articleAdapter = new ArticleAdapter(getActivity(), new ArrayList<Article>());
 
-        articleslistview.setAdapter(articleAdapter);
+        this.setEmptyText("No articles");
+        this.setListAdapter(articleAdapter);
+
+        articleslistview = getListView();
+        if (choiceModeSingle) {
+            articleslistview.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
+
         articleslistview.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                showDetails(position);
+                Article article = (Article) articleslistview.getItemAtPosition(position);
+                mOnArticleSelectedListener.articleSelected(position, article);
             }
         });
 
         updateContent(feedId);
 
-    }
-
-    private void showDetails(int index) {
-        Article article = (Article) articleslistview.getItemAtPosition(index);
-        mOnArticleSelectedListener.articleSelected(index, article);
     }
 
 }

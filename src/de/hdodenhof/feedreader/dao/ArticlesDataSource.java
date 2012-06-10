@@ -84,7 +84,7 @@ public class ArticlesDataSource {
         List<Article> articles = new ArrayList<Article>();
 
         Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID + " = " + feedid, null, null,
-                null, null);
+                null, SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE + " desc");
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -100,8 +100,7 @@ public class ArticlesDataSource {
     public List<Article> getAllArticles() {
         List<Article> articles = new ArrayList<Article>();
 
-        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, null, null, null,
-                null, null);
+        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, null, null, null, null, SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE + " desc");
 
         cursor.moveToFirst();
         while (!cursor.isAfterLast()) {
@@ -112,12 +111,12 @@ public class ArticlesDataSource {
         cursor.close();
 
         return articles;
-    }    
-    
-    public void setRead(long id){
+    }
+
+    public void setRead(long id) {
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_READ, 1);
-        
+
         database.update(SQLiteHelper.ARTICLE_TABLE_NAME, values, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + id, null);
     }
 
@@ -134,17 +133,17 @@ public class ArticlesDataSource {
         }
 
     }
-    
-    private int fromBoolean(boolean bool){
-        if (bool == true){
+
+    private int fromBoolean(boolean bool) {
+        if (bool == true) {
             return 1;
         } else {
             return 0;
         }
     }
-    
-    private boolean toBoolean(int integer){
-        if (integer == 1){
+
+    private boolean toBoolean(int integer) {
+        if (integer == 1) {
             return true;
         } else {
             return false;

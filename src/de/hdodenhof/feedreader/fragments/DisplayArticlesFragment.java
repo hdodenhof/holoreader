@@ -67,6 +67,10 @@ public class DisplayArticlesFragment extends ListFragment {
     public void setChoiceModeSingle() {
         this.choiceModeSingle = true;
     }
+    
+    public void highlight(int position){
+        articleslistview.setItemChecked(position, true);
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,7 +83,8 @@ public class DisplayArticlesFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        DisplayArticleFragment articleFragment = (DisplayArticleFragment) getFragmentManager().findFragmentById(R.id.fragment_article);
+//        DisplayArticleFragment articleFragment = (DisplayArticleFragment) getFragmentManager().findFragmentById(R.id.fragment_article);
+        View articleFragment = getActivity().findViewById(R.id.viewpager);
         DisplayFeedsFragment feedsFragment = (DisplayFeedsFragment) getFragmentManager().findFragmentById(R.id.fragment_feeds);
         if (articleFragment != null || feedsFragment != null) {
             mDualFragments = true;

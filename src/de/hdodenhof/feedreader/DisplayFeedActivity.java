@@ -1,15 +1,23 @@
 package de.hdodenhof.feedreader;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
+
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
+import de.hdodenhof.feedreader.adapter.ArticlePagerAdapter;
+import de.hdodenhof.feedreader.controller.ArticleController;
 import de.hdodenhof.feedreader.controller.FeedController;
 import de.hdodenhof.feedreader.fragments.DisplayArticleFragment;
 import de.hdodenhof.feedreader.fragments.DisplayArticlesFragment;
@@ -17,11 +25,15 @@ import de.hdodenhof.feedreader.model.Article;
 import de.hdodenhof.feedreader.model.Feed;
 
 public class DisplayFeedActivity extends FragmentActivity implements DisplayArticlesFragment.OnArticleSelectedListener,
-        DisplayArticlesFragment.ParameterProvider, DisplayArticleFragment.ParameterProvider {
+        DisplayArticlesFragment.ParameterProvider, DisplayArticleFragment.ParameterProvider, OnPageChangeListener {
 
     private boolean mDualFragments = false;
     private long feedId;
     private long articleId;
+    private ArticlePagerAdapter mPagerAdapter;
+    private ViewPager pager;
+    private Map<Long, Integer> articleMap;
+    private boolean feedViewReady = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,24 +57,21 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
 
         setContentView(R.layout.activity_feed);
 
-        View articleFragment = findViewById(R.id.fragment_article);
+        View articleFragment = findViewById(R.id.viewpager);
         if (articleFragment != null) {
             mDualFragments = true;
         }
 
         if (mDualFragments) {
-            DisplayArticleFragment newArticleFragment = DisplayArticleFragment.newInstance(articleId);
+            this.initialisePaging();
 
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
-            ft.replace(R.id.fragment_article, newArticleFragment);
-            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-            ft.commit();
-            
             DisplayArticlesFragment displayArticlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feed);
             displayArticlesFragment.setChoiceModeSingle();
+            
+            // FIXME
+            feedViewReady = true;
         }
-        
+
         FeedController feedController = new FeedController(this);
         Feed feed = feedController.getFeed(feedId);
 
@@ -70,6 +79,36 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
         actionBar.setTitle(feed.getName());
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+    }
+
+    private void initialisePaging() {
+
+        List<DisplayArticleFragment> fragments = new Vector<DisplayArticleFragment>();
+        List<String> titles = new Vector<String>();
+
+        ArticleController articleController = new ArticleController(this);
+
+        List<Article> articles = articleController.getAllArticles(feedId);
+        int pos = 0;
+        int curr = 0;
+        articleMap = new HashMap<Long, Integer>();
+
+        for (Article article : articles) {
+            fragments.add(DisplayArticleFragment.newInstance(article.getId()));
+            titles.add(article.getTitle());
+            if (article.getId() == articleId) {
+                curr = pos;
+            }
+            articleMap.put(article.getId(), pos);
+            pos++;
+        }
+
+        this.mPagerAdapter = new ArticlePagerAdapter(getSupportFragmentManager(), fragments, titles);
+
+        pager = (ViewPager) findViewById(R.id.viewpager);
+        pager.setAdapter(this.mPagerAdapter);
+        pager.setOnPageChangeListener(this);
+        pager.setCurrentItem(curr);
     }
 
     @Override
@@ -103,17 +142,7 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
     public void articleSelected(int index, Article article) {
 
         if (mDualFragments) {
-            DisplayArticleFragment currentArticleFragment = (DisplayArticleFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_article);
-
-            if (currentArticleFragment == null || currentArticleFragment.getShownIndex() != article.getId()) {
-                DisplayArticleFragment newArticleFragment = DisplayArticleFragment.newInstance(article.getId());
-
-                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-
-                ft.replace(R.id.fragment_article, newArticleFragment);
-                ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                ft.commit();
-            }
+            pager.setCurrentItem((Integer) articleMap.get(article.getId()));
 
         } else {
             Intent intent = new Intent(this, DisplayArticleActivity.class);
@@ -121,5 +150,18 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
             startActivity(intent);
         }
 
+    }
+
+    public void onPageScrollStateChanged(int state) {
+    }
+
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    }
+
+    public void onPageSelected(int position) {
+        if (feedViewReady) {
+            DisplayArticlesFragment displayArticlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feed);
+            displayArticlesFragment.highlight(position);
+        }
     }
 }

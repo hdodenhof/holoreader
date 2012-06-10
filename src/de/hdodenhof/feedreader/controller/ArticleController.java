@@ -10,67 +10,67 @@ import de.hdodenhof.feedreader.dao.ArticlesDataSource;
 import de.hdodenhof.feedreader.model.Article;
 
 public class ArticleController {
-    private ArticlesDataSource datasource;
+        private ArticlesDataSource mArticleDataSource;
 
-    public ArticleController(Context context) {
-        datasource = new ArticlesDataSource(context);
-    }
-
-    private void connect() {
-        try {
-            datasource.open();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        public ArticleController(Context context) {
+                mArticleDataSource = new ArticlesDataSource(context);
         }
-    }
 
-    private void disconnect() {
-        datasource.close();
-    }
+        private void connect() {
+                try {
+                        mArticleDataSource.open();
+                } catch (SQLException e) {
+                        e.printStackTrace();
+                }
+        }
 
-    public ArrayList<Article> getAllArticles(long feedid) {
-        connect();
-        ArrayList<Article> articles = (ArrayList<Article>) datasource.getAllArticles(feedid);
-        disconnect();
-        return articles;
-    }
-    
-    public ArrayList<Article> getAllArticles() {
-        connect();
-        ArrayList<Article> articles = (ArrayList<Article>) datasource.getAllArticles();
-        disconnect();
-        return articles;
-    }
+        private void disconnect() {
+                mArticleDataSource.close();
+        }
 
-    public Article getArticle(long id) {
-        connect();
-        Article article = datasource.getArticle(id);
-        disconnect();
-        return article;
-    }
+        public ArrayList<Article> getAllArticles(long feedid) {
+                connect();
+                ArrayList<Article> mArticles = (ArrayList<Article>) mArticleDataSource.getAllArticles(feedid);
+                disconnect();
+                return mArticles;
+        }
 
-    public void deleteArticles(long feedId) {
-        connect();
-        datasource.deleteArticles(feedId);
-        disconnect();
-    }
+        public ArrayList<Article> getAllArticles() {
+                connect();
+                ArrayList<Article> mArticles = (ArrayList<Article>) mArticleDataSource.getAllArticles();
+                disconnect();
+                return mArticles;
+        }
 
-    public void createArticle(long feedId, String guid, Date date, String title, String summary, String content) {
-        connect();
-        datasource.createArticle(feedId, guid, date, title, summary, content, false);
-        disconnect();
-    }
+        public Article getArticle(long id) {
+                connect();
+                Article mArticle = mArticleDataSource.getArticle(id);
+                disconnect();
+                return mArticle;
+        }
 
-    public void createArticles(long feedId, ArrayList<Article> articles) {
-        connect();
-        datasource.createArticles(feedId, articles);
-        disconnect();
-    }
+        public void deleteArticles(long feedId) {
+                connect();
+                mArticleDataSource.deleteArticles(feedId);
+                disconnect();
+        }
 
-    public void setRead(long id) {
-        connect();
-        datasource.setRead(id);
-        disconnect();
-    }
+        public void createArticle(long feedId, String guid, Date date, String title, String summary, String content) {
+                connect();
+                mArticleDataSource.createArticle(feedId, guid, date, title, summary, content, false);
+                disconnect();
+        }
+
+        public void createArticles(long feedId, ArrayList<Article> articles) {
+                connect();
+                mArticleDataSource.createArticles(feedId, articles);
+                disconnect();
+        }
+
+        public void setRead(long id) {
+                connect();
+                mArticleDataSource.setRead(id);
+                disconnect();
+        }
 
 }

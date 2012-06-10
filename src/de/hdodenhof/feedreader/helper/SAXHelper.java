@@ -15,28 +15,28 @@ import org.xml.sax.helpers.DefaultHandler;
 import de.hdodenhof.feedreader.handler.GenericHandler;
 
 public class SAXHelper {
-    GenericHandler handler;
-    SAXParserFactory factory;
-    SAXParser saxParser;
-    XMLReader xmlReader;
-    InputSource inputSource;
+        GenericHandler mHandler;
+        SAXParserFactory mSAXParserFactory;
+        SAXParser mSAXParser;
+        XMLReader mXMLReader;
+        InputSource mInputSource;
 
-    public SAXHelper(String url, GenericHandler handler) throws ParserConfigurationException, SAXException, IOException {
-        this.handler = handler;
-        this.factory = SAXParserFactory.newInstance();
-        this.saxParser = factory.newSAXParser();
-        this.xmlReader = saxParser.getXMLReader();
-        this.xmlReader.setContentHandler((DefaultHandler) handler);
-        this.inputSource = new InputSource((new URL(url)).openStream());
-    }
+        public SAXHelper(String url, GenericHandler handler) throws ParserConfigurationException, SAXException, IOException {
+                this.mHandler = handler;
+                this.mSAXParserFactory = SAXParserFactory.newInstance();
+                this.mSAXParser = mSAXParserFactory.newSAXParser();
+                this.mXMLReader = mSAXParser.getXMLReader();
+                this.mXMLReader.setContentHandler((DefaultHandler) handler);
+                this.mInputSource = new InputSource((new URL(url)).openStream());
+        }
 
-    public Object parse() throws IOException, SAXException {
-        xmlReader.parse(inputSource);
-        return getHandlerResult();
-    }
+        public Object parse() throws IOException, SAXException {
+                mXMLReader.parse(mInputSource);
+                return getHandlerResult();
+        }
 
-    public Object getHandlerResult() {
-        return handler.getResult();
-    }
+        public Object getHandlerResult() {
+                return mHandler.getResult();
+        }
 
 }

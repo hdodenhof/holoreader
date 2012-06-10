@@ -13,120 +13,120 @@ import org.xml.sax.helpers.DefaultHandler;
 import de.hdodenhof.feedreader.model.Article;
 
 public class ArticleHandler extends DefaultHandler implements GenericHandler {
-    private Article a = null;
+        private Article mArticle = null;
 
-    private ArrayList<Article> articleList;
-    private StringBuffer mSb;
+        private ArrayList<Article> mArticleList;
+        private StringBuffer mSb;
 
-    private boolean isGuid = false;
-    private boolean isPubdate = false;
-    private boolean isArticle = false;
-    private boolean isTitle = false;
-    private boolean isContent = false;
-    private boolean isSummary = false;
+        private boolean mIsGuid = false;
+        private boolean mIsPubdate = false;
+        private boolean mIsArticle = false;
+        private boolean mIsTitle = false;
+        private boolean mIsContent = false;
+        private boolean mIsSummary = false;
 
-    private static final String DATE_FORMATS[] = { "EEE, dd MMM yyyy HH:mm:ss Z", "EEE, dd MMM yyyy HH:mm:ss z", "yyyy-MM-dd'T'HH:mm:ssz",
-            "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
-    private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
+        private static final String DATE_FORMATS[] = { "EEE, dd MMM yyyy HH:mm:ss Z", "EEE, dd MMM yyyy HH:mm:ss z", "yyyy-MM-dd'T'HH:mm:ssz",
+                        "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
+        private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
 
-    public ArticleHandler() {
-        super();
-        articleList = new ArrayList<Article>();
+        public ArticleHandler() {
+                super();
+                mArticleList = new ArrayList<Article>();
 
-        for (int i = 0; i < DATE_FORMATS.length; i++) {
-            mSimpleDateFormats[i] = new SimpleDateFormat(DATE_FORMATS[i], Locale.US);
-            mSimpleDateFormats[i].setTimeZone(TimeZone.getTimeZone("GMT"));
-        }
-    }
-
-    public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException {
-
-        mSb = new StringBuffer();
-        String value = localName.trim();
-
-        if (value.equalsIgnoreCase("TITLE") && isArticle == true) {
-            isTitle = true;
-        }
-
-        else if ((value.equalsIgnoreCase("DESCRIPTION") || value.equalsIgnoreCase("SUMMARY")) && isArticle == true) {
-            isSummary = true;
-        }
-
-        else if ((value.equalsIgnoreCase("ENCODED") || value.equalsIgnoreCase("CONTENT")) && isArticle == true) {
-            isContent = true;
-        }
-
-        else if ((value.equalsIgnoreCase("GUID") || value.equalsIgnoreCase("ID")) && isArticle == true) {
-            isGuid = true;
-        }
-
-        else if (value.equalsIgnoreCase("PUBDATE") || value.equalsIgnoreCase("PUBLISHED") || value.equalsIgnoreCase("DATE"))
-            isPubdate = true;
-
-        else if (value.equalsIgnoreCase("ITEM") || value.equalsIgnoreCase("ENTRY")) {
-            a = new Article();
-            isArticle = true;
-        }
-
-    }
-
-    public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
-
-        if (isArticle) {
-            if (localName.equalsIgnoreCase("ITEM") || localName.equalsIgnoreCase("ENTRY")) {
-                articleList.add(a);
-                a = null;
-                isArticle = false;
-            }
-
-            else if (isTitle) {
-                a.setTitle(mSb.toString().trim());
-                isTitle = false;
-            }
-
-            else if (isSummary) {
-                a.setSummary(mSb.toString().trim());
-                isSummary = false;
-            }
-
-            else if (isGuid) {
-                a.setGuid(mSb.toString().trim());
-                isGuid = false;
-            }
-
-            else if (isPubdate) {
                 for (int i = 0; i < DATE_FORMATS.length; i++) {
-                    try {
-                        a.setPubDate(mSimpleDateFormats[i].parse(mSb.toString().trim()));
-                        break;
-                    } catch (ParseException pe) {
-                        if (i == DATE_FORMATS.length - 1) {
-                            throw new SAXException(pe);
-                        }
-                    }
+                        mSimpleDateFormats[i] = new SimpleDateFormat(DATE_FORMATS[i], Locale.US);
+                        mSimpleDateFormats[i].setTimeZone(TimeZone.getTimeZone("GMT"));
+                }
+        }
+
+        public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException {
+
+                mSb = new StringBuffer();
+                String mValue = localName.trim();
+
+                if (mValue.equalsIgnoreCase("TITLE") && mIsArticle == true) {
+                        mIsTitle = true;
                 }
 
-                isPubdate = false;
-            }
+                else if ((mValue.equalsIgnoreCase("DESCRIPTION") || mValue.equalsIgnoreCase("SUMMARY")) && mIsArticle == true) {
+                        mIsSummary = true;
+                }
 
-            else if (isContent) {
-                a.setContent(mSb.toString().trim());
-                isContent = false;
-            }
+                else if ((mValue.equalsIgnoreCase("ENCODED") || mValue.equalsIgnoreCase("CONTENT")) && mIsArticle == true) {
+                        mIsContent = true;
+                }
+
+                else if ((mValue.equalsIgnoreCase("GUID") || mValue.equalsIgnoreCase("ID")) && mIsArticle == true) {
+                        mIsGuid = true;
+                }
+
+                else if (mValue.equalsIgnoreCase("PUBDATE") || mValue.equalsIgnoreCase("PUBLISHED") || mValue.equalsIgnoreCase("DATE"))
+                        mIsPubdate = true;
+
+                else if (mValue.equalsIgnoreCase("ITEM") || mValue.equalsIgnoreCase("ENTRY")) {
+                        mArticle = new Article();
+                        mIsArticle = true;
+                }
 
         }
 
-    }
+        public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
 
-    public void characters(char[] ch, int start, int length) throws SAXException {
+                if (mIsArticle) {
+                        if (localName.equalsIgnoreCase("ITEM") || localName.equalsIgnoreCase("ENTRY")) {
+                                mArticleList.add(mArticle);
+                                mArticle = null;
+                                mIsArticle = false;
+                        }
 
-        if (isArticle && (isTitle || isContent || isSummary || isGuid || isPubdate)) {
-            mSb.append(new String(ch, start, length));
+                        else if (mIsTitle) {
+                                mArticle.setTitle(mSb.toString().trim());
+                                mIsTitle = false;
+                        }
+
+                        else if (mIsSummary) {
+                                mArticle.setSummary(mSb.toString().trim());
+                                mIsSummary = false;
+                        }
+
+                        else if (mIsGuid) {
+                                mArticle.setGuid(mSb.toString().trim());
+                                mIsGuid = false;
+                        }
+
+                        else if (mIsPubdate) {
+                                for (int i = 0; i < DATE_FORMATS.length; i++) {
+                                        try {
+                                                mArticle.setPubDate(mSimpleDateFormats[i].parse(mSb.toString().trim()));
+                                                break;
+                                        } catch (ParseException pe) {
+                                                if (i == DATE_FORMATS.length - 1) {
+                                                        throw new SAXException(pe);
+                                                }
+                                        }
+                                }
+
+                                mIsPubdate = false;
+                        }
+
+                        else if (mIsContent) {
+                                mArticle.setContent(mSb.toString().trim());
+                                mIsContent = false;
+                        }
+
+                }
+
         }
 
-    }
+        public void characters(char[] ch, int start, int length) throws SAXException {
 
-    public Object getResult() {
-        return this.articleList;
-    }
+                if (mIsArticle && (mIsTitle || mIsContent || mIsSummary || mIsGuid || mIsPubdate)) {
+                        mSb.append(new String(ch, start, length));
+                }
+
+        }
+
+        public Object getResult() {
+                return this.mArticleList;
+        }
 }

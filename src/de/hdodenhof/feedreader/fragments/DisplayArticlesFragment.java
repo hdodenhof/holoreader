@@ -20,129 +20,128 @@ import de.hdodenhof.feedreader.model.Feed;
 
 public class DisplayArticlesFragment extends ListFragment {
 
-    private boolean mDualFragments = false;
-    private ListView articleslistview;
-    private FeedController feedController;
-    private ArticleController articleController;
-    private ArticleAdapter articleAdapter;
-    private ParameterProvider mParameterProvider;
-    private OnArticleSelectedListener mOnArticleSelectedListener;
-    private boolean choiceModeSingle = false;
+        private boolean mTwoPane = false;
+        private ListView mArticlesListView;
+        private FeedController mFeedController;
+        private ArticleController mArticleController;
+        private ArticleAdapter mArticleAdapter;
+        private ActivityConnector mActivityConnector;
+        private boolean mChoiceModeSingle = false;
 
-    public interface OnArticleSelectedListener {
-        public void articleSelected(int index, Article article);
-    }
+        public interface ActivityConnector {
+                public long getFeedId();
 
-    public interface ParameterProvider {
-        public long getFeedId();
-        public int getArticlePosition();
-    }
+                public int getArticlePosition();
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-
-        mParameterProvider = (ParameterProvider) activity;
-        mOnArticleSelectedListener = (OnArticleSelectedListener) activity;
-    }
-
-    public void updateContent(Long id) {
-        ArrayList<Article> articleList;
-
-        if (id == null || id == -1) {
-            articleList = articleController.getAllArticles();
-        } else {
-            Feed feed = feedController.getFeed(id);
-            articleList = articleController.getAllArticles(feed.getId());
+                public void articleSelected(int index, Article article);
         }
 
-        articleAdapter.clear();
-
-        for (Article article : articleList) {
-            articleAdapter.add(article);
-        }
-        articleAdapter.notifyDataSetChanged();
-
-    }
-
-    public void setChoiceModeSingle() {
-        this.choiceModeSingle = true;
-    }
-
-    public void articleChoosen(int position) {
-        articleslistview.setItemChecked(position, true);
-        this.refreshView();
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        feedController = new FeedController(getActivity());
-        articleController = new ArticleController(getActivity());
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        refreshView();
-    }
-
-    private void refreshView() {
-        long feedId = mParameterProvider.getFeedId();
-        
-        int index = articleslistview.getFirstVisiblePosition();
-        View v = articleslistview.getChildAt(0);
-        int top = (v == null) ? 0 : v.getTop();
-
-        updateContent(feedId);
-        
-        articleslistview.setSelectionFromTop(index, top);        
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-        View articleFragment = getActivity().findViewById(R.id.viewpager);
-        DisplayFeedsFragment feedsFragment = (DisplayFeedsFragment) getFragmentManager().findFragmentById(R.id.fragment_feeds);
-        if (articleFragment != null || feedsFragment != null) {
-            mDualFragments = true;
+        @Override
+        public void onAttach(Activity activity) {
+                super.onAttach(activity);
+                mActivityConnector = (ActivityConnector) activity;
         }
 
-        if (!mDualFragments) {
-            ActionBar actionBar = getActivity().getActionBar();
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+        public void updateContent(Long id) {
+                ArrayList<Article> mArticleList;
 
-        if (savedInstanceState != null) {
+                if (id == null || id == -1) {
+                        mArticleList = mArticleController.getAllArticles();
+                } else {
+                        Feed mFeed = mFeedController.getFeed(id);
+                        mArticleList = mArticleController.getAllArticles(mFeed.getId());
+                }
+
+                mArticleAdapter.clear();
+
+                for (Article mArticle : mArticleList) {
+                        mArticleAdapter.add(mArticle);
+                }
+                mArticleAdapter.notifyDataSetChanged();
 
         }
 
-        long feedId = mParameterProvider.getFeedId();
-
-        articleAdapter = new ArticleAdapter(getActivity(), new ArrayList<Article>());
-
-        this.setEmptyText("No articles");
-        this.setListAdapter(articleAdapter);
-
-        articleslistview = getListView();
-        if (choiceModeSingle) {
-            articleslistview.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        public void setChoiceModeSingle() {
+                this.mChoiceModeSingle = true;
         }
 
-        articleslistview.setOnItemClickListener(new OnItemClickListener() {
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Article article = (Article) articleslistview.getItemAtPosition(position);
-                mOnArticleSelectedListener.articleSelected(position, article);
-            }
-        });
-
-        updateContent(feedId);
-
-        if (mParameterProvider.getArticlePosition() != -1) {
-            this.articleChoosen(mParameterProvider.getArticlePosition());
+        public void articleChoosen(int position) {
+                mArticlesListView.setItemChecked(position, true);
+                this.refreshView();
         }
 
-    }
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                mFeedController = new FeedController(getActivity());
+                mArticleController = new ArticleController(getActivity());
+        }
+
+        @Override
+        public void onResume() {
+                super.onResume();
+                refreshView();
+        }
+
+        private void refreshView() {
+                long mFeedID = mActivityConnector.getFeedId();
+
+                int mIndex = mArticlesListView.getFirstVisiblePosition();
+                View mView = mArticlesListView.getChildAt(0);
+                int mTop = (mView == null) ? 0 : mView.getTop();
+
+                updateContent(mFeedID);
+
+                mArticlesListView.setSelectionFromTop(mIndex, mTop);
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+                super.onActivityCreated(savedInstanceState);
+
+                // FIXME
+                View mArticleFragment = getActivity().findViewById(R.id.viewpager);
+                DisplayFeedsFragment mFeedsFragment = (DisplayFeedsFragment) getFragmentManager().findFragmentById(R.id.fragment_feeds);
+                
+                if (mArticleFragment != null || mFeedsFragment != null) {
+                        mTwoPane = true;
+                }
+
+                if (!mTwoPane) {
+                        ActionBar mActionBar = getActivity().getActionBar();
+                        mActionBar.setDisplayHomeAsUpEnabled(true);
+                }
+                // END
+
+                if (savedInstanceState != null) {
+
+                }
+
+                long mFeedID = mActivityConnector.getFeedId();
+
+                mArticleAdapter = new ArticleAdapter(getActivity(), new ArrayList<Article>());
+
+                this.setEmptyText("No articles");
+                this.setListAdapter(mArticleAdapter);
+
+                mArticlesListView = getListView();
+                if (mChoiceModeSingle) {
+                        mArticlesListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                }
+
+                mArticlesListView.setOnItemClickListener(new OnItemClickListener() {
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                Article mArticle = (Article) mArticlesListView.getItemAtPosition(position);
+                                mActivityConnector.articleSelected(position, mArticle);
+                        }
+                });
+
+                updateContent(mFeedID);
+
+                if (mActivityConnector.getArticlePosition() != -1) {
+                        this.articleChoosen(mActivityConnector.getArticlePosition());
+                }
+
+        }
 
 }

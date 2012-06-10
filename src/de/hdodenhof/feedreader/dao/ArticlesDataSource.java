@@ -17,149 +17,152 @@ import de.hdodenhof.feedreader.model.Article;
 
 public class ArticlesDataSource {
 
-    private SQLiteDatabase database;
-    private SQLiteHelper dbHelper;
-    private String[] allColumns = { SQLiteHelper.ARTICLE_TABLE_COLUMN_ID, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID, SQLiteHelper.ARTICLE_TABLE_COLUMN_GUID,
-            SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE, SQLiteHelper.ARTICLE_TABLE_COLUMN_TITLE, SQLiteHelper.ARTICLE_TABLE_COLUMN_SUMMARY,
-            SQLiteHelper.ARTICLE_TABLE_COLUMN_CONTENT, SQLiteHelper.ARTICLE_TABLE_COLUMN_READ };
-    private SimpleDateFormat iso8601Format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        private SQLiteDatabase mDatabase;
+        private SQLiteHelper mDBHelper;
+        private String[] mAllColumns = { SQLiteHelper.ARTICLE_TABLE_COLUMN_ID, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID,
+                        SQLiteHelper.ARTICLE_TABLE_COLUMN_GUID, SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE, SQLiteHelper.ARTICLE_TABLE_COLUMN_TITLE,
+                        SQLiteHelper.ARTICLE_TABLE_COLUMN_SUMMARY, SQLiteHelper.ARTICLE_TABLE_COLUMN_CONTENT, SQLiteHelper.ARTICLE_TABLE_COLUMN_READ };
+        private SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public ArticlesDataSource(Context context) {
-        dbHelper = new SQLiteHelper(context);
-    }
-
-    public void open() throws SQLException {
-        database = dbHelper.getWritableDatabase();
-    }
-
-    public void close() {
-        dbHelper.close();
-    }
-
-    public void createArticle(long feedId, String guid, Date pubDate, String title, String summary, String content, boolean read) {
-        ContentValues values = new ContentValues();
-        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID, feedId);
-        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_GUID, guid);
-        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE, fromDate(pubDate));
-        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_TITLE, title);
-        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_SUMMARY, summary);
-        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_CONTENT, content);
-        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_READ, fromBoolean(read));
-
-        database.insert(SQLiteHelper.ARTICLE_TABLE_NAME, null, values);
-    }
-
-    public void createArticles(long feedId, ArrayList<Article> articles) {
-        database.beginTransaction();
-        try {
-            for (Article article : articles) {
-                createArticle(feedId, article.getGuid(), article.getPubDate(), article.getTitle(), article.getSummary(), article.getContent(), article.isRead());
-            }
-            database.setTransactionSuccessful();
-        } finally {
-            database.endTransaction();
+        public ArticlesDataSource(Context context) {
+                mDBHelper = new SQLiteHelper(context);
         }
 
-    }
-
-    public void deleteArticle(Article article) {
-        database.delete(SQLiteHelper.ARTICLE_TABLE_NAME, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + article.getId(), null);
-    }
-
-    public void deleteArticles(long feedid) {
-        database.delete(SQLiteHelper.ARTICLE_TABLE_NAME, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID + " = " + feedid, null);
-    }
-
-    public Article getArticle(long b) {
-        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + b, null, null, null, null);
-
-        cursor.moveToFirst();
-        Article newArticle = cursorToArticle(cursor);
-        cursor.close();
-
-        return newArticle;
-    }
-
-    public List<Article> getAllArticles(long feedid) {
-        List<Article> articles = new ArrayList<Article>();
-
-        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID + " = " + feedid, null, null,
-                null, SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE + " desc");
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Article article = cursorToArticle(cursor);
-            articles.add(article);
-            cursor.moveToNext();
-        }
-        cursor.close();
-
-        return articles;
-    }
-
-    public List<Article> getAllArticles() {
-        List<Article> articles = new ArrayList<Article>();
-
-        Cursor cursor = database.query(SQLiteHelper.ARTICLE_TABLE_NAME, allColumns, null, null, null, null, SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE + " desc");
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Article article = cursorToArticle(cursor);
-            articles.add(article);
-            cursor.moveToNext();
-        }
-        cursor.close();
-
-        return articles;
-    }
-
-    public void setRead(long id) {
-        ContentValues values = new ContentValues();
-        values.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_READ, 1);
-
-        database.update(SQLiteHelper.ARTICLE_TABLE_NAME, values, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + id, null);
-    }
-
-    private String fromDate(Date date) {
-        return iso8601Format.format(date);
-    }
-
-    private Date toDate(String date) {
-        try {
-            return iso8601Format.parse(date);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return new Date();
+        public void open() throws SQLException {
+                mDatabase = mDBHelper.getWritableDatabase();
         }
 
-    }
-
-    private int fromBoolean(boolean bool) {
-        if (bool == true) {
-            return 1;
-        } else {
-            return 0;
+        public void close() {
+                mDBHelper.close();
         }
-    }
 
-    private boolean toBoolean(int integer) {
-        if (integer == 1) {
-            return true;
-        } else {
-            return false;
+        public void createArticle(long feedId, String guid, Date pubDate, String title, String summary, String content, boolean read) {
+                ContentValues mValues = new ContentValues();
+                mValues.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID, feedId);
+                mValues.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_GUID, guid);
+                mValues.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE, fromDate(pubDate));
+                mValues.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_TITLE, title);
+                mValues.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_SUMMARY, summary);
+                mValues.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_CONTENT, content);
+                mValues.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_READ, fromBoolean(read));
+
+                mDatabase.insert(SQLiteHelper.ARTICLE_TABLE_NAME, null, mValues);
         }
-    }
 
-    private Article cursorToArticle(Cursor cursor) {
-        Article article = new Article();
-        article.setId(cursor.getLong(0));
-        article.setFeedId(cursor.getLong(1));
-        article.setGuid(cursor.getString(2));
-        article.setPubDate(toDate(cursor.getString(3)));
-        article.setTitle(cursor.getString(4));
-        article.setSummary(cursor.getString(5));
-        article.setContent(cursor.getString(6));
-        article.setRead(toBoolean(cursor.getInt(7)));
-        return article;
-    }
+        public void createArticles(long feedId, ArrayList<Article> articles) {
+                mDatabase.beginTransaction();
+                try {
+                        for (Article mArticle : articles) {
+                                createArticle(feedId, mArticle.getGuid(), mArticle.getPubDate(), mArticle.getTitle(), mArticle.getSummary(),
+                                                mArticle.getContent(), mArticle.isRead());
+                        }
+                        mDatabase.setTransactionSuccessful();
+                } finally {
+                        mDatabase.endTransaction();
+                }
+
+        }
+
+        public void deleteArticle(Article article) {
+                mDatabase.delete(SQLiteHelper.ARTICLE_TABLE_NAME, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + article.getId(), null);
+        }
+
+        public void deleteArticles(long feedid) {
+                mDatabase.delete(SQLiteHelper.ARTICLE_TABLE_NAME, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID + " = " + feedid, null);
+        }
+
+        public Article getArticle(long b) {
+                Cursor cursor = mDatabase.query(SQLiteHelper.ARTICLE_TABLE_NAME, mAllColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + b, null, null,
+                                null, null);
+
+                cursor.moveToFirst();
+                Article newArticle = cursorToArticle(cursor);
+                cursor.close();
+
+                return newArticle;
+        }
+
+        public List<Article> getAllArticles(long feedid) {
+                List<Article> mArticles = new ArrayList<Article>();
+
+                Cursor mCursor = mDatabase.query(SQLiteHelper.ARTICLE_TABLE_NAME, mAllColumns, SQLiteHelper.ARTICLE_TABLE_COLUMN_FEEDID + " = " + feedid, null,
+                                null, null, SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE + " desc");
+
+                mCursor.moveToFirst();
+                while (!mCursor.isAfterLast()) {
+                        Article article = cursorToArticle(mCursor);
+                        mArticles.add(article);
+                        mCursor.moveToNext();
+                }
+                mCursor.close();
+
+                return mArticles;
+        }
+
+        public List<Article> getAllArticles() {
+                List<Article> mArticles = new ArrayList<Article>();
+
+                Cursor mCursor = mDatabase.query(SQLiteHelper.ARTICLE_TABLE_NAME, mAllColumns, null, null, null, null,
+                                SQLiteHelper.ARTICLE_TABLE_COLUMN_PUBDATE + " desc");
+
+                mCursor.moveToFirst();
+                while (!mCursor.isAfterLast()) {
+                        Article article = cursorToArticle(mCursor);
+                        mArticles.add(article);
+                        mCursor.moveToNext();
+                }
+                mCursor.close();
+
+                return mArticles;
+        }
+
+        public void setRead(long id) {
+                ContentValues mValues = new ContentValues();
+                mValues.put(SQLiteHelper.ARTICLE_TABLE_COLUMN_READ, 1);
+
+                mDatabase.update(SQLiteHelper.ARTICLE_TABLE_NAME, mValues, SQLiteHelper.ARTICLE_TABLE_COLUMN_ID + " = " + id, null);
+        }
+
+        private String fromDate(Date date) {
+                return mDateFormat.format(date);
+        }
+
+        private Date toDate(String date) {
+                try {
+                        return mDateFormat.parse(date);
+                } catch (ParseException e) {
+                        e.printStackTrace();
+                        return new Date();
+                }
+
+        }
+
+        private int fromBoolean(boolean bool) {
+                if (bool == true) {
+                        return 1;
+                } else {
+                        return 0;
+                }
+        }
+
+        private boolean toBoolean(int integer) {
+                if (integer == 1) {
+                        return true;
+                } else {
+                        return false;
+                }
+        }
+
+        private Article cursorToArticle(Cursor cursor) {
+                Article mArticle = new Article();
+                mArticle.setId(cursor.getLong(0));
+                mArticle.setFeedId(cursor.getLong(1));
+                mArticle.setGuid(cursor.getString(2));
+                mArticle.setPubDate(toDate(cursor.getString(3)));
+                mArticle.setTitle(cursor.getString(4));
+                mArticle.setSummary(cursor.getString(5));
+                mArticle.setContent(cursor.getString(6));
+                mArticle.setRead(toBoolean(cursor.getInt(7)));
+                return mArticle;
+        }
 }

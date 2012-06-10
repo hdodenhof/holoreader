@@ -14,47 +14,47 @@ import de.hdodenhof.feedreader.model.Article;
 
 public class ArticleAdapter extends ArrayAdapter<Article> {
 
-	private ArrayList<Article> items;
-	private LayoutInflater layoutInflater;
+        private ArrayList<Article> mArticles;
+        private LayoutInflater mLayoutInflater;
 
-	public ArticleAdapter(Context context, ArrayList<Article> items) {
-		super(context, 0, items);
-		this.items = items;
-		layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-	}
+        public ArticleAdapter(Context context, ArrayList<Article> articles) {
+                super(context, 0, articles);
+                this.mArticles = articles;
+                mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        }
 
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent) {
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
 
-		final Article item = items.get(position);
-		
-		if (item != null) {
-				
-				convertView = layoutInflater.inflate(R.layout.listitem_article, null);
-				final TextView title = (TextView) convertView.findViewById(R.id.list_item_entry_title);
-				final TextView summary = (TextView) convertView.findViewById(R.id.list_item_entry_summary);
-				final TextView read = (TextView) convertView.findViewById(R.id.list_item_entry_read);
+                final Article mArticle = mArticles.get(position);
 
-				if (title != null) {
-					title.setText(item.getTitle());
-				}
-				if (summary != null) {
-				    summary.setText(item.getSummary());
-				}
-                if (read != null) {
-                    read.setText(readState(item.isRead()));
+                if (mArticle != null) {
+
+                        convertView = mLayoutInflater.inflate(R.layout.listitem_article, null);
+                        final TextView mTitle = (TextView) convertView.findViewById(R.id.list_item_entry_title);
+                        final TextView mSummary = (TextView) convertView.findViewById(R.id.list_item_entry_summary);
+                        final TextView mReadState = (TextView) convertView.findViewById(R.id.list_item_entry_read);
+
+                        if (mTitle != null) {
+                                mTitle.setText(mArticle.getTitle());
+                        }
+                        if (mSummary != null) {
+                                mSummary.setText(mArticle.getSummary());
+                        }
+                        if (mReadState != null) {
+                                mReadState.setText(readState(mArticle.isRead()));
+                        }
                 }
-		}
-		return convertView;
-	}
-	
-	// temporary helper
-	private String readState(boolean read){
-	    if (read == true){
-	        return "read";
-	    } else {
-	        return "unread";
-	    }
-	}
+                return convertView;
+        }
+
+        // temporary helper
+        private String readState(boolean read) {
+                if (read == true) {
+                        return "read";
+                } else {
+                        return "unread";
+                }
+        }
 
 }

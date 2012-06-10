@@ -21,99 +21,99 @@ import de.hdodenhof.feedreader.model.Feed;
 
 public class DisplayFeedsFragment extends ListFragment {
 
-    private ListView feedslistview;
-    private ArrayAdapter<Feed> feedAdapter;
-    private FeedController feedController;
-    private ArticleController articleController;
-    private boolean choiceModeSingle = false;
+        private ListView mFeedsListView;
+        private ArrayAdapter<Feed> mFeedAdapter;
+        private FeedController mFeedController;
+        private ArticleController mArticleController;
+        private boolean mChoiceModeSingle = false;
 
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+                super.onActivityCreated(savedInstanceState);
 
-        if (savedInstanceState != null) {
+                if (savedInstanceState != null) {
 
-        }
-
-        articleController = new ArticleController(getActivity());
-        feedController = new FeedController(getActivity());
-        feedAdapter = new FeedAdapter(getActivity(), feedController.getAllFeeds());
-
-        this.setEmptyText("No feeds");
-        this.setListAdapter(feedAdapter);
-        feedslistview = getListView();
-
-        feedslistview.setOnItemClickListener((OnItemClickListener) getActivity());
-
-        if (choiceModeSingle) {
-            feedslistview.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        } else {
-            feedslistview.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-            feedslistview.setMultiChoiceModeListener(new FeedsMultiChoiceModeListener());
-        }
-
-    }
-
-    public void setChoiceModeSingle() {
-        this.choiceModeSingle = true;
-    }
-
-    public int getListLength() {
-        return feedAdapter.getCount();
-    }
-
-    public void updateFeeds() {
-        feedAdapter.clear();
-        feedAdapter.addAll(feedController.getAllFeeds());
-        feedAdapter.notifyDataSetChanged();
-    }
-
-    private class FeedsMultiChoiceModeListener implements MultiChoiceModeListener {
-
-        private ArrayList<Feed> toDelete;
-
-        public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-            Feed feed = (Feed) feedAdapter.getItem(position);
-
-            if (checked) {
-                toDelete.add(feed);
-            } else {
-                toDelete.remove(feed);
-            }
-        }
-
-        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            switch (item.getItemId()) {
-            case R.id.item_delete:
-
-                for (Feed feed : toDelete) {
-                    articleController.deleteArticles(feed.getId());
-                    feedController.deleteFeed(feed);
-                    feedAdapter.remove(feed);
                 }
 
-                feedAdapter.notifyDataSetChanged();
-                mode.finish();
-                return true;
-            default:
-                return false;
-            }
+                mArticleController = new ArticleController(getActivity());
+                mFeedController = new FeedController(getActivity());
+                mFeedAdapter = new FeedAdapter(getActivity(), mFeedController.getAllFeeds());
+
+                this.setEmptyText("No feeds");
+                this.setListAdapter(mFeedAdapter);
+                mFeedsListView = getListView();
+
+                mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
+
+                if (mChoiceModeSingle) {
+                        mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                } else {
+                        mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+                        mFeedsListView.setMultiChoiceModeListener(new FeedsMultiChoiceModeListener());
+                }
+
         }
 
-        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.feed_context, menu);
-
-            toDelete = new ArrayList<Feed>();
-            return true;
+        public void setChoiceModeSingle() {
+                this.mChoiceModeSingle = true;
         }
 
-        public void onDestroyActionMode(ActionMode mode) {
+        public int getListLength() {
+                return mFeedAdapter.getCount();
         }
 
-        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            return false;
+        public void updateFeeds() {
+                mFeedAdapter.clear();
+                mFeedAdapter.addAll(mFeedController.getAllFeeds());
+                mFeedAdapter.notifyDataSetChanged();
         }
-    }
+
+        private class FeedsMultiChoiceModeListener implements MultiChoiceModeListener {
+
+                private ArrayList<Feed> mFeedsToDelete;
+
+                public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                        Feed mFeed = (Feed) mFeedAdapter.getItem(position);
+
+                        if (checked) {
+                                mFeedsToDelete.add(mFeed);
+                        } else {
+                                mFeedsToDelete.remove(mFeed);
+                        }
+                }
+
+                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                        switch (item.getItemId()) {
+                        case R.id.item_delete:
+
+                                for (Feed mFeed : mFeedsToDelete) {
+                                        mArticleController.deleteArticles(mFeed.getId());
+                                        mFeedController.deleteFeed(mFeed);
+                                        mFeedAdapter.remove(mFeed);
+                                }
+
+                                mFeedAdapter.notifyDataSetChanged();
+                                mode.finish();
+                                return true;
+                        default:
+                                return false;
+                        }
+                }
+
+                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                        MenuInflater mMenuInflater = mode.getMenuInflater();
+                        mMenuInflater.inflate(R.menu.feed_context, menu);
+
+                        mFeedsToDelete = new ArrayList<Feed>();
+                        return true;
+                }
+
+                public void onDestroyActionMode(ActionMode mode) {
+                }
+
+                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                        return false;
+                }
+        }
 
 }

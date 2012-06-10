@@ -14,77 +14,77 @@ import de.hdodenhof.feedreader.model.Feed;
 
 public class FeedsDataSource {
 
-    // Database fields
-    private SQLiteDatabase database;
-    private SQLiteHelper dbHelper;
-    private String[] allColumns = { SQLiteHelper.FEED_TABLE_COLUMN_ID, SQLiteHelper.FEED_TABLE_COLUMN_NAME, SQLiteHelper.FEED_TABLE_COLUMN_URL };
+        // Database fields
+        private SQLiteDatabase mDatabase;
+        private SQLiteHelper mDBHelper;
+        private String[] mAllColumns = { SQLiteHelper.FEED_TABLE_COLUMN_ID, SQLiteHelper.FEED_TABLE_COLUMN_NAME, SQLiteHelper.FEED_TABLE_COLUMN_URL };
 
-    public FeedsDataSource(Context context) {
-        dbHelper = new SQLiteHelper(context);
-    }
-
-    public void open() throws SQLException {
-        database = dbHelper.getWritableDatabase();
-    }
-
-    public void close() {
-        dbHelper.close();
-    }
-
-    public Feed createFeed(String feedName, String feedUrl) {
-        ContentValues values = new ContentValues();
-        values.put(SQLiteHelper.FEED_TABLE_COLUMN_NAME, feedName);
-        values.put(SQLiteHelper.FEED_TABLE_COLUMN_URL, feedUrl);
-
-        long insertId = database.insert(SQLiteHelper.FEED_TABLE_NAME, null, values);
-
-        Cursor cursor = database.query(SQLiteHelper.FEED_TABLE_NAME, allColumns, SQLiteHelper.FEED_TABLE_COLUMN_ID + " = " + insertId, null, null, null, null);
-
-        cursor.moveToFirst();
-        Feed newFeed = cursorToFeed(cursor);
-        cursor.close();
-
-        return newFeed;
-    }
-  
-    
-    public void deleteFeed(Feed feed) {
-        long id = feed.getId();
-
-        database.delete(SQLiteHelper.FEED_TABLE_NAME, SQLiteHelper.FEED_TABLE_COLUMN_ID + " = " + id, null);
-    }
-    
-    public Feed getFeed(long b){
-        Cursor cursor = database.query(SQLiteHelper.FEED_TABLE_NAME, allColumns, SQLiteHelper.FEED_TABLE_COLUMN_ID + " = " + b, null, null, null, null);
-
-        cursor.moveToFirst();
-        Feed newFeed = cursorToFeed(cursor);
-        cursor.close();
-
-        return newFeed;
-    }
-
-    public List<Feed> getAllFeeds() {
-        List<Feed> feeds = new ArrayList<Feed>();
-
-        Cursor cursor = database.query(SQLiteHelper.FEED_TABLE_NAME, allColumns, null, null, null, null, null);
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            Feed feed = cursorToFeed(cursor);
-            feeds.add(feed);
-            cursor.moveToNext();
+        public FeedsDataSource(Context context) {
+                mDBHelper = new SQLiteHelper(context);
         }
-        // Make sure to close the cursor
-        cursor.close();
-        return feeds;
-    }
 
-    private Feed cursorToFeed(Cursor cursor) {
-        Feed feed = new Feed();
-        feed.setId(cursor.getLong(0));
-        feed.setName(cursor.getString(1));
-        feed.setUrl(cursor.getString(2));
-        return feed;
-    }
+        public void open() throws SQLException {
+                mDatabase = mDBHelper.getWritableDatabase();
+        }
+
+        public void close() {
+                mDBHelper.close();
+        }
+
+        public Feed createFeed(String feedName, String feedUrl) {
+                ContentValues mValues = new ContentValues();
+                mValues.put(SQLiteHelper.FEED_TABLE_COLUMN_NAME, feedName);
+                mValues.put(SQLiteHelper.FEED_TABLE_COLUMN_URL, feedUrl);
+
+                long mInsertID = mDatabase.insert(SQLiteHelper.FEED_TABLE_NAME, null, mValues);
+
+                Cursor mCursor = mDatabase.query(SQLiteHelper.FEED_TABLE_NAME, mAllColumns, SQLiteHelper.FEED_TABLE_COLUMN_ID + " = " + mInsertID, null, null,
+                                null, null);
+
+                mCursor.moveToFirst();
+                Feed mFeed = cursorToFeed(mCursor);
+                mCursor.close();
+
+                return mFeed;
+        }
+
+        public void deleteFeed(Feed feed) {
+                long mFeedID = feed.getId();
+
+                mDatabase.delete(SQLiteHelper.FEED_TABLE_NAME, SQLiteHelper.FEED_TABLE_COLUMN_ID + " = " + mFeedID, null);
+        }
+
+        public Feed getFeed(long b) {
+                Cursor mCursor = mDatabase.query(SQLiteHelper.FEED_TABLE_NAME, mAllColumns, SQLiteHelper.FEED_TABLE_COLUMN_ID + " = " + b, null, null, null,
+                                null);
+
+                mCursor.moveToFirst();
+                Feed mFeed = cursorToFeed(mCursor);
+                mCursor.close();
+
+                return mFeed;
+        }
+
+        public List<Feed> getAllFeeds() {
+                List<Feed> mFeeds = new ArrayList<Feed>();
+
+                Cursor mCursor = mDatabase.query(SQLiteHelper.FEED_TABLE_NAME, mAllColumns, null, null, null, null, null);
+
+                mCursor.moveToFirst();
+                while (!mCursor.isAfterLast()) {
+                        Feed mFeed = cursorToFeed(mCursor);
+                        mFeeds.add(mFeed);
+                        mCursor.moveToNext();
+                }
+                mCursor.close();
+                return mFeeds;
+        }
+
+        private Feed cursorToFeed(Cursor cursor) {
+                Feed mFeed = new Feed();
+                mFeed.setId(cursor.getLong(0));
+                mFeed.setName(cursor.getString(1));
+                mFeed.setUrl(cursor.getString(2));
+                return mFeed;
+        }
 }

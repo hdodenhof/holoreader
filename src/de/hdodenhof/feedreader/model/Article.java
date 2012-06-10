@@ -10,93 +10,93 @@ import android.text.Spanned;
 
 public class Article {
 
-    private long id;
-    private long feedId;
-    private Date pubDate;
-    private String guid;
-    private String title;
-    private String summary;
-    private String content;
-    private boolean read;
+        private long mID;
+        private long mFeedID;
+        private Date mPubDate;
+        private String mGUID;
+        private String mTitle;
+        private String mSummary;
+        private String mContent;
+        private boolean mRead;
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setSummary(String text) {
-        this.summary = text;
-    }
-
-    public String getTitle() {
-        return this.title;
-    }
-
-    public String getSummary() {
-        return this.summary;
-    }
-
-    public String getContent() {
-        return this.content;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getFeedId() {
-        return feedId;
-    }
-
-    public void setFeedId(long feedId) {
-        this.feedId = feedId;
-    }
-
-    public String getGuid() {
-        return guid;
-    }
-
-    public void setGuid(String guid) {
-        this.guid = guid;
-    }
-
-    public Date getPubDate() {
-        return pubDate;
-    }
-
-    public void setPubDate(Date pubDate) {
-        this.pubDate = pubDate;
-    }
-
-    public Spanned getFormatedContent() {
-
-        if (content != null && content.length() != 0) {
-            Document doc = Jsoup.parse(content);
-            doc.select("img").remove();
-            return Html.fromHtml(doc.toString());
-        } else {
-            return Html.fromHtml("<h1>Full article not supplied</h1>");
+        public void setTitle(String title) {
+                this.mTitle = title;
         }
 
-    }
+        public void setSummary(String text) {
+                this.mSummary = text;
+        }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
+        public String getTitle() {
+                return this.mTitle;
+        }
 
-    public boolean isRead() {
-        return read;
-    }
+        public String getSummary() {
+                return this.mSummary;
+        }
 
-    public void setRead(boolean read) {
-        this.read = read;
-    }
+        public String getContent() {
+                return this.mContent;
+        }
 
-    public String toString() {
-        return this.getTitle();
-    }
+        public long getId() {
+                return mID;
+        }
+
+        public void setId(long id) {
+                this.mID = id;
+        }
+
+        public long getFeedId() {
+                return mFeedID;
+        }
+
+        public void setFeedId(long feedId) {
+                this.mFeedID = feedId;
+        }
+
+        public String getGuid() {
+                return mGUID;
+        }
+
+        public void setGuid(String guid) {
+                this.mGUID = guid;
+        }
+
+        public Date getPubDate() {
+                return mPubDate;
+        }
+
+        public void setPubDate(Date pubDate) {
+                this.mPubDate = pubDate;
+        }
+
+        public Spanned getFormatedContent() {
+
+                if (mContent != null && mContent.length() != 0) {
+                        Document mDOcument = Jsoup.parse(mContent);
+                        mDOcument.select("img").remove();
+                        return Html.fromHtml(mDOcument.toString());
+                } else {
+                        return Html.fromHtml("<h1>Full article not supplied</h1>");
+                }
+
+        }
+
+        public void setContent(String content) {
+                this.mContent = content;
+        }
+
+        public boolean isRead() {
+                return mRead;
+        }
+
+        public void setRead(boolean read) {
+                this.mRead = read;
+        }
+
+        public String toString() {
+                return this.getTitle();
+        }
 
 }

@@ -16,71 +16,67 @@ import de.hdodenhof.feedreader.model.Article;
 
 public class DisplayArticleFragment extends Fragment {
 
-    private ArticleController articleController;
-    private long articleId;
-    private ParameterProvider mParameterProvider;
+        private ArticleController mArticleController;
+        private ActivityConnector mActivityConnector;
+        private long mArticleID;
 
-    public interface ParameterProvider {
-        public long getArticleId();
-    }
-    
-    public interface UpdateHandler {
-        public void handleUpdate(int articleId);
-    }
-    
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        
-        mParameterProvider = (ParameterProvider) activity;
-    }       
-    
-    public static DisplayArticleFragment newInstance(Long articleId) {
-        DisplayArticleFragment instance = new DisplayArticleFragment();
-        instance.articleId = articleId;
-
-        return instance;
-    }
-
-    public DisplayArticleFragment() {
-        this.articleId = -1;
-    }
-
-    public Long getShownIndex() {
-        return this.articleId;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        articleController = new ArticleController(getActivity());
-        
-        if(this.articleId == -1){
-            this.articleId = mParameterProvider.getArticleId();
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View contentView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
-
-        if (articleId != -1) {
-            Article article = articleController.getArticle(articleId);
-
-            TextView header = (TextView) contentView.findViewById(R.id.article_header);
-            header.setText(article.getTitle());
-
-            TextView pubDate = (TextView) contentView.findViewById(R.id.article_pubdate);
-            CharSequence formattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", article.getPubDate());
-            pubDate.setText(formattedPubdate);
-
-            TextView text = (TextView) contentView.findViewById(R.id.article_text);
-            text.setText(article.getFormatedContent());
-            text.setMovementMethod(LinkMovementMethod.getInstance());
+        public interface ActivityConnector {
+                public long getArticleId();
         }
 
-        return contentView;
+        @Override
+        public void onAttach(Activity activity) {
+                super.onAttach(activity);
 
-    }
+                mActivityConnector = (ActivityConnector) activity;
+        }
+
+        public static DisplayArticleFragment newInstance(Long articleId) {
+                DisplayArticleFragment mArticleFragmentInstance = new DisplayArticleFragment();
+                mArticleFragmentInstance.mArticleID = articleId;
+
+                return mArticleFragmentInstance;
+        }
+
+        public DisplayArticleFragment() {
+                this.mArticleID = -1;
+        }
+
+        public Long getShownIndex() {
+                return this.mArticleID;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
+                mArticleController = new ArticleController(getActivity());
+
+                if (this.mArticleID == -1) {
+                        this.mArticleID = mActivityConnector.getArticleId();
+                }
+        }
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+                View mContentView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
+
+                if (mArticleID != -1) {
+                        Article mArticle = mArticleController.getArticle(mArticleID);
+
+                        TextView mHeader = (TextView) mContentView.findViewById(R.id.article_header);
+                        mHeader.setText(mArticle.getTitle());
+
+                        TextView mPubDate = (TextView) mContentView.findViewById(R.id.article_pubdate);
+                        CharSequence mFormattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", mArticle.getPubDate());
+                        mPubDate.setText(mFormattedPubdate);
+
+                        TextView mText = (TextView) mContentView.findViewById(R.id.article_text);
+                        mText.setText(mArticle.getFormatedContent());
+                        mText.setMovementMethod(LinkMovementMethod.getInstance());
+                }
+
+                return mContentView;
+
+        }
 
 }

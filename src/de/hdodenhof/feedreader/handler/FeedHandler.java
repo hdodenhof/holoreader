@@ -6,45 +6,45 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class FeedHandler extends DefaultHandler implements GenericHandler {
 
-    private String name;
-    private StringBuffer mSb;
+        private String mName;
+        private StringBuffer mSb;
 
-    private boolean isFound = false;
-    private boolean isTitle = false;
+        private boolean mIsFound = false;
+        private boolean mIsTitle = false;
 
-    public FeedHandler() {
-        super();
-    }
-
-    public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException {
-
-        if (localName.equalsIgnoreCase("TITLE") && !isFound) {
-            mSb = new StringBuffer();
-            isTitle = true;
-        }
-    }
-
-    public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
-
-        if (!isFound) {
-            if (localName.equalsIgnoreCase("TITLE")) {
-                name = mSb.toString().trim();
-                isTitle = false;
-                isFound = true;
-            } 
+        public FeedHandler() {
+                super();
         }
 
-    }
+        public void startElement(String uri, String localName, String qName, Attributes attrs) throws SAXException {
 
-    public void characters(char[] ch, int start, int length) throws SAXException {
-
-        if (isTitle) {
-            mSb.append(new String(ch, start, length));
+                if (localName.equalsIgnoreCase("TITLE") && !mIsFound) {
+                        mSb = new StringBuffer();
+                        mIsTitle = true;
+                }
         }
 
-    }
+        public void endElement(String namespaceURI, String localName, String qName) throws SAXException {
 
-    public Object getResult() {
-        return this.name;
-    }
+                if (!mIsFound) {
+                        if (localName.equalsIgnoreCase("TITLE")) {
+                                mName = mSb.toString().trim();
+                                mIsTitle = false;
+                                mIsFound = true;
+                        }
+                }
+
+        }
+
+        public void characters(char[] ch, int start, int length) throws SAXException {
+
+                if (mIsTitle) {
+                        mSb.append(new String(ch, start, length));
+                }
+
+        }
+
+        public Object getResult() {
+                return this.mName;
+        }
 }

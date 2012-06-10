@@ -9,48 +9,48 @@ import de.hdodenhof.feedreader.dao.FeedsDataSource;
 import de.hdodenhof.feedreader.model.Feed;
 
 public class FeedController {
-    private FeedsDataSource datasource;
-    
-    public FeedController(Context context){
-        datasource = new FeedsDataSource(context);
-    }
-    
-    private void connect(){
-        try {
-            datasource.open();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        private FeedsDataSource mFeedsDataSource;
+
+        public FeedController(Context context) {
+                mFeedsDataSource = new FeedsDataSource(context);
         }
-    }
-    
-    private void disconnect(){
-        datasource.close();
-    }
-    
-    public Feed getFeed(long feedid){
-        connect();
-        Feed feed = datasource.getFeed(feedid);
-        disconnect();
-        return feed;
-    }
-    
-    public ArrayList<Feed> getAllFeeds(){
-        connect();
-        ArrayList<Feed> feeds = (ArrayList<Feed>) datasource.getAllFeeds();
-        disconnect();
-        return feeds;        
-    }
-    
-    public void deleteFeed(Feed feed){
-        connect();
-        datasource.deleteFeed(feed);
-        disconnect();       
-    }
-    
-    public void addFeed(Feed feed){
-        connect();
-        datasource.createFeed(feed.getName(), feed.getUrl());
-        disconnect();
-    }
-    
+
+        private void connect() {
+                try {
+                        mFeedsDataSource.open();
+                } catch (SQLException e) {
+                        e.printStackTrace();
+                }
+        }
+
+        private void disconnect() {
+                mFeedsDataSource.close();
+        }
+
+        public Feed getFeed(long feedid) {
+                connect();
+                Feed mFeed = mFeedsDataSource.getFeed(feedid);
+                disconnect();
+                return mFeed;
+        }
+
+        public ArrayList<Feed> getAllFeeds() {
+                connect();
+                ArrayList<Feed> mFeeds = (ArrayList<Feed>) mFeedsDataSource.getAllFeeds();
+                disconnect();
+                return mFeeds;
+        }
+
+        public void deleteFeed(Feed feed) {
+                connect();
+                mFeedsDataSource.deleteFeed(feed);
+                disconnect();
+        }
+
+        public void addFeed(Feed feed) {
+                connect();
+                mFeedsDataSource.createFeed(feed.getName(), feed.getUrl());
+                disconnect();
+        }
+
 }

@@ -1,36 +1,36 @@
 package de.hdodenhof.feedreader.model;
 
 public class Feed {
-    private long id;
-    private String name;
-    private String url;
+        private long mID;
+        private String mName;
+        private String mURL;
 
-    public long getId() {
-        return id;
-    }
+        public long getId() {
+                return mID;
+        }
 
-    public void setId(long id) {
-        this.id = id;
-    }
+        public void setId(long id) {
+                this.mID = id;
+        }
 
-    public String getUrl() {
-        return url;
-    }
+        public String getUrl() {
+                return mURL;
+        }
 
-    public void setUrl(String comment) {
-        this.url = comment;
-    }
-    
-    public String getName() {
-        return name;
-    }
+        public void setUrl(String comment) {
+                this.mURL = comment;
+        }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+        public String getName() {
+                return mName;
+        }
 
-    @Override
-    public String toString() {
-        return getName();
-    }
+        public void setName(String name) {
+                this.mName = name;
+        }
+
+        @Override
+        public String toString() {
+                return getName();
+        }
 }

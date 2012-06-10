@@ -24,166 +24,163 @@ import de.hdodenhof.feedreader.model.Feed;
 import de.hdodenhof.feedreader.tasks.AddFeedTask;
 import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
 
-public class HomeActivity extends FragmentActivity implements OnItemClickListener, DisplayArticlesFragment.OnArticleSelectedListener,
-        DisplayArticlesFragment.ParameterProvider {
+public class HomeActivity extends FragmentActivity implements OnItemClickListener, DisplayArticlesFragment.ActivityConnector {
 
-    private boolean mDualFragments = false;
-    private ProgressDialog spinner;
-    private ProgressDialog progressDialog;
-    private DisplayFeedsFragment feedsFragment;
-    private DisplayArticlesFragment articlesFragment;
-    private long feedId = -1;
+        private boolean mTwoPane = false;
+        private ProgressDialog mSpinner;
+        private ProgressDialog mProgresBar;
+        private DisplayFeedsFragment mFeedsFragment;
+        private DisplayArticlesFragment mArticlesFragment;
+        private long mFeedID = -1;
 
-    Handler asyncHandler = new Handler() {
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-            case 1:
-                // added feed
-                feedsFragment.updateFeeds();
-                if(mDualFragments){
-                    articlesFragment.updateContent(null);
+        Handler mAsyncHandler = new Handler() {
+                public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+                        switch (msg.what) {
+                        case 1:
+                                // added feed
+                                mFeedsFragment.updateFeeds();
+                                if (mTwoPane) {
+                                        mArticlesFragment.updateContent(null);
+                                }
+                                mSpinner.dismiss();
+                                break;
+                        case 2:
+                                // updated single feed
+                                mSpinner.dismiss();
+                                break;
+                        case 3:
+                                // refreshed feeds
+                                if (mTwoPane) {
+                                        mArticlesFragment.updateContent(null);
+                                }
+                                mProgresBar.dismiss();
+                        case 9:
+                                // refresh progress bar
+                                mProgresBar.setProgress(msg.arg1);
+                        default:
+                                break;
+                        }
                 }
-                spinner.dismiss();
-                break;
-            case 2:
-                // updated single feed
-                spinner.dismiss();
-                break;
-            case 3:
-                // refreshed feeds
-                if(mDualFragments){
-                    articlesFragment.updateContent(null);
-                }                
-                progressDialog.dismiss();
-            case 9:
-                // refresh progress bar
-                progressDialog.setProgress(msg.arg1);
-            default:
-                break;
-            }
-        }
-    };
+        };
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+                super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
+                if (savedInstanceState != null) {
+
+                }
+
+                setContentView(R.layout.activity_home);
+
+                mFeedsFragment = (DisplayFeedsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feeds);
+                mArticlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articles);
+                if (mArticlesFragment != null) {
+                        mTwoPane = true;
+                }
+
+                if (mTwoPane) {
+                        mFeedsFragment.setChoiceModeSingle();
+                }
 
         }
 
-        setContentView(R.layout.activity_home);
-
-        feedsFragment = (DisplayFeedsFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feeds);
-        articlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articles);
-        if (articlesFragment != null) {
-            mDualFragments = true;
-        }
-        
-        if (mDualFragments){
-            feedsFragment.setChoiceModeSingle();
+        public long getFeedId() {
+                return this.mFeedID;
         }
 
-    }
-
-    public long getFeedId() {
-        return this.feedId;
-    }  
-
-    public int getArticlePosition() {
-        return -1;
-    } 
-
-    private void addFeed(String feedUrl) {
-        spinner = ProgressDialog.show(this, "", "Please wait...", true);
-        AddFeedTask addFeedTask = new AddFeedTask(asyncHandler, this);
-        addFeedTask.execute(feedUrl);
-    }
-
-    private void refreshFeeds() {
-
-        progressDialog = new ProgressDialog(this);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setMessage("Loading...");
-        progressDialog.setCancelable(false);
-        progressDialog.setProgress(0);
-        progressDialog.setMax(feedsFragment.getListLength());
-        progressDialog.show();
-
-        RefreshFeedsTask refreshFeedsTask = new RefreshFeedsTask(asyncHandler, this);
-        refreshFeedsTask.execute();
-    }
-
-    private void showAddDialog() {
-        AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
-        alert.setTitle("Add feed");
-        alert.setMessage("Input Feed URL");
-
-        final EditText input = new EditText(this);
-        input.setText("http://t3n.de/news/feed");
-        alert.setView(input);
-
-        alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String value = input.getText().toString();
-                addFeed(value);
-            }
-        });
-
-        alert.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-            }
-        });
-
-        alert.show();
-    }
-
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Feed feed = (Feed) parent.getItemAtPosition(position);
-        this.feedId = feed.getId();
-
-        if (!mDualFragments) {
-            Intent intent = new Intent(this, DisplayFeedActivity.class);
-            intent.putExtra("feedid", feed.getId());
-            startActivity(intent);
-        } else {
-            articlesFragment.updateContent(feed.getId());
+        public int getArticlePosition() {
+                return -1;
         }
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
-        return true;
-    }
-
-    public void articleSelected(int index, Article article) {
-
-        ArticleController articleController = new ArticleController(this);
-        long feedId = articleController.getArticle(article.getId()).getFeedId();
-
-        Intent intent = new Intent(this, DisplayFeedActivity.class);
-        intent.putExtra("articleid", article.getId());
-        intent.putExtra("feedid", feedId);
-        startActivity(intent);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-        case R.id.item_refresh:
-            refreshFeeds();
-            return true;
-        case R.id.item_add:
-            showAddDialog();
-            return true;
-        default:
-            return super.onOptionsItemSelected(item);
+        private void addFeed(String feedUrl) {
+                mSpinner = ProgressDialog.show(this, "", "Please wait...", true);
+                AddFeedTask mAddFeedTask = new AddFeedTask(mAsyncHandler, this);
+                mAddFeedTask.execute(feedUrl);
         }
-    }
+
+        private void refreshFeeds() {
+                mProgresBar = new ProgressDialog(this);
+                mProgresBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                mProgresBar.setMessage("Loading...");
+                mProgresBar.setCancelable(false);
+                mProgresBar.setProgress(0);
+                mProgresBar.setMax(mFeedsFragment.getListLength());
+                mProgresBar.show();
+
+                RefreshFeedsTask mRefreshFeedsTask = new RefreshFeedsTask(mAsyncHandler, this);
+                mRefreshFeedsTask.execute();
+        }
+
+        private void showAddDialog() {
+                AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
+
+                mAlertDialog.setTitle("Add feed");
+                mAlertDialog.setMessage("Input Feed URL");
+
+                final EditText mInput = new EditText(this);
+                mInput.setText("http://t3n.de/news/feed");
+                mAlertDialog.setView(mInput);
+
+                mAlertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                                String value = mInput.getText().toString();
+                                addFeed(value);
+                        }
+                });
+
+                mAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                        }
+                });
+
+                mAlertDialog.show();
+        }
+
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Feed mFeed = (Feed) parent.getItemAtPosition(position);
+                this.mFeedID = mFeed.getId();
+
+                if (!mTwoPane) {
+                        Intent mIntent = new Intent(this, DisplayFeedActivity.class);
+                        mIntent.putExtra("feedid", mFeed.getId());
+                        startActivity(mIntent);
+                } else {
+                        mArticlesFragment.updateContent(mFeed.getId());
+                }
+
+        }
+
+        @Override
+        public boolean onCreateOptionsMenu(Menu menu) {
+                MenuInflater mMenuInflater = getMenuInflater();
+                mMenuInflater.inflate(R.menu.main, menu);
+                return true;
+        }
+
+        public void articleSelected(int index, Article article) {
+                ArticleController mArticleController = new ArticleController(this);
+                long mFeedID = mArticleController.getArticle(article.getId()).getFeedId();
+
+                Intent mIntent = new Intent(this, DisplayFeedActivity.class);
+                mIntent.putExtra("articleid", article.getId());
+                mIntent.putExtra("feedid", mFeedID);
+                startActivity(mIntent);
+        }
+
+        @Override
+        public boolean onOptionsItemSelected(MenuItem item) {
+                switch (item.getItemId()) {
+                case R.id.item_refresh:
+                        refreshFeeds();
+                        return true;
+                case R.id.item_add:
+                        showAddDialog();
+                        return true;
+                default:
+                        return super.onOptionsItemSelected(item);
+                }
+        }
 
 }

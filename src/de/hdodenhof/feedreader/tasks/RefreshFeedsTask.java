@@ -16,61 +16,61 @@ import de.hdodenhof.feedreader.model.Feed;
 
 public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
 
-    Handler mainUIHandler;
-    Context applicationContext;
+        Handler mMainUIHandler;
+        Context mContext;
 
-    public RefreshFeedsTask(Handler mainUIHandler, Context context) {
-        this.mainUIHandler = mainUIHandler;
-        this.applicationContext = context;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected Void doInBackground(Void... params) {
-
-        ArrayList<Article> articles = new ArrayList<Article>();
-        ArrayList<Feed> feeds = new ArrayList<Feed>();
-        FeedController feedController = new FeedController(applicationContext);
-        ArticleController articleController = new ArticleController(applicationContext);
-
-        try {
-
-            int n = 0;
-            feeds = feedController.getAllFeeds();
-            for (Feed feed : feeds) {
-                n++;
-                SAXHelper saxHelper = new SAXHelper(feed.getUrl(), new ArticleHandler());
-                articles = (ArrayList<Article>) saxHelper.parse();
-                articleController.deleteArticles(feed.getId());
-                articleController.createArticles(feed.getId(), articles);
-                publishProgress(n);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
+        public RefreshFeedsTask(Handler mainUIHandler, Context context) {
+                this.mMainUIHandler = mainUIHandler;
+                this.mContext = context;
         }
 
-        return null;
+        @SuppressWarnings("unchecked")
+        protected Void doInBackground(Void... params) {
 
-    }
+                ArrayList<Article> mAticles = new ArrayList<Article>();
+                ArrayList<Feed> mFeeds = new ArrayList<Feed>();
+                FeedController mFeedController = new FeedController(mContext);
+                ArticleController mArticleController = new ArticleController(mContext);
 
-    @Override
-    protected void onProgressUpdate(Integer... values) {
-        Message msg = Message.obtain();
-        msg.what = 9;
-        msg.arg1 = values[0];
-        mainUIHandler.sendMessage(msg);
-    }
+                try {
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
+                        int n = 0;
+                        mFeeds = mFeedController.getAllFeeds();
+                        for (Feed mFeed : mFeeds) {
+                                n++;
+                                SAXHelper mSAXHelper = new SAXHelper(mFeed.getUrl(), new ArticleHandler());
+                                mAticles = (ArrayList<Article>) mSAXHelper.parse();
+                                mArticleController.deleteArticles(mFeed.getId());
+                                mArticleController.createArticles(mFeed.getId(), mAticles);
+                                publishProgress(n);
+                        }
 
-    @Override
-    protected void onPostExecute(Void result) {
-        Message msg = Message.obtain();
-        msg.what = 3;
-        mainUIHandler.sendMessage(msg);
-    }
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+
+                return null;
+
+        }
+
+        @Override
+        protected void onProgressUpdate(Integer... values) {
+                Message mMSG = Message.obtain();
+                mMSG.what = 9;
+                mMSG.arg1 = values[0];
+                mMainUIHandler.sendMessage(mMSG);
+        }
+
+        @Override
+        protected void onPreExecute() {
+                super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+                Message mMSG = Message.obtain();
+                mMSG.what = 3;
+                mMainUIHandler.sendMessage(mMSG);
+        }
 
 }

@@ -35,6 +35,7 @@ public class DisplayArticlesFragment extends ListFragment {
 
     public interface ParameterProvider {
         public long getFeedId();
+        public int getArticlePosition();
     }
 
     @Override
@@ -83,7 +84,6 @@ public class DisplayArticlesFragment extends ListFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-//        DisplayArticleFragment articleFragment = (DisplayArticleFragment) getFragmentManager().findFragmentById(R.id.fragment_article);
         View articleFragment = getActivity().findViewById(R.id.viewpager);
         DisplayFeedsFragment feedsFragment = (DisplayFeedsFragment) getFragmentManager().findFragmentById(R.id.fragment_feeds);
         if (articleFragment != null || feedsFragment != null) {
@@ -119,7 +119,11 @@ public class DisplayArticlesFragment extends ListFragment {
         });
 
         updateContent(feedId);
-
+        
+        if (mParameterProvider.getArticlePosition() != -1){
+            highlight(mParameterProvider.getArticlePosition());
+        }
+        
     }
 
 }

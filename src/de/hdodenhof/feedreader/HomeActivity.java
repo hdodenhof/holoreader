@@ -88,7 +88,11 @@ public class HomeActivity extends FragmentActivity implements OnItemClickListene
 
     public long getFeedId() {
         return -1;
-    }    
+    }  
+
+    public int getArticlePosition() {
+        return -1;
+    } 
 
     private void addFeed(String feedUrl) {
         spinner = ProgressDialog.show(this, "", "Please wait...", true);

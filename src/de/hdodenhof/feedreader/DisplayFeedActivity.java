@@ -67,7 +67,7 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
 
             DisplayArticlesFragment displayArticlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feed);
             displayArticlesFragment.setChoiceModeSingle();
-            
+
             // FIXME
             feedViewReady = true;
         }
@@ -139,6 +139,14 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
         return this.articleId;
     }
 
+    public int getArticlePosition() {
+        if (mDualFragments) {
+            return (Integer) articleMap.get(this.articleId);
+        } else {
+            return -1;
+        }
+    }
+
     public void articleSelected(int index, Article article) {
 
         if (mDualFragments) {
@@ -164,4 +172,5 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
             displayArticlesFragment.highlight(position);
         }
     }
+
 }

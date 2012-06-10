@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -116,7 +115,6 @@ public class DisplayArticleActivity extends FragmentActivity implements DisplayA
     public void onPageSelected(int position) {
         ArticleController articleController = new ArticleController(this);
         articleController.setRead(getKeyByValue(articleMap, position));
-        Log.v("FR", "setRead()");
     }
 
     public static <T, E> T getKeyByValue(Map<T, E> map, E value) {

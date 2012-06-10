@@ -170,7 +170,7 @@ public class DisplayFeedActivity extends FragmentActivity implements DisplayArti
     public void onPageSelected(int position) {
         if (feedViewReady) {
             DisplayArticlesFragment displayArticlesFragment = (DisplayArticlesFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feed);
-            displayArticlesFragment.highlight(position);
+            displayArticlesFragment.articleChoosen(position);
         }
         
         ArticleController articleController = new ArticleController(this);

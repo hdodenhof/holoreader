@@ -35,7 +35,6 @@ public class DisplayArticlesFragment extends ListFragment {
 
     public interface ParameterProvider {
         public long getFeedId();
-
         public int getArticlePosition();
     }
 
@@ -70,8 +69,9 @@ public class DisplayArticlesFragment extends ListFragment {
         this.choiceModeSingle = true;
     }
 
-    public void highlight(int position) {
+    public void articleChoosen(int position) {
         articleslistview.setItemChecked(position, true);
+        this.refreshView();
     }
 
     @Override
@@ -79,6 +79,24 @@ public class DisplayArticlesFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         feedController = new FeedController(getActivity());
         articleController = new ArticleController(getActivity());
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshView();
+    }
+
+    private void refreshView() {
+        long feedId = mParameterProvider.getFeedId();
+        
+        int index = articleslistview.getFirstVisiblePosition();
+        View v = articleslistview.getChildAt(0);
+        int top = (v == null) ? 0 : v.getTop();
+
+        updateContent(feedId);
+        
+        articleslistview.setSelectionFromTop(index, top);        
     }
 
     @Override
@@ -122,7 +140,7 @@ public class DisplayArticlesFragment extends ListFragment {
         updateContent(feedId);
 
         if (mParameterProvider.getArticlePosition() != -1) {
-            highlight(mParameterProvider.getArticlePosition());
+            this.articleChoosen(mParameterProvider.getArticlePosition());
         }
 
     }

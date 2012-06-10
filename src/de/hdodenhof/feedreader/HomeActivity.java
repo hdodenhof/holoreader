@@ -32,6 +32,7 @@ public class HomeActivity extends FragmentActivity implements OnItemClickListene
     private ProgressDialog progressDialog;
     private DisplayFeedsFragment feedsFragment;
     private DisplayArticlesFragment articlesFragment;
+    private long feedId = -1;
 
     Handler asyncHandler = new Handler() {
         public void handleMessage(Message msg) {
@@ -87,7 +88,7 @@ public class HomeActivity extends FragmentActivity implements OnItemClickListene
     }
 
     public long getFeedId() {
-        return -1;
+        return this.feedId;
     }  
 
     public int getArticlePosition() {
@@ -141,6 +142,7 @@ public class HomeActivity extends FragmentActivity implements OnItemClickListene
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Feed feed = (Feed) parent.getItemAtPosition(position);
+        this.feedId = feed.getId();
 
         if (!mDualFragments) {
             Intent intent = new Intent(this, DisplayFeedActivity.class);

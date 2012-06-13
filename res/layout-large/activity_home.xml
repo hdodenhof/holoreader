@@ -5,8 +5,8 @@
     android:orientation="horizontal" >
 
     <fragment
-        android:id="@+id/fragment_feeds"
-        android:name="de.hdodenhof.feedreader.fragments.DisplayFeedsFragment"
+        android:id="@+id/fragment_feedlist"
+        android:name="de.hdodenhof.feedreader.fragments.FeedListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />
@@ -17,8 +17,8 @@
         android:background="#808080" />
 
     <fragment
-        android:id="@+id/fragment_articles"
-        android:name="de.hdodenhof.feedreader.fragments.DisplayArticlesFragment"
+        android:id="@+id/fragment_articlelist"
+        android:name="de.hdodenhof.feedreader.fragments.ArticleListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="3" />

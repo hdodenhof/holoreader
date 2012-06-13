@@ -5,8 +5,8 @@
     android:orientation="horizontal" >
 
     <fragment
-        android:id="@+id/fragment_feeds"
-        android:name="de.hdodenhof.feedreader.fragments.DisplayFeedsFragment"
+        android:id="@+id/fragment_feedlist"
+        android:name="de.hdodenhof.feedreader.fragments.FeedListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1" />

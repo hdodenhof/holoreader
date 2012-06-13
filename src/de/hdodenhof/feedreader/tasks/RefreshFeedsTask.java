@@ -7,17 +7,24 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 
-import de.hdodenhof.feedreader.controller.ArticleController;
-import de.hdodenhof.feedreader.controller.FeedController;
-import de.hdodenhof.feedreader.handler.ArticleHandler;
-import de.hdodenhof.feedreader.helper.SAXHelper;
-import de.hdodenhof.feedreader.model.Article;
-import de.hdodenhof.feedreader.model.Feed;
+import de.hdodenhof.feedreader.controllers.RSSController;
+import de.hdodenhof.feedreader.handlers.ArticleHandler;
+import de.hdodenhof.feedreader.helpers.SAXHelper;
+import de.hdodenhof.feedreader.models.Article;
+import de.hdodenhof.feedreader.models.Feed;
 
+/**
+ * 
+ * @author Henning Dodenhof
+ *
+ */
 public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
 
-        Handler mMainUIHandler;
-        Context mContext;
+        @SuppressWarnings("unused")
+        private static final String TAG = RefreshFeedsTask.class.getSimpleName();               
+        
+        private Handler mMainUIHandler;
+        private Context mContext;
 
         public RefreshFeedsTask(Handler mainUIHandler, Context context) {
                 this.mMainUIHandler = mainUIHandler;
@@ -27,21 +34,23 @@ public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
         @SuppressWarnings("unchecked")
         protected Void doInBackground(Void... params) {
 
-                ArrayList<Article> mAticles = new ArrayList<Article>();
+                ArrayList<Article> mArticles = new ArrayList<Article>();
                 ArrayList<Feed> mFeeds = new ArrayList<Feed>();
-                FeedController mFeedController = new FeedController(mContext);
-                ArticleController mArticleController = new ArticleController(mContext);
+                RSSController mController = new RSSController(mContext);
 
                 try {
 
                         int n = 0;
-                        mFeeds = mFeedController.getAllFeeds();
+                        mFeeds = mController.getFeeds();
                         for (Feed mFeed : mFeeds) {
                                 n++;
                                 SAXHelper mSAXHelper = new SAXHelper(mFeed.getUrl(), new ArticleHandler());
-                                mAticles = (ArrayList<Article>) mSAXHelper.parse();
-                                mArticleController.deleteArticles(mFeed.getId());
-                                mArticleController.createArticles(mFeed.getId(), mAticles);
+                                mArticles = (ArrayList<Article>) mSAXHelper.parse();
+                                mController.deleteArticles(mFeed.getId());
+                                for (Article mArticle : mArticles) {
+                                        mArticle.setFeedId(mFeed.getId());
+                                }
+                                mController.createArticles(mArticles);
                                 publishProgress(n);
                         }
 

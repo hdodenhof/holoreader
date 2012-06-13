@@ -7,19 +7,26 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 
-import de.hdodenhof.feedreader.controller.ArticleController;
-import de.hdodenhof.feedreader.handler.ArticleHandler;
-import de.hdodenhof.feedreader.helper.SAXHelper;
-import de.hdodenhof.feedreader.model.Article;
-import de.hdodenhof.feedreader.model.Feed;
+import de.hdodenhof.feedreader.controllers.RSSController;
+import de.hdodenhof.feedreader.handlers.ArticleHandler;
+import de.hdodenhof.feedreader.helpers.SAXHelper;
+import de.hdodenhof.feedreader.models.Article;
+import de.hdodenhof.feedreader.models.Feed;
 
+/**
+ * 
+ * @author Henning Dodenhof
+ *
+ */
 public class UpdateFeedTask extends AsyncTask<Feed, Void, Void> {
 
+        @SuppressWarnings("unused")
+        private static final String TAG = UpdateFeedTask.class.getSimpleName();               
+        
+        private Handler mMainUIHandler;
+        private Context mContext;
         private Feed mFeed;
-
-        Handler mMainUIHandler;
-        Context mContext;
-
+        
         public UpdateFeedTask(Handler mainUIHandler, Context context) {
                 this.mMainUIHandler = mainUIHandler;
                 this.mContext = context;
@@ -30,17 +37,17 @@ public class UpdateFeedTask extends AsyncTask<Feed, Void, Void> {
 
                 mFeed = (Feed) params[0];
                 ArrayList<Article> mArticles = new ArrayList<Article>();
-                ArticleController mArticleController = new ArticleController(mContext);
+                RSSController mController = new RSSController(mContext);
 
                 try {
                         SAXHelper mSAXHelper = new SAXHelper(mFeed.getUrl(), new ArticleHandler());
                         mArticles = (ArrayList<Article>) mSAXHelper.parse();
 
-                        mArticleController.deleteArticles(mFeed.getId());
+                        mController.deleteArticles(mFeed.getId());
                         for (Article mArticle : mArticles) {
-                                mArticleController.createArticle(mFeed.getId(), mArticle.getGuid(), mArticle.getPubDate(), mArticle.getTitle(),
-                                                mArticle.getSummary(), mArticle.getContent());
+                                mArticle.setFeedId(mFeed.getId());
                         }
+                        mController.createArticles(mArticles);
 
                 } catch (Exception e) {
                         e.printStackTrace();

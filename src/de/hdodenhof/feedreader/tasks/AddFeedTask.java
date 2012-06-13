@@ -5,15 +5,24 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 
-import de.hdodenhof.feedreader.controller.FeedController;
-import de.hdodenhof.feedreader.handler.FeedHandler;
-import de.hdodenhof.feedreader.helper.SAXHelper;
-import de.hdodenhof.feedreader.model.Feed;
+import de.hdodenhof.feedreader.controllers.RSSController;
+import de.hdodenhof.feedreader.handlers.FeedHandler;
+import de.hdodenhof.feedreader.helpers.SAXHelper;
+import de.hdodenhof.feedreader.models.Feed;
 
+/**
+ * 
+ * @author Henning Dodenhof
+ *
+ */
 public class AddFeedTask extends AsyncTask<String, Void, Void> {
-        Handler mMainUIHandler;
-        Context mContext;
-        Feed mFeed;
+        
+        @SuppressWarnings("unused")
+        private static final String TAG = AddFeedTask.class.getSimpleName();        
+        
+        private Handler mMainUIHandler;
+        private Context mContext;
+        private Feed mFeed;
 
         public AddFeedTask(Handler mainUIHandler, Context context) {
                 this.mMainUIHandler = mainUIHandler;
@@ -24,14 +33,14 @@ public class AddFeedTask extends AsyncTask<String, Void, Void> {
         protected Void doInBackground(String... params) {
 
                 mFeed.setUrl(params[0]);
-                FeedController mFeedController = new FeedController(mContext);
+                RSSController mController = new RSSController(mContext);
 
                 try {
                         SAXHelper mSAXHelper = new SAXHelper(mFeed.getUrl(), new FeedHandler());
                         String mName = (String) mSAXHelper.parse();
 
                         mFeed.setName(mName);
-                        mFeedController.addFeed(mFeed);
+                        mController.addFeed(mFeed);
 
                 } catch (Exception e) {
                         e.printStackTrace();

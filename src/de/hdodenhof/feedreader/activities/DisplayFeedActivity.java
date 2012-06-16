@@ -98,15 +98,10 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
 
                 RSSMessage mMessage = new RSSMessage();
 
-                try {
-                        ArticleListFragment mA = (ArticleListFragment) fragment;
-                        if (mTwoPane) {
-                                mMessage = new RSSMessage();
-                                mMessage.type = RSSMessage.CHOICE_MODE_SINGLE;
-                                mA.handleMessage(mMessage);
-                        }
-                } catch (ClassCastException e) {
-
+                if(fragment instanceof ArticleListFragment && mTwoPane){
+                        mMessage = new RSSMessage();
+                        mMessage.type = RSSMessage.CHOICE_MODE_SINGLE;
+                        fragment.handleMessage(mMessage);
                 }
 
                 mMessage = new RSSMessage();

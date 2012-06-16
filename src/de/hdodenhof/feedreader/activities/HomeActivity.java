@@ -127,15 +127,10 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
                 mMessage.feeds = mFeeds;
                 fragment.handleMessage(mMessage);
 
-                try {
-                        FeedListFragment mF = (FeedListFragment) fragment;
-                        if (mTwoPane) {
-                                mMessage = new RSSMessage();
-                                mMessage.type = RSSMessage.CHOICE_MODE_SINGLE;
-                                mF.handleMessage(mMessage);
-                        }
-                } catch (ClassCastException e) {
-
+                if(fragment instanceof FeedListFragment && mTwoPane){
+                        mMessage = new RSSMessage();
+                        mMessage.type = RSSMessage.CHOICE_MODE_SINGLE;
+                        fragment.handleMessage(mMessage);                        
                 }
         }
 

@@ -10,6 +10,8 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import android.text.Html;
+
 import de.hdodenhof.feedreader.models.Article;
 
 /**
@@ -93,7 +95,7 @@ public class ArticleHandler extends DefaultHandler implements GenericHandler {
                         }
 
                         else if (mIsSummary) {
-                                mArticle.setSummary(mSb.toString().trim());
+                                mArticle.setSummary(Html.fromHtml(mSb.toString().trim()).toString());
                                 mIsSummary = false;
                         }
 
@@ -118,7 +120,7 @@ public class ArticleHandler extends DefaultHandler implements GenericHandler {
                         }
 
                         else if (mIsContent) {
-                                mArticle.setContent(mSb.toString().trim());
+                                mArticle.setContent(mSb.toString().trim().replaceAll("(?s)<!--.*?-->", ""));
                                 mIsContent = false;
                         }
 

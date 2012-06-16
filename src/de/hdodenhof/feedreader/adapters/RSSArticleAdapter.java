@@ -2,6 +2,8 @@ package de.hdodenhof.feedreader.adapters;
 
 import java.util.ArrayList;
 
+import org.jsoup.Jsoup;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,13 +17,13 @@ import de.hdodenhof.feedreader.models.Article;
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
 public class RSSArticleAdapter extends ArrayAdapter<Article> implements RSSAdapter {
 
         @SuppressWarnings("unused")
-        private static final String TAG = RSSArticleAdapter.class.getSimpleName();               
-        
+        private static final String TAG = RSSArticleAdapter.class.getSimpleName();
+
         private ArrayList<Article> mArticles;
         private LayoutInflater mLayoutInflater;
 
@@ -47,7 +49,11 @@ public class RSSArticleAdapter extends ArrayAdapter<Article> implements RSSAdapt
                                 mTitle.setText(mArticle.getTitle());
                         }
                         if (mSummary != null) {
-                                mSummary.setText(mArticle.getSummary());
+                                if (mArticle.getSummary() != null) {
+                                        mSummary.setText(mArticle.getSummary());
+                                } else {
+                                        mSummary.setText(Jsoup.parse(mArticle.getContent()).text());
+                                }
                         }
                         if (mReadState != null) {
                                 mReadState.setText(readState(mArticle.isRead()));
@@ -64,7 +70,7 @@ public class RSSArticleAdapter extends ArrayAdapter<Article> implements RSSAdapt
                 }
         }
 
-        public int getType(){
+        public int getType() {
                 return RSSAdapter.TYPE_ARTICLE;
         }
 

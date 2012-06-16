@@ -24,6 +24,7 @@ public class FeedDAO {
         public static final String _ID = "_id";
         public static final String NAME = "name";
         public static final String URL = "url";
+        public static final String UPDATED = "updated";
 
         private SQLiteHelper mDBHelper;
 
@@ -69,6 +70,7 @@ public class FeedDAO {
                 }
                 mValues.put(NAME, feed.getName());
                 mValues.put(URL, feed.getUrl());
+                mValues.put(UPDATED, SQLiteHelper.fromDate(feed.getUpdated()));
 
                 long mInsertID = mDatabase.insert(TABLE, null, mValues);
 
@@ -85,6 +87,7 @@ public class FeedDAO {
                 mValues.put(_ID, feed.getId());
                 mValues.put(NAME, feed.getName());
                 mValues.put(URL, feed.getUrl());
+                mValues.put(UPDATED, SQLiteHelper.fromDate(feed.getUpdated()));
 
                 int mNum = mDatabase.update(TABLE, mValues, _ID + "=?", new String[] { Integer.toString(feed.getId()) });
                 mDatabase.close();
@@ -113,6 +116,7 @@ public class FeedDAO {
                 mFeed.setId(cursor.getInt(cursor.getColumnIndex(_ID)));
                 mFeed.setName(cursor.getString(cursor.getColumnIndex(NAME)));
                 mFeed.setUrl(cursor.getString(cursor.getColumnIndex(URL)));
+                mFeed.setUpdated(SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(UPDATED))));
                 return mFeed;
         }
 }

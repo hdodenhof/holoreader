@@ -3,6 +3,7 @@ package de.hdodenhof.feedreader.adapters;
 import java.util.ArrayList;
 
 import android.content.Context;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,12 +42,16 @@ public class RSSFeedAdapter extends ArrayAdapter<Feed> implements RSSAdapter {
                         convertView = mLayoutInflater.inflate(R.layout.listitem_feed, null);
                         final TextView mTitle = (TextView) convertView.findViewById(R.id.list_item_feed_title);
                         final TextView mSummary = (TextView) convertView.findViewById(R.id.list_item_feed_summary);
+                        final TextView mUpdated = (TextView) convertView.findViewById(R.id.list_item_feed_updated);
 
                         if (mTitle != null) {
                                 mTitle.setText(mFeed.getName());
                         }
                         if (mSummary != null) {
                                 mSummary.setText(mFeed.getUrl());
+                        }
+                        if (mUpdated != null) {
+                                mUpdated.setText(DateFormat.format("E, dd MMM yyyy - kk:mm", mFeed.getUpdated()));
                         }
                 }
                 return convertView;

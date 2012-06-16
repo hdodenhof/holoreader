@@ -50,6 +50,10 @@ public class RSSController {
                 mArticleDAO.update(article);
         }
         
+        public void updateFeed(Feed feed){
+                mFeedDAO.update(feed);
+        }
+        
         public void addFeed(Feed feed){
                 mFeedDAO.insert(feed);  
         }

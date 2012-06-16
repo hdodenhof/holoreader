@@ -1,6 +1,7 @@
 package de.hdodenhof.feedreader.tasks;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -51,6 +52,10 @@ public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
                                         mArticle.setFeedId(mFeed.getId());
                                 }
                                 mController.createArticles(mArticles);
+                                
+                                mFeed.setUpdated(new Date());
+                                mController.updateFeed(mFeed);
+                                
                                 publishProgress(n);
                         }
 

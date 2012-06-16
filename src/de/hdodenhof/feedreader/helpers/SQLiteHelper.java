@@ -23,10 +23,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         private static final String TAG = SQLiteHelper.class.getSimpleName();
         
         private static final String DATABASE_NAME = "feedreader";
-        private static final int DATABASE_VERSION = 4;
+        private static final int DATABASE_VERSION = 5;
 
         private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
-                        + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT);";
+                        + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT, " + FeedDAO.UPDATED + " TEXT);";
 
         private static final String ARTICLE_TABLE_CREATE = "CREATE TABLE " + ArticleDAO.TABLE + " (" + ArticleDAO._ID + " integer primary key autoincrement, "
                         + ArticleDAO.FEEDID + " integer , " + ArticleDAO.GUID + " TEXT , " + ArticleDAO.PUBDATE + " TEXT , " + ArticleDAO.TITLE + " TEXT , "
@@ -51,6 +51,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                         ContentValues mValues = new ContentValues();
                         mValues.put(FeedDAO.NAME, mData[0]);
                         mValues.put(FeedDAO.URL, mData[1]);
+                        mValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
 
                         database.insert(FeedDAO.TABLE, null, mValues);
                 }

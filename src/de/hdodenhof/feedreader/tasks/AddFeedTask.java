@@ -1,5 +1,7 @@
 package de.hdodenhof.feedreader.tasks;
 
+import java.util.Date;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -40,6 +42,7 @@ public class AddFeedTask extends AsyncTask<String, Void, Void> {
                         String mName = (String) mSAXHelper.parse();
 
                         mFeed.setName(mName);
+                        mFeed.setUpdated(new Date());
                         mController.addFeed(mFeed);
 
                 } catch (Exception e) {

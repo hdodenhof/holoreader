@@ -24,6 +24,7 @@ import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
+
 /**
  * 
  * @author Henning Dodenhof

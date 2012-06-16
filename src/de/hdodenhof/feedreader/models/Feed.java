@@ -1,6 +1,7 @@
 package de.hdodenhof.feedreader.models;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * 
@@ -12,6 +13,7 @@ public class Feed {
         private String mName;
         private String mURL;
         private ArrayList<Article> mArticles;
+        private Date mUpdated;
 
         public int getId() {
                 return mID;
@@ -41,8 +43,16 @@ public class Feed {
                 return mArticles;
         }
 
-        public void setArticles(ArrayList<Article> mArticles) {
-                this.mArticles = mArticles;
+        public void setArticles(ArrayList<Article> articles) {
+                this.mArticles = articles;
+        }
+
+        public Date getUpdated() {
+                return mUpdated;
+        }
+
+        public void setUpdated(Date updated) {
+                this.mUpdated = updated;
         }
 
         @Override

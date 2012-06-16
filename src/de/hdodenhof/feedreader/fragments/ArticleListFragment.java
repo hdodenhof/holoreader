@@ -57,6 +57,8 @@ public class ArticleListFragment extends ListFragment implements RSSFragment {
                         refreshAdapter(mArticleList);
                         if (message.article != null) {
                                 mArticlesListView.setItemChecked(mCurrent, true);
+                                int mPosition = (mCurrent - 1 < 0) ? 0 : mCurrent - 1;
+                                mArticlesListView.setSelectionFromTop(mPosition, 0);                                  
                         }
 
                         break;
@@ -83,6 +85,8 @@ public class ArticleListFragment extends ListFragment implements RSSFragment {
                 case RSSMessage.POSITION_CHANGED:
                         if (mInitialized) {
                                 mArticlesListView.setItemChecked(message.position, true);
+                                int mPosition = (message.position - 1 < 0) ? 0 : message.position - 1;
+                                mArticlesListView.setSelectionFromTop(mPosition, 0);  
                         }
                         break;
                 case RSSMessage.CHOICE_MODE_SINGLE:

@@ -4,6 +4,9 @@ import java.util.List;
 
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.widget.TextView;
 
 import de.hdodenhof.feedreader.fragments.ArticleFragment;
 
@@ -29,6 +32,11 @@ public class ArticlePagerAdapter extends FragmentPagerAdapter {
         @Override
         public ArticleFragment getItem(int position) {
                 return this.mFragments.get(position);
+        }
+        
+        @Override
+        public void destroyItem(View collection, int position, Object view) {
+            ((ViewPager) collection).removeView((TextView) view);
         }
 
         @Override

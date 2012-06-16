@@ -31,6 +31,14 @@ public class RSSController {
                 ArrayList<Feed> mFeeds = mFeedDAO.getAll();
                 for (Feed mFeed : mFeeds) {
                         mFeed.setArticles(mArticleDAO.getAllWithFeedID(mFeed.getId()));
+                        
+                        int mUnread = 0;
+                        for (Article article : mFeed.getArticles()) {
+                                if (!article.isRead()){
+                                        mUnread++;
+                                }
+                        }
+                        mFeed.setUnread(mUnread);
                 }
                 return mFeeds;
         }

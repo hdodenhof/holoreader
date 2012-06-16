@@ -53,8 +53,7 @@ public class FeedListFragment extends ListFragment implements RSSFragment {
                         mFeedAdapter.addAll(message.feeds);
                         mFeedAdapter.notifyDataSetChanged();                        
                         break;
-                case RSSMessage.FEEDS_UPDATED:
-                        // TODO: keep select state
+                case RSSMessage.FEEDLIST_UPDATED:
                         mFeedAdapter.clear();
                         mFeedAdapter.addAll(message.feeds);
                         mFeedAdapter.notifyDataSetChanged();                        

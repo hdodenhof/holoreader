@@ -45,7 +45,7 @@ public class ArticlePagerFragment implements RSSFragment, OnPageChangeListener {
                 case RSSMessage.INITIALIZE:
                         initialisePaging(message.feed, message.article);
                         break;
-                case RSSMessage.POSITION_UPDATED:
+                case RSSMessage.POSITION_CHANGED:
                         if (mPager.getCurrentItem() != message.position) {
                                 mPager.setCurrentItem(message.position);
                         }

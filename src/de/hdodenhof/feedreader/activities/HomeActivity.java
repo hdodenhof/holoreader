@@ -110,7 +110,7 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
 
                 for (RSSFragment mFragment : mFragments) {
                         RSSMessage mMessage = new RSSMessage();
-                        mMessage.type = RSSMessage.FEEDS_UPDATED;
+                        mMessage.type = RSSMessage.FEEDLIST_UPDATED;
                         mMessage.feeds = mFeeds;
                         mFragment.handleMessage(mMessage);
                 }
@@ -217,7 +217,7 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
                         } else {
                                 for (RSSFragment mFragment : mFragments) {
                                         RSSMessage mMessage = new RSSMessage();
-                                        mMessage.type = RSSMessage.FEED_UPDATED;
+                                        mMessage.type = RSSMessage.FEED_SELECTED;
                                         mMessage.feeds = mFeeds;
                                         mMessage.feed = mFeed;
                                         mFragment.handleMessage(mMessage);

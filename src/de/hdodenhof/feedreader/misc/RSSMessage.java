@@ -13,10 +13,12 @@ import de.hdodenhof.feedreader.models.Feed;
 public class RSSMessage {
 
         public static final int INITIALIZE = 1;
-        public static final int FEEDS_UPDATED = 2;
-        public static final int FEED_UPDATED = 3;
-        public static final int ARTICLE_UPDATED = 4;
-        public static final int POSITION_UPDATED = 5;
+        public static final int FEEDLIST_UPDATED = 2;
+        public static final int FEED_SELECTED = 3;
+        public static final int FEED_UPDATED = 4;
+        public static final int ARTICLE_SELECTED = 5;
+        public static final int ARTICLE_UPDATED = 6;
+        public static final int POSITION_CHANGED = 7;
         public static final int CHOICE_MODE_SINGLE = 9;
         
         public ArrayList<Feed> feeds;

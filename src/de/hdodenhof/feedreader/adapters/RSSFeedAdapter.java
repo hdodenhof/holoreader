@@ -43,6 +43,7 @@ public class RSSFeedAdapter extends ArrayAdapter<Feed> implements RSSAdapter {
                         final TextView mTitle = (TextView) convertView.findViewById(R.id.list_item_feed_title);
                         final TextView mSummary = (TextView) convertView.findViewById(R.id.list_item_feed_summary);
                         final TextView mUpdated = (TextView) convertView.findViewById(R.id.list_item_feed_updated);
+                        final TextView mUnread = (TextView) convertView.findViewById(R.id.list_item_feed_unread);
 
                         if (mTitle != null) {
                                 mTitle.setText(mFeed.getName());
@@ -51,8 +52,12 @@ public class RSSFeedAdapter extends ArrayAdapter<Feed> implements RSSAdapter {
                                 mSummary.setText(mFeed.getUrl());
                         }
                         if (mUpdated != null) {
-                                mUpdated.setText(DateFormat.format("E, dd MMM yyyy - kk:mm", mFeed.getUpdated()));
+                                mUpdated.setText("Refreshed: " + DateFormat.format("E, dd MMM yyyy - kk:mm", mFeed.getUpdated()));
                         }
+                        if (mUnread != null) {
+                                mUnread.setText("Unread: " + mFeed.getUnread());
+                        }                        
+                        
                 }
                 return convertView;
         }

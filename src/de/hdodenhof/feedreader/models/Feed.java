@@ -14,6 +14,7 @@ public class Feed {
         private String mURL;
         private ArrayList<Article> mArticles;
         private Date mUpdated;
+        private int mUnread;
 
         public int getId() {
                 return mID;
@@ -53,6 +54,14 @@ public class Feed {
 
         public void setUpdated(Date updated) {
                 this.mUpdated = updated;
+        }
+
+        public int getUnread() {
+                return mUnread;
+        }
+
+        public void setUnread(int unread) {
+                this.mUnread = unread;
         }
 
         @Override

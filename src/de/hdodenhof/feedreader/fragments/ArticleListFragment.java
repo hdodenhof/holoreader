@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
-import android.view.View;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
@@ -61,7 +60,7 @@ public class ArticleListFragment extends ListFragment implements RSSFragment {
                         }
 
                         break;
-                case RSSMessage.FEEDS_UPDATED:
+                case RSSMessage.FEEDLIST_UPDATED:
                         mArticleList = new ArrayList<Article>();
 
                         for (Feed mFeed : message.feeds) {
@@ -72,22 +71,16 @@ public class ArticleListFragment extends ListFragment implements RSSFragment {
 
                         refreshAdapter(mArticleList);
                         break;
-                case RSSMessage.FEED_UPDATED:
+                case RSSMessage.FEED_SELECTED:
                         mArticleList = new ArrayList<Article>();
 
                         for (Article mArticle : message.feed.getArticles()) {
                                 mArticleList.add(mArticle);
                         }
 
-                        int mIndex = mArticlesListView.getFirstVisiblePosition();
-                        View mView = mArticlesListView.getChildAt(0);
-                        int mTop = (mView == null) ? 0 : mView.getTop();
-
                         refreshAdapter(mArticleList);
-
-                        mArticlesListView.setSelectionFromTop(mIndex, mTop);
                         break;
-                case RSSMessage.POSITION_UPDATED:
+                case RSSMessage.POSITION_CHANGED:
                         if (mInitialized) {
                                 mArticlesListView.setItemChecked(message.position, true);
                         }

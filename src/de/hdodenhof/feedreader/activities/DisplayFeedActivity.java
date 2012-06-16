@@ -174,7 +174,7 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
                                         RSSMessage mMessage = new RSSMessage();
                                         mMessage.article = mArticle;
                                         mMessage.position = position;
-                                        mMessage.type = RSSMessage.POSITION_UPDATED;
+                                        mMessage.type = RSSMessage.POSITION_CHANGED;
                                         mFragment.handleMessage(mMessage);
                                 }
                         }
@@ -196,7 +196,7 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
                         RSSMessage mMessage = new RSSMessage();
                         mMessage.article = article;
                         mMessage.position = position;
-                        mMessage.type = RSSMessage.POSITION_UPDATED;
+                        mMessage.type = RSSMessage.POSITION_CHANGED;
                         mFragment.handleMessage(mMessage);
                 }
         }

@@ -74,9 +74,15 @@ public class RSSController {
                 mArticleDAO.deleteWithFeedID(feedID);
         }
         
-        public void createArticles(ArrayList<Article> articles){
+        public void createOrUpdateArticles(ArrayList<Article> articles){
                 for (Article article : articles) {
-                        mArticleDAO.insert(article);
+                        Article mExistingArticle = mArticleDAO.getWithGUID(article.getGuid());
+                        if(mExistingArticle != null){
+                                article.setRead(mExistingArticle.isRead());
+                                mArticleDAO.update(article);
+                        } else {
+                                mArticleDAO.insert(article);    
+                        }
                 }
         }
         

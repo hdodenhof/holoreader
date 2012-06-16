@@ -47,7 +47,7 @@ public class UpdateFeedTask extends AsyncTask<Feed, Void, Void> {
                         for (Article mArticle : mArticles) {
                                 mArticle.setFeedId(mFeed.getId());
                         }
-                        mController.createArticles(mArticles);
+                        mController.createOrUpdateArticles(mArticles);
 
                 } catch (Exception e) {
                         e.printStackTrace();

@@ -47,11 +47,11 @@ public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
                                 n++;
                                 SAXHelper mSAXHelper = new SAXHelper(mFeed.getUrl(), new ArticleHandler());
                                 mArticles = (ArrayList<Article>) mSAXHelper.parse();
-                                mController.deleteArticles(mFeed.getId());
+
                                 for (Article mArticle : mArticles) {
                                         mArticle.setFeedId(mFeed.getId());
                                 }
-                                mController.createArticles(mArticles);
+                                mController.createOrUpdateArticles(mArticles);
                                 
                                 mFeed.setUpdated(new Date());
                                 mController.updateFeed(mFeed);

@@ -49,7 +49,7 @@ public class FeedDAO {
 
         public Feed get(int id) {
                 SQLiteDatabase mDatabase = mDBHelper.getWritableDatabase();
-                Cursor mCursor = mDatabase.query(TABLE, null, _ID + " = " + id, null, null, null, null);
+                Cursor mCursor = mDatabase.query(TABLE, null, _ID + "=?", new String[] { Integer.toString(id) }, null, null, null);
                 Feed mFeed = null;
 
                 if (mCursor.moveToFirst()) {
@@ -74,7 +74,7 @@ public class FeedDAO {
 
                 long mInsertID = mDatabase.insert(TABLE, null, mValues);
 
-                Cursor mCursor = mDatabase.query(TABLE, null, _ID + " = " + mInsertID, null, null, null, null);
+                Cursor mCursor = mDatabase.query(TABLE, null, _ID + "=?", new String[] { Long.toString(mInsertID) }, null, null, null, null);
                 mCursor.close();
                 mDBHelper.close();
 

@@ -68,7 +68,7 @@ public class ArticleDAO {
 
         public Article get(int id) {
                 SQLiteDatabase mDatabase = mDBHelper.getWritableDatabase();
-                Cursor mCursor = mDatabase.query(TABLE, null, _ID + " = " + id, null, null, null, null);
+                Cursor mCursor = mDatabase.query(TABLE, null, _ID + "=?", new String[] { Integer.toString(id) }, null, null, null, null);
                 Article mArticle = null;
 
                 if (mCursor.moveToFirst()) {
@@ -80,6 +80,20 @@ public class ArticleDAO {
                 return mArticle;
         }
 
+        public Article getWithGUID(String guid) {
+                SQLiteDatabase mDatabase = mDBHelper.getWritableDatabase();
+                Cursor mCursor = mDatabase.query(TABLE, null, GUID + "=?", new String[] { guid }, null, null, null);
+                Article mArticle = null;
+
+                if (mCursor.moveToFirst()) {
+                        mArticle = cursorToArticle(mCursor);
+                }
+                mCursor.close();
+                mDBHelper.close();
+
+                return mArticle;
+        }        
+        
         public long insert(Article article) {
                 SQLiteDatabase mDatabase = mDBHelper.getWritableDatabase();
                 ContentValues mValues = new ContentValues();
@@ -97,7 +111,7 @@ public class ArticleDAO {
 
                 long mInsertID = mDatabase.insert(TABLE, null, mValues);
 
-                Cursor mCursor = mDatabase.query(TABLE, null, _ID + " = " + mInsertID, null, null, null, null);
+                Cursor mCursor = mDatabase.query(TABLE, null, _ID + "=?", new String[] { Long.toString(mInsertID) }, null, null, null);
                 mCursor.close();
                 mDBHelper.close();
 

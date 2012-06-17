@@ -16,7 +16,7 @@ import de.hdodenhof.feedreader.models.Feed;
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
 public class ArticleListFragment extends ListFragment implements RSSFragment {
 
@@ -56,9 +56,9 @@ public class ArticleListFragment extends ListFragment implements RSSFragment {
                         }
                         refreshAdapter(mArticleList);
                         if (message.article != null) {
-                                mArticlesListView.setItemChecked(mCurrent, true);
                                 int mPosition = (mCurrent - 1 < 0) ? 0 : mCurrent - 1;
-                                mArticlesListView.setSelectionFromTop(mPosition, 0);                                  
+                                mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 1000);
+                                mArticlesListView.setItemChecked(mCurrent, true);
                         }
 
                         break;
@@ -84,9 +84,9 @@ public class ArticleListFragment extends ListFragment implements RSSFragment {
                         break;
                 case RSSMessage.POSITION_CHANGED:
                         if (mInitialized) {
-                                mArticlesListView.setItemChecked(message.position, true);
                                 int mPosition = (message.position - 1 < 0) ? 0 : message.position - 1;
-                                mArticlesListView.setSelectionFromTop(mPosition, 0);  
+                                mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 1000);
+                                mArticlesListView.setItemChecked(message.position, true);
                         }
                         break;
                 case RSSMessage.CHOICE_MODE_SINGLE:

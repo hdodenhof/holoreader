@@ -11,12 +11,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.misc.RSSImageGetter;
 import de.hdodenhof.feedreader.models.Article;
 
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
 public class ArticleFragment extends Fragment {
 
@@ -48,10 +49,11 @@ public class ArticleFragment extends Fragment {
                         TextView mPubDate = (TextView) mContentView.findViewById(R.id.article_pubdate);
                         CharSequence mFormattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", mArticle.getPubDate());
                         mPubDate.setText(mFormattedPubdate);
-
+                        
                         TextView mText = (TextView) mContentView.findViewById(R.id.article_text);
-                        mText.setText(Html.fromHtml(mArticle.getContent()));
+                        mText.setText(Html.fromHtml(mArticle.getContent(), new RSSImageGetter(mText, getActivity()), null));
                         mText.setMovementMethod(LinkMovementMethod.getInstance());
+
                 }
 
                 return mContentView;

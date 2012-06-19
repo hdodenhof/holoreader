@@ -2,57 +2,54 @@ package de.hdodenhof.feedreader.adapters;
 
 import java.util.List;
 
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.view.View;
-import android.widget.TextView;
+import android.support.v4.app.FragmentStatePagerAdapter;
 
 import de.hdodenhof.feedreader.fragments.ArticleFragment;
+import de.hdodenhof.feedreader.models.Article;
 
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
-public class ArticlePagerAdapter extends FragmentPagerAdapter {
+public class ArticlePagerAdapter extends FragmentStatePagerAdapter {
 
         @SuppressWarnings("unused")
-        private static final String TAG = ArticlePagerAdapter.class.getSimpleName();        
-        
-        private List<ArticleFragment> mFragments;
-        private List<String> mTitles;
+        private static final String TAG = ArticlePagerAdapter.class.getSimpleName();
 
-        public ArticlePagerAdapter(FragmentManager fm, List<ArticleFragment> fragments, List<String> titles) {
+        private List<Article> mArticles;
+
+        public ArticlePagerAdapter(FragmentManager fm, List<Article> articles) {
                 super(fm);
-                this.mFragments = fragments;
-                this.mTitles = titles;
+                this.mArticles = articles;
         }
 
         @Override
-        public ArticleFragment getItem(int position) {
-                return this.mFragments.get(position);
-        }
-        
-        @Override
-        public void destroyItem(View collection, int position, Object view) {
-            ((ViewPager) collection).removeView((TextView) view);
+        public Fragment getItem(int position) {
+                return ArticleFragment.newInstance(this.mArticles.get(position));
         }
 
         @Override
         public int getCount() {
-                return this.mFragments.size();
+                return this.mArticles.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
                 final int LENGTH = 25;
 
-                if (mTitles.get(position).length() > LENGTH) {
-                        return mTitles.get(position).substring(0, LENGTH) + "...";
+                String mTitle = mArticles.get(position).getTitle();
+                if (mTitle.length() > LENGTH) {
+                        return mTitle.substring(0, LENGTH) + "...";
                 } else {
-                        return mTitles.get(position);
+                        return mTitle;
                 }
+        }
+        
+        public Article getArticleAtPosition(int position){
+                return mArticles.get(position);
         }
 
 }

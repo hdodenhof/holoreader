@@ -1,11 +1,7 @@
 package de.hdodenhof.feedreader.fragments;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Vector;
 
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
@@ -32,7 +28,6 @@ public class ArticlePagerFragment implements RSSFragment, OnPageChangeListener {
         private FragmentActivity mContext;
         private ArticlePagerAdapter mPagerAdapter;
         private ViewPager mPager;
-        private Map<Article, Integer> mArticleMap;
 
         public ArticlePagerFragment(FragmentActivity context) {
                 this.mContext = context;
@@ -57,27 +52,21 @@ public class ArticlePagerFragment implements RSSFragment, OnPageChangeListener {
 
         private void initialisePaging(Feed feed, Article article) {
 
-                List<ArticleFragment> mArticleFragments = new Vector<ArticleFragment>();
-                List<String> mTitles = new Vector<String>();
                 List<Article> mArticles = new ArrayList<Article>();
 
                 mArticles.addAll(feed.getArticles());
 
                 int mPos = 0;
                 int mCurrent = 0;
-                mArticleMap = new HashMap<Article, Integer>();
 
                 for (Article mArticle : mArticles) {
-                        mArticleFragments.add(ArticleFragment.newInstance(mArticle));
-                        mTitles.add(mArticle.getTitle());
                         if (mArticle.getId() == article.getId()) {
                                 mCurrent = mPos;
                         }
-                        mArticleMap.put(mArticle, mPos);
                         mPos++;
                 }
 
-                mPagerAdapter = new ArticlePagerAdapter(mContext.getSupportFragmentManager(), mArticleFragments, mTitles);
+                mPagerAdapter = new ArticlePagerAdapter(mContext.getSupportFragmentManager(), mArticles);
 
                 mPager = (ViewPager) mContext.findViewById(R.id.viewpager_article);
                 mPager.setAdapter(mPagerAdapter);
@@ -92,17 +81,8 @@ public class ArticlePagerFragment implements RSSFragment, OnPageChangeListener {
         }
 
         public void onPageSelected(int position) {
-                Article mArticle = getKeyByValue(mArticleMap, position);
+                Article mArticle = mPagerAdapter.getArticleAtPosition(position);
                 ((ArticleOnPageChangeListener) mContext).onArticleChanged(mArticle, position);
-        }
-
-        private static <T, E> T getKeyByValue(Map<T, E> map, E value) {
-                for (Entry<T, E> mEntry : map.entrySet()) {
-                        if (value.equals(mEntry.getValue())) {
-                                return mEntry.getKey();
-                        }
-                }
-                return null;
         }
 
 }

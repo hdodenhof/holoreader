@@ -37,9 +37,12 @@ public class RSSFeedAdapter extends ArrayAdapter<Feed> implements RSSAdapter {
 
                 final Feed mFeed = mFeeds.get(position);
 
+                if (convertView == null) {
+                        convertView = mLayoutInflater.inflate(R.layout.listitem_feed, null);
+                }                
+                
                 if (mFeed != null) {
 
-                        convertView = mLayoutInflater.inflate(R.layout.listitem_feed, null);
                         final TextView mTitle = (TextView) convertView.findViewById(R.id.list_item_feed_title);
                         final TextView mSummary = (TextView) convertView.findViewById(R.id.list_item_feed_summary);
                         final TextView mUpdated = (TextView) convertView.findViewById(R.id.list_item_feed_updated);

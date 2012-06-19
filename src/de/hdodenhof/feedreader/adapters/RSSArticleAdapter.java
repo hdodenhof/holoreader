@@ -38,9 +38,12 @@ public class RSSArticleAdapter extends ArrayAdapter<Article> implements RSSAdapt
 
                 final Article mArticle = mArticles.get(position);
 
+                if (convertView == null) {
+                        convertView = mLayoutInflater.inflate(R.layout.listitem_article, null);
+                }
+
                 if (mArticle != null) {
 
-                        convertView = mLayoutInflater.inflate(R.layout.listitem_article, null);
                         final TextView mTitle = (TextView) convertView.findViewById(R.id.list_item_entry_title);
                         final TextView mSummary = (TextView) convertView.findViewById(R.id.list_item_entry_summary);
                         final TextView mReadState = (TextView) convertView.findViewById(R.id.list_item_entry_read);

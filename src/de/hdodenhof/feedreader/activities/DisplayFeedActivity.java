@@ -28,7 +28,7 @@ import de.hdodenhof.feedreader.models.Feed;
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
 public class DisplayFeedActivity extends FragmentActivity implements OnFragmentReadyListener, ArticleOnPageChangeListener, OnItemClickListener {
 
@@ -98,7 +98,7 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
 
                 RSSMessage mMessage = new RSSMessage();
 
-                if(fragment instanceof ArticleListFragment && mTwoPane){
+                if (fragment instanceof ArticleListFragment && mTwoPane) {
                         mMessage = new RSSMessage();
                         mMessage.type = RSSMessage.CHOICE_MODE_SINGLE;
                         fragment.handleMessage(mMessage);
@@ -165,11 +165,13 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
                         } else {
                                 ArrayList<Feed> mFeeds = new ArrayList<Feed>();
                                 mFeeds.add(mFeed);
+
+                                RSSMessage mMessage = new RSSMessage();
+                                mMessage.article = mArticle;
+                                mMessage.position = position;
+                                mMessage.type = RSSMessage.POSITION_CHANGED;
+
                                 for (RSSFragment mFragment : mFragments) {
-                                        RSSMessage mMessage = new RSSMessage();
-                                        mMessage.article = mArticle;
-                                        mMessage.position = position;
-                                        mMessage.type = RSSMessage.POSITION_CHANGED;
                                         mFragment.handleMessage(mMessage);
                                 }
                         }
@@ -187,11 +189,13 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
         public void onArticleChanged(Article article, int position) {
                 article.setRead(true);
                 mController.updateArticle(article);
+
+                RSSMessage mMessage = new RSSMessage();
+                mMessage.article = article;
+                mMessage.position = position;
+                mMessage.type = RSSMessage.POSITION_CHANGED;
+
                 for (RSSFragment mFragment : mFragments) {
-                        RSSMessage mMessage = new RSSMessage();
-                        mMessage.article = article;
-                        mMessage.position = position;
-                        mMessage.type = RSSMessage.POSITION_CHANGED;
                         mFragment.handleMessage(mMessage);
                 }
         }

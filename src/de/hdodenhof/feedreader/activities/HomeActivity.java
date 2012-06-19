@@ -34,7 +34,7 @@ import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
 public class HomeActivity extends FragmentActivity implements OnFragmentReadyListener, OnItemClickListener {
 
@@ -108,10 +108,11 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
         private void reloadFeeds() {
                 mFeeds = mController.getFeeds();
 
+                RSSMessage mMessage = new RSSMessage();
+                mMessage.type = RSSMessage.FEEDLIST_UPDATED;
+                mMessage.feeds = mFeeds;
+
                 for (RSSFragment mFragment : mFragments) {
-                        RSSMessage mMessage = new RSSMessage();
-                        mMessage.type = RSSMessage.FEEDLIST_UPDATED;
-                        mMessage.feeds = mFeeds;
                         mFragment.handleMessage(mMessage);
                 }
         }
@@ -127,10 +128,10 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
                 mMessage.feeds = mFeeds;
                 fragment.handleMessage(mMessage);
 
-                if(fragment instanceof FeedListFragment && mTwoPane){
+                if (fragment instanceof FeedListFragment && mTwoPane) {
                         mMessage = new RSSMessage();
                         mMessage.type = RSSMessage.CHOICE_MODE_SINGLE;
-                        fragment.handleMessage(mMessage);                        
+                        fragment.handleMessage(mMessage);
                 }
         }
 
@@ -210,11 +211,12 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
                                 mIntent.putExtra("feedid", mFeed.getId());
                                 startActivity(mIntent);
                         } else {
+                                RSSMessage mMessage = new RSSMessage();
+                                mMessage.type = RSSMessage.FEED_SELECTED;
+                                mMessage.feeds = mFeeds;
+                                mMessage.feed = mFeed;
+
                                 for (RSSFragment mFragment : mFragments) {
-                                        RSSMessage mMessage = new RSSMessage();
-                                        mMessage.type = RSSMessage.FEED_SELECTED;
-                                        mMessage.feeds = mFeeds;
-                                        mMessage.feed = mFeed;
                                         mFragment.handleMessage(mMessage);
                                 }
                         }

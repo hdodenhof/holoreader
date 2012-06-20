@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -13,24 +14,24 @@ import android.view.MenuItem;
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.controllers.RSSController;
 import de.hdodenhof.feedreader.fragments.ArticlePagerFragment;
-import de.hdodenhof.feedreader.fragments.RSSFragment;
 import de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener;
 import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
+import de.hdodenhof.feedreader.runnables.SendMessageRunnable;
 
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
 public class DisplayArticleActivity extends FragmentActivity implements OnFragmentReadyListener, ArticleOnPageChangeListener {
 
         @SuppressWarnings("unused")
         private static final String TAG = DisplayArticleActivity.class.getSimpleName();
 
-        private ArrayList<RSSFragment> mFragments = new ArrayList<RSSFragment>();
+        private ArrayList<Handler> mHandlers = new ArrayList<Handler>();
         private RSSController mController;
         private Feed mFeed;
         private Article mArticle;
@@ -59,8 +60,8 @@ public class DisplayArticleActivity extends FragmentActivity implements OnFragme
                         mFeed = mController.getFeed(getIntent().getIntExtra("feedid", 0));
                         mArticle = mController.getArticle(getIntent().getIntExtra("articleid", -1));
 
-                        mFragments.add(new ArticlePagerFragment(this));
-
+                        new ArticlePagerFragment(this);
+                        
                         ActionBar mActionBar = getActionBar();
                         mActionBar.setTitle(mFeed.getName());
                         mActionBar.setDisplayHomeAsUpEnabled(true);
@@ -68,10 +69,12 @@ public class DisplayArticleActivity extends FragmentActivity implements OnFragme
 
         }
 
-        /*
-         * @see de.hdodenhof.feedreader.listeners.OnFragmentReadyListener#onFragmentReady(de.hdodenhof.feedreader.fragments.RSSFragment)
+        /**
+         * @see de.hdodenhof.feedreader.listeners.OnFragmentReadyListener#onFragmentReady(android.os.Handler)
          */
-        public void onFragmentReady(RSSFragment fragment) {
+        public void onFragmentReady(Handler handler) {
+                mHandlers.add(handler);
+
                 ArrayList<Feed> mFeeds = new ArrayList<Feed>();
                 mFeeds.add(mFeed);
 
@@ -80,11 +83,13 @@ public class DisplayArticleActivity extends FragmentActivity implements OnFragme
                 mMessage.feed = mFeed;
                 mMessage.article = mArticle;
                 mMessage.type = RSSMessage.INITIALIZE;
-                fragment.handleMessage(mMessage);
+
+                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
 
         /*
-         * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+         * @see
+         * android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
          */
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
@@ -111,7 +116,8 @@ public class DisplayArticleActivity extends FragmentActivity implements OnFragme
         }
 
         /*
-         * @see de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener#onArticleChanged(de.hdodenhof.feedreader.models.Article, int)
+         * @see de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener#
+         * onArticleChanged(de.hdodenhof.feedreader.models.Article, int)
          */
         public void onArticleChanged(Article article, int position) {
                 article.setRead(true);

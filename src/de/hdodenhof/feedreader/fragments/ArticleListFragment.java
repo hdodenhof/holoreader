@@ -3,6 +3,8 @@ package de.hdodenhof.feedreader.fragments;
 import java.util.ArrayList;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.ListFragment;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
@@ -18,7 +20,7 @@ import de.hdodenhof.feedreader.models.Feed;
  * @author Henning Dodenhof
  * 
  */
-public class ArticleListFragment extends ListFragment implements RSSFragment {
+public class ArticleListFragment extends ListFragment {
 
         @SuppressWarnings("unused")
         private static final String TAG = ArticleListFragment.class.getSimpleName();
@@ -27,74 +29,81 @@ public class ArticleListFragment extends ListFragment implements RSSFragment {
         private RSSArticleAdapter mArticleAdapter;
         private boolean mInitialized = false;;
 
+        Handler mMessageHandler = new Handler() {
+                public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+
+                        RSSMessage mMessage = (RSSMessage) msg.obj;
+                        ArrayList<Article> mArticleList;
+
+                        switch (mMessage.type) {
+                        case RSSMessage.INITIALIZE:
+                                mArticleList = new ArrayList<Article>();
+
+                                int mPos = 0;
+                                int mCurrent = 0;
+
+                                for (Feed mFeed : mMessage.feeds) {
+                                        for (Article mArticle : mFeed.getArticles()) {
+                                                mArticleList.add(mArticle);
+                                                if (mMessage.article != null && mArticle.getId() == mMessage.article.getId()) {
+                                                        mCurrent = mPos;
+                                                }
+                                                mPos++;
+                                        }
+                                }
+                                refreshAdapter(mArticleList);
+                                if (mMessage.article != null) {
+                                        int mPosition = (mCurrent - 1 < 0) ? 0 : mCurrent - 1;
+                                        mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 1000);
+                                        mArticlesListView.setItemChecked(mCurrent, true);
+                                }
+
+                                break;
+                        case RSSMessage.FEEDLIST_UPDATED:
+                                mArticleList = new ArrayList<Article>();
+
+                                for (Feed mFeed : mMessage.feeds) {
+                                        for (Article mArticle : mFeed.getArticles()) {
+                                                mArticleList.add(mArticle);
+                                        }
+                                }
+
+                                refreshAdapter(mArticleList);
+                                break;
+                        case RSSMessage.FEED_SELECTED:
+                                mArticleList = new ArrayList<Article>();
+
+                                for (Article mArticle : mMessage.feed.getArticles()) {
+                                        mArticleList.add(mArticle);
+                                }
+
+                                refreshAdapter(mArticleList);
+                                break;
+                        case RSSMessage.POSITION_CHANGED:
+                                if (mInitialized) {
+                                        if (mArticlesListView.getCheckedItemPosition() != mMessage.position) {
+                                                int mPosition = (mMessage.position - 1 < 0) ? 0 : mMessage.position - 1;
+                                                mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 500);
+                                                mArticlesListView.setItemChecked(mMessage.position, true);
+                                        }
+                                }
+                                break;
+                        case RSSMessage.CHOICE_MODE_SINGLE_ARTICLE:
+                                mArticlesListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                                break;
+                        default:
+                                break;
+                        }
+                }
+        };
+
         private void refreshAdapter(ArrayList<Article> articles) {
                 mArticleAdapter.clear();
                 for (Article mArticle : articles) {
                         mArticleAdapter.add(mArticle);
                 }
                 mArticleAdapter.notifyDataSetChanged();
-        }
-
-        public void handleMessage(RSSMessage message) {
-                ArrayList<Article> mArticleList;
-
-                switch (message.type) {
-                case RSSMessage.INITIALIZE:
-                        mArticleList = new ArrayList<Article>();
-
-                        int mPos = 0;
-                        int mCurrent = 0;
-
-                        for (Feed mFeed : message.feeds) {
-                                for (Article mArticle : mFeed.getArticles()) {
-                                        mArticleList.add(mArticle);
-                                        if (message.article != null && mArticle.getId() == message.article.getId()) {
-                                                mCurrent = mPos;
-                                        }
-                                        mPos++;
-                                }
-                        }
-                        refreshAdapter(mArticleList);
-                        if (message.article != null) {
-                                int mPosition = (mCurrent - 1 < 0) ? 0 : mCurrent - 1;
-                                mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 1000);
-                                mArticlesListView.setItemChecked(mCurrent, true);
-                        }
-
-                        break;
-                case RSSMessage.FEEDLIST_UPDATED:
-                        mArticleList = new ArrayList<Article>();
-
-                        for (Feed mFeed : message.feeds) {
-                                for (Article mArticle : mFeed.getArticles()) {
-                                        mArticleList.add(mArticle);
-                                }
-                        }
-
-                        refreshAdapter(mArticleList);
-                        break;
-                case RSSMessage.FEED_SELECTED:
-                        mArticleList = new ArrayList<Article>();
-
-                        for (Article mArticle : message.feed.getArticles()) {
-                                mArticleList.add(mArticle);
-                        }
-
-                        refreshAdapter(mArticleList);
-                        break;
-                case RSSMessage.POSITION_CHANGED:
-                        if (mInitialized) {
-                                int mPosition = (message.position - 1 < 0) ? 0 : message.position - 1;
-                                mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 1000);
-                                mArticlesListView.setItemChecked(message.position, true);
-                        }
-                        break;
-                case RSSMessage.CHOICE_MODE_SINGLE:
-                        mArticlesListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-                        break;
-                default:
-                        break;
-                }
         }
 
         @Override
@@ -114,7 +123,7 @@ public class ArticleListFragment extends ListFragment implements RSSFragment {
                 mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
                 mInitialized = true;
-                ((OnFragmentReadyListener) getActivity()).onFragmentReady(this);
+                ((OnFragmentReadyListener) getActivity()).onFragmentReady(mMessageHandler);
 
         }
 

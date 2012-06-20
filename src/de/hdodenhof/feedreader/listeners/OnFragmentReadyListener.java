@@ -1,6 +1,6 @@
 package de.hdodenhof.feedreader.listeners;
 
-import de.hdodenhof.feedreader.fragments.RSSFragment;
+import android.os.Handler;
 
 /**
  * 
@@ -15,5 +15,5 @@ public interface OnFragmentReadyListener {
          * @param fragment
          *                Fragment that called
          */
-        public void onFragmentReady(RSSFragment fragment);
+        public void onFragmentReady(Handler handler);
 }

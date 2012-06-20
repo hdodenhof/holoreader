@@ -22,12 +22,11 @@ import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.adapters.RSSAdapter;
 import de.hdodenhof.feedreader.controllers.RSSController;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
-import de.hdodenhof.feedreader.fragments.FeedListFragment;
-import de.hdodenhof.feedreader.fragments.RSSFragment;
 import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
+import de.hdodenhof.feedreader.runnables.SendMessageRunnable;
 import de.hdodenhof.feedreader.tasks.AddFeedTask;
 import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
 
@@ -41,10 +40,10 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
         @SuppressWarnings("unused")
         private static final String TAG = FragmentActivity.class.getSimpleName();
 
+        private ArrayList<Handler> mHandlers = new ArrayList<Handler>();
         private boolean mTwoPane = false;
         private ProgressDialog mSpinner;
         private ProgressDialog mProgresBar;
-        private ArrayList<RSSFragment> mFragments = new ArrayList<RSSFragment>();
         private RSSController mController;
         private ArrayList<Feed> mFeeds;
 
@@ -92,11 +91,9 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
 
                 mController = new RSSController(this);
                 mFeeds = mController.getFeeds();
-                mFragments.add((FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist));
 
                 ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
                 if (mArticleListFragment != null) {
-                        mFragments.add(mArticleListFragment);
                         mTwoPane = true;
                 }
 
@@ -112,27 +109,29 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
                 mMessage.type = RSSMessage.FEEDLIST_UPDATED;
                 mMessage.feeds = mFeeds;
 
-                for (RSSFragment mFragment : mFragments) {
-                        mFragment.handleMessage(mMessage);
-                }
+                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
-
-        /*
-         * @see
-         * de.hdodenhof.feedreader.listeners.OnFragmentReadyListener#onFragmentReady
-         * (de.hdodenhof.feedreader.fragments.RSSFragment)
+        
+        /**
+         * @see de.hdodenhof.feedreader.listeners.OnFragmentReadyListener#onFragmentReady(android.os.Handler)
          */
-        public void onFragmentReady(RSSFragment fragment) {
-                RSSMessage mMessage = new RSSMessage();
+        public void onFragmentReady(Handler handler) {
+                mHandlers.add(handler);
+                RSSMessage mMessage;
+                
+                if (mTwoPane) {
+                        mMessage = new RSSMessage();
+                        mMessage.type = RSSMessage.CHOICE_MODE_SINGLE_FEED;
+                        
+                        // TODO only set CHOICE_MODE_SINGLE on feed list and not on article list
+                        new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
+                }
+
+                mMessage = new RSSMessage();
                 mMessage.type = RSSMessage.INITIALIZE;
                 mMessage.feeds = mFeeds;
-                fragment.handleMessage(mMessage);
-
-                if (fragment instanceof FeedListFragment && mTwoPane) {
-                        mMessage = new RSSMessage();
-                        mMessage.type = RSSMessage.CHOICE_MODE_SINGLE;
-                        fragment.handleMessage(mMessage);
-                }
+                
+                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
 
         /**
@@ -216,9 +215,7 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
                                 mMessage.feeds = mFeeds;
                                 mMessage.feed = mFeed;
 
-                                for (RSSFragment mFragment : mFragments) {
-                                        mFragment.handleMessage(mMessage);
-                                }
+                                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
                         }
                         break;
 

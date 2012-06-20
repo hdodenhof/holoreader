@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,14 +17,13 @@ import android.widget.AdapterView.OnItemClickListener;
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.adapters.RSSAdapter;
 import de.hdodenhof.feedreader.controllers.RSSController;
-import de.hdodenhof.feedreader.fragments.ArticleListFragment;
 import de.hdodenhof.feedreader.fragments.ArticlePagerFragment;
-import de.hdodenhof.feedreader.fragments.RSSFragment;
 import de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener;
 import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
+import de.hdodenhof.feedreader.runnables.SendMessageRunnable;
 
 /**
  * 
@@ -35,8 +35,8 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
         @SuppressWarnings("unused")
         private static final String TAG = DisplayFeedActivity.class.getSimpleName();
 
+        private ArrayList<Handler> mHandlers = new ArrayList<Handler>();
         private boolean mTwoPane = false;
-        private ArrayList<RSSFragment> mFragments = new ArrayList<RSSFragment>();
         private RSSController mController;
         private Feed mFeed;
         private Article mArticle;
@@ -62,7 +62,6 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
 
                         mController = new RSSController(this);
 
-                        mFragments.add((ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist));
                         mFeed = mController.getFeed(getIntent().getIntExtra("feedid", 0));
 
                         if (findViewById(R.id.viewpager_article) != null) {
@@ -77,9 +76,9 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
                                 mArticle = mController.getArticle(getIntent().getIntExtra("articleid", -1));
 
                                 if (mTwoPane) {
-                                        mFragments.add(new ArticlePagerFragment(this));
-                                }
-
+                                        new ArticlePagerFragment(this);
+                                }                                
+                                
                                 ActionBar mActionBar = getActionBar();
                                 mActionBar.setTitle(mFeed.getName());
                                 mActionBar.setDisplayHomeAsUpEnabled(true);
@@ -89,19 +88,20 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
         }
 
         /**
-         * @see de.hdodenhof.feedreader.listeners.OnFragmentReadyListener#onFragmentReady
-         *      (de.hdodenhof.feedreader.fragments.RSSFragment)
+         * @see de.hdodenhof.feedreader.listeners.OnFragmentReadyListener#onFragmentReady(android.os.Handler)
          */
-        public void onFragmentReady(RSSFragment fragment) {
+        public void onFragmentReady(Handler handler) {
+                mHandlers.add(handler);
+
                 ArrayList<Feed> mFeeds = new ArrayList<Feed>();
                 mFeeds.add(mFeed);
 
-                RSSMessage mMessage = new RSSMessage();
+                RSSMessage mMessage;
 
-                if (fragment instanceof ArticleListFragment && mTwoPane) {
+                if (mTwoPane) {
                         mMessage = new RSSMessage();
-                        mMessage.type = RSSMessage.CHOICE_MODE_SINGLE;
-                        fragment.handleMessage(mMessage);
+                        mMessage.type = RSSMessage.CHOICE_MODE_SINGLE_ARTICLE;
+                        new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
                 }
 
                 mMessage = new RSSMessage();
@@ -113,7 +113,7 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
                 }
 
                 mMessage.type = RSSMessage.INITIALIZE;
-                fragment.handleMessage(mMessage);
+                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
 
         /**
@@ -171,9 +171,7 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
                                 mMessage.position = position;
                                 mMessage.type = RSSMessage.POSITION_CHANGED;
 
-                                for (RSSFragment mFragment : mFragments) {
-                                        mFragment.handleMessage(mMessage);
-                                }
+                                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
                         }
                         break;
                 default:
@@ -187,16 +185,29 @@ public class DisplayFeedActivity extends FragmentActivity implements OnFragmentR
          *      int)
          */
         public void onArticleChanged(Article article, int position) {
-                article.setRead(true);
-                mController.updateArticle(article);
-
                 RSSMessage mMessage = new RSSMessage();
                 mMessage.article = article;
                 mMessage.position = position;
                 mMessage.type = RSSMessage.POSITION_CHANGED;
 
-                for (RSSFragment mFragment : mFragments) {
-                        mFragment.handleMessage(mMessage);
+                new Thread(new MarkReadRunnable(article)).start();
+                new Thread(new SendMessageRunnable(mHandlers, mMessage, 200)).start();
+        }
+
+        /**
+         * 
+         */
+        private class MarkReadRunnable implements Runnable {
+                private Article mArticle;
+
+                public MarkReadRunnable(Article article) {
+                        this.mArticle = article;
+                }
+
+                public void run() {
+                        mArticle.setRead(true);
+                        mController.updateArticle(mArticle);
                 }
         }
+
 }

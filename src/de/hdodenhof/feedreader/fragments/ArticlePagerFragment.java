@@ -3,6 +3,8 @@ package de.hdodenhof.feedreader.fragments;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -20,7 +22,7 @@ import de.hdodenhof.feedreader.models.Feed;
  * @author Henning Dodenhof
  *
  */
-public class ArticlePagerFragment implements RSSFragment, OnPageChangeListener {
+public class ArticlePagerFragment implements OnPageChangeListener {
 
         @SuppressWarnings("unused")
         private static final String TAG = ArticlePagerFragment.class.getSimpleName();        
@@ -29,25 +31,31 @@ public class ArticlePagerFragment implements RSSFragment, OnPageChangeListener {
         private ArticlePagerAdapter mPagerAdapter;
         private ViewPager mPager;
 
+        Handler mMessageHandler = new Handler() {
+                public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+                        
+                        RSSMessage mMessage = (RSSMessage) msg.obj;
+                        
+                        switch (mMessage.type) {
+                        case RSSMessage.INITIALIZE:
+                                initialisePaging(mMessage.feed, mMessage.article);
+                                break;                        
+                        case RSSMessage.POSITION_CHANGED:
+                                if (mPager.getCurrentItem() != mMessage.position) {
+                                        mPager.setCurrentItem(mMessage.position);
+                                }
+                                break;   
+                        default:
+                                break;
+                        }
+                }
+        };  
+        
         public ArticlePagerFragment(FragmentActivity context) {
                 this.mContext = context;
 
-                ((OnFragmentReadyListener) mContext).onFragmentReady(this);
-        }
-
-        public void handleMessage(RSSMessage message) {
-                switch (message.type) {
-                case RSSMessage.INITIALIZE:
-                        initialisePaging(message.feed, message.article);
-                        break;
-                case RSSMessage.POSITION_CHANGED:
-                        if (mPager.getCurrentItem() != message.position) {
-                                mPager.setCurrentItem(message.position);
-                        }
-                        break;
-                default:
-                        break;
-                }
+                ((OnFragmentReadyListener) mContext).onFragmentReady(mMessageHandler);
         }
 
         private void initialisePaging(Feed feed, Article article) {

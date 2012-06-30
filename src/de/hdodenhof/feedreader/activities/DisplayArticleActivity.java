@@ -15,7 +15,7 @@ import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.controllers.RSSController;
 import de.hdodenhof.feedreader.fragments.ArticlePagerFragment;
 import de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener;
-import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
+import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
@@ -26,7 +26,7 @@ import de.hdodenhof.feedreader.runnables.SendMessageRunnable;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayArticleActivity extends FragmentActivity implements OnFragmentReadyListener, ArticleOnPageChangeListener {
+public class DisplayArticleActivity extends FragmentActivity implements FragmentCallback, ArticleOnPageChangeListener {
 
         @SuppressWarnings("unused")
         private static final String TAG = DisplayArticleActivity.class.getSimpleName();
@@ -70,7 +70,7 @@ public class DisplayArticleActivity extends FragmentActivity implements OnFragme
         }
 
         /**
-         * @see de.hdodenhof.feedreader.listeners.OnFragmentReadyListener#onFragmentReady(android.os.Handler)
+         * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.os.Handler)
          */
         public void onFragmentReady(Handler handler) {
                 mHandlers.add(handler);
@@ -86,6 +86,13 @@ public class DisplayArticleActivity extends FragmentActivity implements OnFragme
 
                 new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
+        
+        /**
+         * @see de.hdodenhof.feedreader.misc.FragmentCallback#isDualPane()
+         */
+        public boolean isDualPane() {
+                return false;
+        }    
 
         /*
          * @see

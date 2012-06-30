@@ -10,7 +10,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import de.hdodenhof.feedreader.adapters.RSSArticleAdapter;
-import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
+import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
@@ -123,7 +123,7 @@ public class ArticleListFragment extends ListFragment {
                 mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
                 mInitialized = true;
-                ((OnFragmentReadyListener) getActivity()).onFragmentReady(mMessageHandler);
+                ((FragmentCallback) getActivity()).onFragmentReady(mMessageHandler);
 
         }
 

@@ -3,6 +3,12 @@ package de.hdodenhof.feedreader.tasks;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.select.Elements;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -17,13 +23,13 @@ import de.hdodenhof.feedreader.models.Feed;
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
 public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
 
         @SuppressWarnings("unused")
-        private static final String TAG = RefreshFeedsTask.class.getSimpleName();               
-        
+        private static final String TAG = RefreshFeedsTask.class.getSimpleName();
+
         private Handler mMainUIHandler;
         private Context mContext;
 
@@ -50,12 +56,22 @@ public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
 
                                 for (Article mArticle : mArticles) {
                                         mArticle.setFeedId(mFeed.getId());
+
+                                        Document mDocument = Jsoup.parse(mArticle.getContent());
+                                        Elements mIframes = mDocument.getElementsByTag("iframe");
+                                        
+                                        TextNode mPlaceholder = new TextNode("(video removed)", null);
+                                        for (Element mIframe : mIframes) {
+                                                mIframe.replaceWith(mPlaceholder);
+                                        }
+                                        
+                                        mArticle.setContent(mDocument.html());
                                 }
                                 mController.createOrUpdateArticles(mArticles);
-                                
+
                                 mFeed.setUpdated(new Date());
                                 mController.updateFeed(mFeed);
-                                
+
                                 publishProgress(n);
                         }
 

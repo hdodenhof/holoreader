@@ -12,7 +12,7 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.adapters.ArticlePagerAdapter;
 import de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener;
-import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
+import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
@@ -55,7 +55,7 @@ public class ArticlePagerFragment implements OnPageChangeListener {
         public ArticlePagerFragment(FragmentActivity context) {
                 this.mContext = context;
 
-                ((OnFragmentReadyListener) mContext).onFragmentReady(mMessageHandler);
+                ((FragmentCallback) mContext).onFragmentReady(mMessageHandler);
         }
 
         private void initialisePaging(Feed feed, Article article) {

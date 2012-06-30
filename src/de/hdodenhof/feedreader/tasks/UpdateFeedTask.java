@@ -2,6 +2,11 @@ package de.hdodenhof.feedreader.tasks;
 
 import java.util.ArrayList;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
@@ -46,6 +51,16 @@ public class UpdateFeedTask extends AsyncTask<Feed, Void, Void> {
                         mController.deleteArticles(mFeed.getId());
                         for (Article mArticle : mArticles) {
                                 mArticle.setFeedId(mFeed.getId());
+                                
+                                Document doc = Jsoup.parse(mArticle.getContent());
+                                Elements ifrms = doc.getElementsByTag("iframe");
+                                ifrms.remove();
+
+                                Elements imgs = doc.getElementsByTag("img");
+                                for (Element img : imgs) {
+                                        img.removeAttr("width");
+                                        img.removeAttr("height");
+                                }                                
                         }
                         mController.createOrUpdateArticles(mArticles);
 

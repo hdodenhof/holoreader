@@ -22,7 +22,7 @@ import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.adapters.RSSAdapter;
 import de.hdodenhof.feedreader.controllers.RSSController;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
-import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
+import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
@@ -35,7 +35,7 @@ import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
  * @author Henning Dodenhof
  * 
  */
-public class HomeActivity extends FragmentActivity implements OnFragmentReadyListener, OnItemClickListener {
+public class HomeActivity extends FragmentActivity implements FragmentCallback, OnItemClickListener {
 
         @SuppressWarnings("unused")
         private static final String TAG = FragmentActivity.class.getSimpleName();
@@ -113,7 +113,7 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
         }
         
         /**
-         * @see de.hdodenhof.feedreader.listeners.OnFragmentReadyListener#onFragmentReady(android.os.Handler)
+         * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.os.Handler)
          */
         public void onFragmentReady(Handler handler) {
                 mHandlers.add(handler);
@@ -133,6 +133,13 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
                 
                 new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
+        
+        /**
+         * @see de.hdodenhof.feedreader.misc.FragmentCallback#isDualPane()
+         */
+        public boolean isDualPane() {
+                return mTwoPane;
+        } 
 
         /**
          * Starts an AsyncTask to fetch a new feed and add it to the database
@@ -261,5 +268,4 @@ public class HomeActivity extends FragmentActivity implements OnFragmentReadyLis
                         return super.onOptionsItemSelected(item);
                 }
         }
-
 }

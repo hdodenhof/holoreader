@@ -39,7 +39,7 @@
                 android:layout_marginBottom="10dip"
                 android:textAppearance="?android:attr/textAppearanceSmall" />
 
-            <TextView
+            <WebView
                 android:id="@+id/article_text"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />

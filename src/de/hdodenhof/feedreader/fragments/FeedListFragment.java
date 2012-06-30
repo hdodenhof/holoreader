@@ -11,7 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import de.hdodenhof.feedreader.adapters.RSSFeedAdapter;
-import de.hdodenhof.feedreader.listeners.OnFragmentReadyListener;
+import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.misc.RSSMessage;
 import de.hdodenhof.feedreader.models.Feed;
 
@@ -66,7 +66,7 @@ public class FeedListFragment extends ListFragment  {
 
                 mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
                 
-                ((OnFragmentReadyListener) getActivity()).onFragmentReady(mMessageHandler);
+                ((FragmentCallback) getActivity()).onFragmentReady(mMessageHandler);
 
         }
 }

@@ -89,7 +89,7 @@ public class RSSController {
 
                         } else {
                                 mArticleDAO.insert(article);
-                                downloadImages(article);
+//                                downloadImages(article);
                         }
                 }
         }

@@ -15,13 +15,13 @@ import de.hdodenhof.feedreader.daos.FeedDAO;
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
 public class SQLiteHelper extends SQLiteOpenHelper {
 
         @SuppressWarnings("unused")
         private static final String TAG = SQLiteHelper.class.getSimpleName();
-        
+
         private static final String DATABASE_NAME = "feedreader";
         private static final int DATABASE_VERSION = 5;
 
@@ -34,7 +34,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
         private static final String mDummydata[][] = { { "t3n News", "http://t3n.de/news/feed" },
                         { "Gründerszene.de - Infos für Gründer, Unternehmer, StartUps | Gründerszene", "http://www.gruenderszene.de/feed/" },
-                        { "netzpolitik.org", "http://netzpolitik.org/feed" }, { "Android Developers Blog", "http://android-developers.blogspot.com/atom.xml" } };
+                        { "netzpolitik.org", "http://netzpolitik.org/feed" }, { "Android Developers Blog", "http://android-developers.blogspot.com/atom.xml" },
+                        { "mobiFlip.de", "http://feeds.feedburner.com/mobiFlip" } };
 
         public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
@@ -77,7 +78,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 }
 
         }
-        
+
         public static int fromBoolean(boolean bool) {
                 if (bool == true) {
                         return 1;

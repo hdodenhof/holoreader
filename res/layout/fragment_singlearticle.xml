@@ -1,49 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/article_scrollview"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_height="wrap_content"
     android:background="#FFFFFF"
-    android:orientation="vertical" >
+    android:fillViewport="true"
+    android:scrollbars="vertical" >
 
-    <ScrollView
-        android:id="@+id/SCROLLER_ID"
+    <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:fillViewport="true"
-        android:scrollbars="vertical" >
+        android:layout_margin="5dip"
+        android:orientation="vertical" >
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/article_header"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_margin="5dip"
-            android:orientation="vertical" >
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textStyle="bold" />
 
-            <TextView
-                android:id="@+id/article_header"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dip"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textStyle="bold" />
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_marginTop="5dip"
+            android:background="#000000" />
 
-            <View
-                android:layout_width="fill_parent"
-                android:layout_height="1dip"
-                android:layout_marginTop="5dip"
-                android:background="#000000" />
+        <TextView
+            android:id="@+id/article_pubdate"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dip"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
-            <TextView
-                android:id="@+id/article_pubdate"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dip"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
+        <WebView
+            android:id="@+id/article_text"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 
-            <WebView
-                android:id="@+id/article_text"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-    </ScrollView>
-
-</LinearLayout>
+</ScrollView>

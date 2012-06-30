@@ -1,5 +1,6 @@
 package de.hdodenhof.feedreader.fragments;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import android.os.Bundle;
@@ -27,76 +28,102 @@ public class ArticleListFragment extends ListFragment {
 
         private ListView mArticlesListView;
         private RSSArticleAdapter mArticleAdapter;
-        private boolean mInitialized = false;;
+        private boolean mInitialized = false;
 
-        Handler mMessageHandler = new Handler() {
+        Handler mMessageHandler = new MyHandler(this);
+
+        private static class MyHandler extends Handler {
+                private final WeakReference<ArticleListFragment> mTargetReference;
+
+                MyHandler(ArticleListFragment target) {
+                        mTargetReference = new WeakReference<ArticleListFragment>(target);
+                }
+
                 public void handleMessage(Message msg) {
                         super.handleMessage(msg);
+                        ArticleListFragment mTarget = mTargetReference.get();
 
                         RSSMessage mMessage = (RSSMessage) msg.obj;
-                        ArrayList<Article> mArticleList;
-
                         switch (mMessage.type) {
                         case RSSMessage.INITIALIZE:
-                                mArticleList = new ArrayList<Article>();
-
-                                int mPos = 0;
-                                int mCurrent = 0;
-
-                                for (Feed mFeed : mMessage.feeds) {
-                                        for (Article mArticle : mFeed.getArticles()) {
-                                                mArticleList.add(mArticle);
-                                                if (mMessage.article != null && mArticle.getId() == mMessage.article.getId()) {
-                                                        mCurrent = mPos;
-                                                }
-                                                mPos++;
-                                        }
-                                }
-                                refreshAdapter(mArticleList);
-                                if (mMessage.article != null) {
-                                        int mPosition = (mCurrent - 1 < 0) ? 0 : mCurrent - 1;
-                                        mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 1000);
-                                        mArticlesListView.setItemChecked(mCurrent, true);
-                                }
-
+                                mTarget.initialize(mMessage.feeds, mMessage.article);
                                 break;
                         case RSSMessage.FEEDLIST_UPDATED:
-                                mArticleList = new ArrayList<Article>();
-
-                                for (Feed mFeed : mMessage.feeds) {
-                                        for (Article mArticle : mFeed.getArticles()) {
-                                                mArticleList.add(mArticle);
-                                        }
-                                }
-
-                                refreshAdapter(mArticleList);
+                                mTarget.updateFeedlist(mMessage.feeds);
                                 break;
                         case RSSMessage.FEED_SELECTED:
-                                mArticleList = new ArrayList<Article>();
-
-                                for (Article mArticle : mMessage.feed.getArticles()) {
-                                        mArticleList.add(mArticle);
-                                }
-
-                                refreshAdapter(mArticleList);
+                                mTarget.selectFeed(mMessage.feed);
                                 break;
                         case RSSMessage.POSITION_CHANGED:
-                                if (mInitialized) {
-                                        if (mArticlesListView.getCheckedItemPosition() != mMessage.position) {
-                                                int mPosition = (mMessage.position - 1 < 0) ? 0 : mMessage.position - 1;
-                                                mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 500);
-                                                mArticlesListView.setItemChecked(mMessage.position, true);
-                                        }
-                                }
+                                mTarget.changePosition(mMessage.position);
                                 break;
                         case RSSMessage.CHOICE_MODE_SINGLE_ARTICLE:
-                                mArticlesListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+                                mTarget.setChoiceModeSingle();
                                 break;
                         default:
                                 break;
                         }
                 }
-        };
+        }
+
+        private void initialize(ArrayList<Feed> feeds, Article article) {
+                ArrayList<Article> mArticleList = new ArrayList<Article>();
+
+                int mPos = 0;
+                int mCurrent = 0;
+
+                for (Feed mFeed : feeds) {
+                        for (Article mArticle : mFeed.getArticles()) {
+                                mArticleList.add(mArticle);
+                                if (article != null && mArticle.getId() == article.getId()) {
+                                        mCurrent = mPos;
+                                }
+                                mPos++;
+                        }
+                }
+                refreshAdapter(mArticleList);
+                if (article != null) {
+                        int mPosition = (mCurrent - 1 < 0) ? 0 : mCurrent - 1;
+                        mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 1000);
+                        mArticlesListView.setItemChecked(mCurrent, true);
+                }
+        }
+
+        private void updateFeedlist(ArrayList<Feed> feeds) {
+                ArrayList<Article> mArticleList = new ArrayList<Article>();
+
+                for (Feed mFeed : feeds) {
+                        for (Article mArticle : mFeed.getArticles()) {
+                                mArticleList.add(mArticle);
+                        }
+                }
+
+                refreshAdapter(mArticleList);
+        }
+
+        private void selectFeed(Feed feed) {
+                ArrayList<Article> mArticleList = new ArrayList<Article>();
+
+                for (Article mArticle : feed.getArticles()) {
+                        mArticleList.add(mArticle);
+                }
+
+                refreshAdapter(mArticleList);
+        }
+
+        private void changePosition(int position) {
+                if (mInitialized) {
+                        if (mArticlesListView.getCheckedItemPosition() != position) {
+                                int mPosition = (position - 1 < 0) ? 0 : position - 1;
+                                mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 500);
+                                mArticlesListView.setItemChecked(position, true);
+                        }
+                }
+        }
+
+        private void setChoiceModeSingle() {
+                mArticlesListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
 
         private void refreshAdapter(ArrayList<Article> articles) {
                 mArticleAdapter.clear();

@@ -1,5 +1,6 @@
 package de.hdodenhof.feedreader.fragments;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import android.os.Bundle;
@@ -18,38 +19,54 @@ import de.hdodenhof.feedreader.models.Feed;
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
-public class FeedListFragment extends ListFragment  {
+public class FeedListFragment extends ListFragment {
 
         @SuppressWarnings("unused")
         private static final String TAG = FeedListFragment.class.getSimpleName();
-        
+
         private ListView mFeedsListView;
         private ArrayAdapter<Feed> mFeedAdapter;
 
-        Handler mMessageHandler = new Handler() {
+        Handler mMessageHandler = new MyHandler(this);
+
+        private static class MyHandler extends Handler {
+                private final WeakReference<FeedListFragment> mTargetReference;
+
+                MyHandler(FeedListFragment target) {
+                        mTargetReference = new WeakReference<FeedListFragment>(target);
+                }
+
                 public void handleMessage(Message msg) {
                         super.handleMessage(msg);
-                        
+                        FeedListFragment mTarget = mTargetReference.get();
+
                         RSSMessage mMessage = (RSSMessage) msg.obj;
-                        
                         switch (mMessage.type) {
                         case RSSMessage.INITIALIZE:
                         case RSSMessage.FEEDLIST_UPDATED:
-                                mFeedAdapter.clear();
-                                mFeedAdapter.addAll(mMessage.feeds);
-                                mFeedAdapter.notifyDataSetChanged();                        
-                                break;                        
+                                mTarget.updateFeedlist(mMessage.feeds);
+                                break;
                         case RSSMessage.CHOICE_MODE_SINGLE_FEED:
-                                mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-                                break;                        
+                                mTarget.setChoiceModeSingle();
+                                break;
                         default:
                                 break;
                         }
                 }
-        };         
-        
+        }
+
+        private void updateFeedlist(ArrayList<Feed> feeds) {
+                mFeedAdapter.clear();
+                mFeedAdapter.addAll(feeds);
+                mFeedAdapter.notifyDataSetChanged();
+        }
+
+        private void setChoiceModeSingle() {
+                mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
+
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
                 super.onActivityCreated(savedInstanceState);
@@ -65,7 +82,7 @@ public class FeedListFragment extends ListFragment  {
                 mFeedsListView = getListView();
 
                 mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
-                
+
                 ((FragmentCallback) getActivity()).onFragmentReady(mMessageHandler);
 
         }

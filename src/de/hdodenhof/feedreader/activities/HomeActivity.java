@@ -1,5 +1,6 @@
 package de.hdodenhof.feedreader.activities;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
@@ -50,31 +51,70 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         /**
          * Handles messages from AsyncTasks started within this activity
          */
-        Handler mAsyncHandler = new Handler() {
+        Handler mAsyncHandler = new AsynHandler(this);
+
+        private static class AsynHandler extends Handler {
+                private final WeakReference<HomeActivity> mTargetReference;
+
+                AsynHandler(HomeActivity target) {
+                        mTargetReference = new WeakReference<HomeActivity>(target);
+                }
+
                 public void handleMessage(Message msg) {
                         super.handleMessage(msg);
+                        HomeActivity mTarget = mTargetReference.get();
+
                         switch (msg.what) {
                         case 1:
                                 // added feed
-                                reloadFeeds();
-                                mSpinner.dismiss();
+                                mTarget.feedAdded();
                                 break;
                         case 2:
                                 // updated single feed
-                                mSpinner.dismiss();
+                                mTarget.feedUpdated();
                                 break;
                         case 3:
                                 // refreshed feeds
-                                reloadFeeds();
-                                mProgresBar.dismiss();
+                                mTarget.feedsRefreshed();
                         case 9:
                                 // refresh progress bar
-                                mProgresBar.setProgress(msg.arg1);
+                                mTarget.updateProgress(msg.arg1);
                         default:
                                 break;
                         }
                 }
         };
+
+        /**
+         * Update feedlist and dismiss spinner after new feed has been added
+         */
+        private void feedAdded() {
+                reloadFeeds();
+                mSpinner.dismiss();
+        }
+
+        /**
+         * Dismiss spinner after feed has been updated
+         */
+        private void feedUpdated() {
+                mSpinner.dismiss();
+        }
+
+        /**
+         * Update feedlist and dismiss progress bar after feeds have been
+         * refreshed
+         */
+        private void feedsRefreshed() {
+                reloadFeeds();
+                mProgresBar.dismiss();
+        }
+
+        /**
+         * Update progress bar during feeds refresh
+         */
+        private void updateProgress(int progress) {
+                mProgresBar.setProgress(progress);
+        }
 
         /**
          * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -111,35 +151,36 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
                 new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
-        
+
         /**
          * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.os.Handler)
          */
         public void onFragmentReady(Handler handler) {
                 mHandlers.add(handler);
                 RSSMessage mMessage;
-                
+
                 if (mTwoPane) {
                         mMessage = new RSSMessage();
                         mMessage.type = RSSMessage.CHOICE_MODE_SINGLE_FEED;
-                        
-                        // TODO only set CHOICE_MODE_SINGLE on feed list and not on article list
+
+                        // TODO only set CHOICE_MODE_SINGLE on feed list and not
+                        // on article list
                         new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
                 }
 
                 mMessage = new RSSMessage();
                 mMessage.type = RSSMessage.INITIALIZE;
                 mMessage.feeds = mFeeds;
-                
+
                 new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
-        
+
         /**
          * @see de.hdodenhof.feedreader.misc.FragmentCallback#isDualPane()
          */
         public boolean isDualPane() {
                 return mTwoPane;
-        } 
+        }
 
         /**
          * Starts an AsyncTask to fetch a new feed and add it to the database

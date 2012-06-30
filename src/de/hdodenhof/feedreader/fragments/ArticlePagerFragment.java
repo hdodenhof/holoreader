@@ -1,8 +1,10 @@
 package de.hdodenhof.feedreader.fragments;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.FragmentActivity;
@@ -20,46 +22,48 @@ import de.hdodenhof.feedreader.models.Feed;
 /**
  * 
  * @author Henning Dodenhof
- *
+ * 
  */
+
+@SuppressLint("ValidFragment")
 public class ArticlePagerFragment implements OnPageChangeListener {
 
         @SuppressWarnings("unused")
-        private static final String TAG = ArticlePagerFragment.class.getSimpleName();        
-        
+        private static final String TAG = ArticlePagerFragment.class.getSimpleName();
+
         private FragmentActivity mContext;
         private ArticlePagerAdapter mPagerAdapter;
         private ViewPager mPager;
 
-        Handler mMessageHandler = new Handler() {
+        Handler mMessageHandler = new MyHandler(this);
+
+        private static class MyHandler extends Handler {
+                private final WeakReference<ArticlePagerFragment> mTargetReference;
+
+                MyHandler(ArticlePagerFragment target) {
+                        mTargetReference = new WeakReference<ArticlePagerFragment>(target);
+                }
+
                 public void handleMessage(Message msg) {
                         super.handleMessage(msg);
-                        
+                        ArticlePagerFragment mTarget = mTargetReference.get();
+
                         RSSMessage mMessage = (RSSMessage) msg.obj;
-                        
+
                         switch (mMessage.type) {
                         case RSSMessage.INITIALIZE:
-                                initialisePaging(mMessage.feed, mMessage.article);
-                                break;                        
+                                mTarget.initialize(mMessage.feed, mMessage.article);
+                                break;
                         case RSSMessage.POSITION_CHANGED:
-                                if (mPager.getCurrentItem() != mMessage.position) {
-                                        mPager.setCurrentItem(mMessage.position);
-                                }
-                                break;   
+                                mTarget.changePosition(mMessage.position);
+                                break;
                         default:
                                 break;
                         }
                 }
-        };  
-        
-        public ArticlePagerFragment(FragmentActivity context) {
-                this.mContext = context;
-
-                ((FragmentCallback) mContext).onFragmentReady(mMessageHandler);
         }
 
-        private void initialisePaging(Feed feed, Article article) {
-
+        private void initialize(Feed feed, Article article) {
                 List<Article> mArticles = new ArrayList<Article>();
 
                 mArticles.addAll(feed.getArticles());
@@ -80,6 +84,18 @@ public class ArticlePagerFragment implements OnPageChangeListener {
                 mPager.setAdapter(mPagerAdapter);
                 mPager.setOnPageChangeListener(this);
                 mPager.setCurrentItem(mCurrent);
+        }
+
+        private void changePosition(int position) {
+                if (mPager.getCurrentItem() != position) {
+                        mPager.setCurrentItem(position);
+                }
+        }
+        
+        public ArticlePagerFragment(FragmentActivity context) {
+                this.mContext = context;
+
+                ((FragmentCallback) mContext).onFragmentReady(mMessageHandler);
         }
 
         public void onPageScrollStateChanged(int state) {

@@ -86,7 +86,7 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         };
 
         /**
-         * Update feedlist and dismiss spinner after new feed has been added
+         * Update feed list and dismiss spinner after new feed has been added
          */
         private void feedAdded() {
                 reloadFeeds();
@@ -101,7 +101,7 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         }
 
         /**
-         * Update feedlist and dismiss progress bar after feeds have been
+         * Update feed list and dismiss progress bar after feeds have been
          * refreshed
          */
         private void feedsRefreshed() {

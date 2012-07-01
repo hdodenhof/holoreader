@@ -2,8 +2,6 @@ package de.hdodenhof.feedreader.adapters;
 
 import java.util.ArrayList;
 
-import org.jsoup.Jsoup;
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,11 +50,7 @@ public class RSSArticleAdapter extends ArrayAdapter<Article> implements RSSAdapt
                                 mTitle.setText(mArticle.getTitle());
                         }
                         if (mSummary != null) {
-                                if (mArticle.getSummary() != null) {
-                                        mSummary.setText(mArticle.getSummary());
-                                } else {
-                                        mSummary.setText(Jsoup.parse(mArticle.getContent()).text());
-                                }
+                                mSummary.setText(mArticle.getSummary());
                         }
                         if (mReadState != null) {
                                 mReadState.setText(readState(mArticle.isRead()));

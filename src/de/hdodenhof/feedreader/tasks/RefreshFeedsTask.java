@@ -30,6 +30,8 @@ public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
         @SuppressWarnings("unused")
         private static final String TAG = RefreshFeedsTask.class.getSimpleName();
 
+        private static final int SUMMARY_MAXLENGTH = 250;
+        
         private Handler mMainUIHandler;
         private Context mContext;
 
@@ -59,13 +61,23 @@ public class RefreshFeedsTask extends AsyncTask<Void, Integer, Void> {
 
                                         Document mDocument = Jsoup.parse(mArticle.getContent());
                                         Elements mIframes = mDocument.getElementsByTag("iframe");
-                                        
+
                                         TextNode mPlaceholder = new TextNode("(video removed)", null);
                                         for (Element mIframe : mIframes) {
                                                 mIframe.replaceWith(mPlaceholder);
                                         }
-                                        
+
                                         mArticle.setContent(mDocument.html());
+
+                                        if (mArticle.getSummary() == null) {
+                                                String mSummary = mDocument.text();
+                                                if (mSummary.length() > SUMMARY_MAXLENGTH) {
+                                                        mArticle.setSummary(mSummary.substring(0, SUMMARY_MAXLENGTH));
+                                                } else {
+                                                        mArticle.setSummary(mSummary);
+                                                }
+                                        }
+
                                 }
                                 mController.createOrUpdateArticles(mArticles);
 

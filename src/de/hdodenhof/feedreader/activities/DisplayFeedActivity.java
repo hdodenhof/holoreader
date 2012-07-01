@@ -66,6 +66,7 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
 
                         if (findViewById(R.id.viewpager_article) != null) {
                                 mTwoPane = true;
+
                         }
 
                         if (mTwoPane && !getIntent().hasExtra("articleid")) {
@@ -73,9 +74,8 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
                                 mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                 startActivity(mIntent);
                         } else {
-                                mArticle = mController.getArticle(getIntent().getIntExtra("articleid", -1));
-
                                 if (mTwoPane) {
+                                        mArticle = mController.getArticle(getIntent().getIntExtra("articleid", 0));
                                         new ArticlePagerFragment(this);
                                 }                                
                                 
@@ -83,7 +83,6 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
                                 mActionBar.setTitle(mFeed.getName());
                                 mActionBar.setDisplayHomeAsUpEnabled(true);
                         }
-
                 }
         }
 

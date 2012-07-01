@@ -2,8 +2,6 @@ package de.hdodenhof.feedreader.fragments;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -49,28 +47,25 @@ public class ArticleFragment extends Fragment {
                 View mContentView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
 
                 if (mArticle != null) {
-                        int mViewWidth; 
-                        
+                        int mViewWidth;
+
                         Display display = getActivity().getWindowManager().getDefaultDisplay();
                         DisplayMetrics displayMetrics = new DisplayMetrics();
-                        display.getMetrics(displayMetrics);                        
-                        
-                        if (((FragmentCallback) getActivity()).isDualPane()){
+                        display.getMetrics(displayMetrics);
+
+                        if (((FragmentCallback) getActivity()).isDualPane()) {
                                 // TODO Remove fixed value
-                                mViewWidth = (int) Math.round(displayMetrics.widthPixels*0.75);
+                                mViewWidth = (int) Math.round(displayMetrics.widthPixels * 0.75);
                         } else {
                                 mViewWidth = displayMetrics.widthPixels;
-                        }  
-                        
+                        }
+
                         // TODO Remove fixed value
-                        int mContentWidth = Math.round((mViewWidth-40) / displayMetrics.density);
-                        
+                        int mContentWidth = Math.round((mViewWidth - 40) / displayMetrics.density);
+
                         Document doc = Jsoup.parse(mArticle.getContent());
-                        Elements imgs = doc.getElementsByTag("img");
-                        for (Element img : imgs) {
-                                img.attr("style", "max-width:" + String.valueOf(mContentWidth) + "; height:auto;");
-                        }                        
-                        
+                        doc.head().append("<style type=\"text/css\">img { max-width: " + String.valueOf(mContentWidth) + "; height: auto}</style>");
+
                         TextView mHeader = (TextView) mContentView.findViewById(R.id.article_header);
                         mHeader.setText(mArticle.getTitle());
 
@@ -80,6 +75,8 @@ public class ArticleFragment extends Fragment {
 
                         WebView mText = (WebView) mContentView.findViewById(R.id.article_text);
                         mText.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);
+
+                        mContentView.scrollTo(0, 0);
                 }
 
                 return mContentView;

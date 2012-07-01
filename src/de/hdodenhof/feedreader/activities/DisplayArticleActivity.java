@@ -61,7 +61,7 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
                         mArticle = mController.getArticle(getIntent().getIntExtra("articleid", -1));
 
                         new ArticlePagerFragment(this);
-                        
+
                         ActionBar mActionBar = getActionBar();
                         mActionBar.setTitle(mFeed.getName());
                         mActionBar.setDisplayHomeAsUpEnabled(true);
@@ -86,17 +86,16 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
 
                 new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
-        
+
         /**
          * @see de.hdodenhof.feedreader.misc.FragmentCallback#isDualPane()
          */
         public boolean isDualPane() {
                 return false;
-        }    
+        }
 
-        /*
-         * @see
-         * android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+        /**
+         * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
          */
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
@@ -112,7 +111,7 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
                 }
         }
 
-        /*
+        /**
          * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
          */
         @Override
@@ -122,7 +121,7 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
                 return true;
         }
 
-        /*
+        /**
          * @see de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener#
          * onArticleChanged(de.hdodenhof.feedreader.models.Article, int)
          */

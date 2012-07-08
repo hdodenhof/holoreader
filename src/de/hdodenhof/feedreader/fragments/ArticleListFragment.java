@@ -29,7 +29,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
 
         @SuppressWarnings("unused")
         private static final String TAG = ArticleListFragment.class.getSimpleName();
-        private static final int LOADER = 10;
+        private static final int LOADER = 20;
 
         private ListView mArticlesListView;
         private RSSArticleAdapter mArticleAdapter;

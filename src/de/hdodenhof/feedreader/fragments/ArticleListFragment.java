@@ -29,6 +29,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
 
         @SuppressWarnings("unused")
         private static final String TAG = ArticleListFragment.class.getSimpleName();
+        private static final int LOADER = 10;
 
         private ListView mArticlesListView;
         private RSSArticleAdapter mArticleAdapter;
@@ -38,13 +39,13 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         private boolean mScrollTop = false;
 
         public void updateFeedlist(ArrayList<Feed> feeds) {
-                getLoaderManager().restartLoader(0, null, this);
+                getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
         }
 
         public void selectFeed(int feedID) {
                 mCursorFilter = "feed/" + String.valueOf(feedID);
                 mScrollTop = true;
-                getLoaderManager().restartLoader(0, null, this);
+                getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
         }
 
         public void changePosition(int position) {
@@ -62,7 +63,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         }
         
         public void refreshList() {
-                getLoaderManager().restartLoader(0, null, this);
+                getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
         }
 
         @Override
@@ -80,7 +81,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
                 String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
                 int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_summary, R.id.list_item_entry_read };
 
-                getLoaderManager().initLoader(0, null, this);
+                getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
                 mArticleAdapter = new RSSArticleAdapter(getActivity(), R.layout.listitem_article, null, uiBindFrom, uiBindTo,
                                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);

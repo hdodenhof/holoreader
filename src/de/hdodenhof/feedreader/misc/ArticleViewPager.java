@@ -28,6 +28,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
         @SuppressWarnings("unused")
         private static final String TAG = ArticleViewPager.class.getSimpleName();
+        private static final int LOADER = 30;  
 
         private FragmentActivity mContext;
         private ArticlePagerAdapter mPagerAdapter;
@@ -48,7 +49,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
                 int mArticleID = mContext.getIntent().getIntExtra("articleid", 0);
                 mFeedID = queryFeedID(mArticleID);
 
-                mContext.getSupportLoaderManager().initLoader(0, null, this);
+                mContext.getSupportLoaderManager().initLoader(LOADER, null, this);
 
                 mPagerAdapter = new ArticlePagerAdapter(mContext.getSupportFragmentManager(), mProjection, null);
 

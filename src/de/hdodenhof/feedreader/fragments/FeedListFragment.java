@@ -26,6 +26,7 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
 
         @SuppressWarnings("unused")
         private static final String TAG = FeedListFragment.class.getSimpleName();
+        private static final int LOADER = 10;  
 
         private ListView mFeedsListView;
         private SimpleCursorAdapter mFeedAdapter;
@@ -41,7 +42,7 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
                 String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
                 int[] uiBindTo = { R.id.list_item_feed_title, R.id.list_item_feed_summary, R.id.list_item_feed_updated, R.id.list_item_feed_unread };
 
-                getLoaderManager().initLoader(0, null, this);
+                getActivity().getSupportLoaderManager().initLoader(0, null, this);
 
                 mFeedAdapter = new RSSFeedAdapter(getActivity(), R.layout.listitem_feed, null, uiBindFrom, uiBindTo,
                                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
@@ -61,7 +62,7 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
         }
 
         public void refreshList() {
-                getLoaderManager().restartLoader(0, null, this);
+                getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
         }
 
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {

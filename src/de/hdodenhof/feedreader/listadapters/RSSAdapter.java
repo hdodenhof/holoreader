@@ -1,4 +1,4 @@
-package de.hdodenhof.feedreader.adapters;
+package de.hdodenhof.feedreader.listadapters;
 
 /**
  * 

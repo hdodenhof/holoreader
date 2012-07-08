@@ -1,4 +1,4 @@
-package de.hdodenhof.feedreader.handlers;
+package de.hdodenhof.feedreader.saxhandlers;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

@@ -15,6 +15,8 @@ import android.webkit.WebView;
 import android.widget.TextView;
 
 import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.models.Article;
 
@@ -30,6 +32,11 @@ public class ArticleFragment extends Fragment {
 
         private Article mArticle;
 
+        public static ArticleFragment newInstance(){
+                ArticleFragment mArticleFragmentInstance = new ArticleFragment();
+                return mArticleFragmentInstance;
+        }
+        
         public static ArticleFragment newInstance(Article article) {
                 ArticleFragment mArticleFragmentInstance = new ArticleFragment();
                 mArticleFragmentInstance.mArticle = article;
@@ -40,12 +47,23 @@ public class ArticleFragment extends Fragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
+                
+                Bundle args = getArguments();
+                String title = args.getString(ArticleDAO.TITLE);
+                String content = args.getString(ArticleDAO.CONTENT);
+                String pubdate= args.getString(ArticleDAO.PUBDATE);
+                
+                mArticle = new Article();
+                mArticle.setTitle(title);
+                mArticle.setContent(content);
+                mArticle.setPubDate(SQLiteHelper.toDate(pubdate));
+                
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
                 View mContentView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
-
+                
                 if (mArticle != null) {
                         int mViewWidth;
 

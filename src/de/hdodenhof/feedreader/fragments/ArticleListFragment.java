@@ -1,27 +1,31 @@
 package de.hdodenhof.feedreader.fragments;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-import de.hdodenhof.feedreader.adapters.RSSArticleAdapter;
+import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
+import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.misc.RSSMessage;
-import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.models.Feed;
+import de.hdodenhof.feedreader.providers.RSSContentProvider;
 
 /**
  * 
  * @author Henning Dodenhof
  * 
  */
-public class ArticleListFragment extends ListFragment {
+public class ArticleListFragment extends ListFragment implements LoaderCallbacks<Cursor> {
 
         @SuppressWarnings("unused")
         private static final String TAG = ArticleListFragment.class.getSimpleName();
@@ -30,88 +34,20 @@ public class ArticleListFragment extends ListFragment {
         private RSSArticleAdapter mArticleAdapter;
         private boolean mInitialized = false;
 
-        Handler mMessageHandler = new MyHandler(this);
+        private String mCursorFilter;
+        private boolean mScrollTop = false;
 
-        private static class MyHandler extends Handler {
-                private final WeakReference<ArticleListFragment> mTargetReference;
-
-                MyHandler(ArticleListFragment target) {
-                        mTargetReference = new WeakReference<ArticleListFragment>(target);
-                }
-
-                public void handleMessage(Message msg) {
-                        super.handleMessage(msg);
-                        ArticleListFragment mTarget = mTargetReference.get();
-
-                        RSSMessage mMessage = (RSSMessage) msg.obj;
-                        switch (mMessage.type) {
-                        case RSSMessage.INITIALIZE:
-                                mTarget.initialize(mMessage.feeds, mMessage.article);
-                                break;
-                        case RSSMessage.FEEDLIST_UPDATED:
-                                mTarget.updateFeedlist(mMessage.feeds);
-                                break;
-                        case RSSMessage.FEED_SELECTED:
-                                mTarget.selectFeed(mMessage.feed);
-                                break;
-                        case RSSMessage.POSITION_CHANGED:
-                                mTarget.changePosition(mMessage.position);
-                                break;
-                        case RSSMessage.CHOICE_MODE_SINGLE_ARTICLE:
-                                mTarget.setChoiceModeSingle();
-                                break;
-                        default:
-                                break;
-                        }
-                }
+        public void updateFeedlist(ArrayList<Feed> feeds) {
+                getLoaderManager().restartLoader(0, null, this);
         }
 
-        private void initialize(ArrayList<Feed> feeds, Article article) {
-                ArrayList<Article> mArticleList = new ArrayList<Article>();
-
-                int mPos = 0;
-                int mCurrent = 0;
-
-                for (Feed mFeed : feeds) {
-                        for (Article mArticle : mFeed.getArticles()) {
-                                mArticleList.add(mArticle);
-                                if (article != null && mArticle.getId() == article.getId()) {
-                                        mCurrent = mPos;
-                                }
-                                mPos++;
-                        }
-                }
-                refreshAdapter(mArticleList);
-                if (article != null) {
-                        int mPosition = (mCurrent - 1 < 0) ? 0 : mCurrent - 1;
-                        mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 1000);
-                        mArticlesListView.setItemChecked(mCurrent, true);
-                }
+        public void selectFeed(int feedID) {
+                mCursorFilter = "feed/" + String.valueOf(feedID);
+                mScrollTop = true;
+                getLoaderManager().restartLoader(0, null, this);
         }
 
-        private void updateFeedlist(ArrayList<Feed> feeds) {
-                ArrayList<Article> mArticleList = new ArrayList<Article>();
-
-                for (Feed mFeed : feeds) {
-                        for (Article mArticle : mFeed.getArticles()) {
-                                mArticleList.add(mArticle);
-                        }
-                }
-
-                refreshAdapter(mArticleList);
-        }
-
-        private void selectFeed(Feed feed) {
-                ArrayList<Article> mArticleList = new ArrayList<Article>();
-
-                for (Article mArticle : feed.getArticles()) {
-                        mArticleList.add(mArticle);
-                }
-
-                refreshAdapter(mArticleList);
-        }
-
-        private void changePosition(int position) {
+        public void changePosition(int position) {
                 if (mInitialized) {
                         if (mArticlesListView.getCheckedItemPosition() != position) {
                                 int mPosition = (position - 1 < 0) ? 0 : position - 1;
@@ -121,16 +57,12 @@ public class ArticleListFragment extends ListFragment {
                 }
         }
 
-        private void setChoiceModeSingle() {
+        public void setChoiceModeSingle() {
                 mArticlesListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         }
-
-        private void refreshAdapter(ArrayList<Article> articles) {
-                mArticleAdapter.clear();
-                for (Article mArticle : articles) {
-                        mArticleAdapter.add(mArticle);
-                }
-                mArticleAdapter.notifyDataSetChanged();
+        
+        public void refreshList() {
+                getLoaderManager().restartLoader(0, null, this);
         }
 
         @Override
@@ -140,8 +72,18 @@ public class ArticleListFragment extends ListFragment {
                 if (savedInstanceState != null) {
 
                 }
+                
+                if(getActivity().getIntent().hasExtra("feedid")){
+                        mCursorFilter = "feed/" + getActivity().getIntent().getIntExtra("feedid", 0);
+                }
 
-                mArticleAdapter = new RSSArticleAdapter(getActivity(), new ArrayList<Article>());
+                String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
+                int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_summary, R.id.list_item_entry_read };
+
+                getLoaderManager().initLoader(0, null, this);
+
+                mArticleAdapter = new RSSArticleAdapter(getActivity(), R.layout.listitem_article, null, uiBindFrom, uiBindTo,
+                                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
                 this.setEmptyText("No articles");
                 this.setListAdapter(mArticleAdapter);
@@ -150,8 +92,32 @@ public class ArticleListFragment extends ListFragment {
                 mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
                 mInitialized = true;
-                ((FragmentCallback) getActivity()).onFragmentReady(mMessageHandler);
+                ((FragmentCallback) getActivity()).onFragmentReady(this);
 
         }
 
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                Uri mBaseUri;
+                if (mCursorFilter != null) {
+                        mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, mCursorFilter);
+                } else {
+                        mBaseUri = RSSContentProvider.URI_ARTICLES;
+                }
+
+                String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
+                CursorLoader mCursorLoader = new CursorLoader(getActivity(), mBaseUri, mProjection, null, null, null);
+                return mCursorLoader;
+        }
+
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                mArticleAdapter.swapCursor(data);
+                if (mScrollTop) {
+                        mArticlesListView.scrollTo(0, 0);
+                        mScrollTop = false;
+                }
+        }
+
+        public void onLoaderReset(Loader<Cursor> loader) {
+                mArticleAdapter.swapCursor(null);
+        }
 }

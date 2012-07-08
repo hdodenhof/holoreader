@@ -1,71 +1,34 @@
 package de.hdodenhof.feedreader.fragments;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-
+import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v4.app.ListFragment;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import de.hdodenhof.feedreader.adapters.RSSFeedAdapter;
+import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
+import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.misc.RSSMessage;
-import de.hdodenhof.feedreader.models.Feed;
+import de.hdodenhof.feedreader.providers.RSSContentProvider;
 
 /**
  * 
  * @author Henning Dodenhof
  * 
  */
-public class FeedListFragment extends ListFragment {
+public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cursor> {
 
         @SuppressWarnings("unused")
         private static final String TAG = FeedListFragment.class.getSimpleName();
 
         private ListView mFeedsListView;
-        private ArrayAdapter<Feed> mFeedAdapter;
-
-        Handler mMessageHandler = new MyHandler(this);
-
-        private static class MyHandler extends Handler {
-                private final WeakReference<FeedListFragment> mTargetReference;
-
-                MyHandler(FeedListFragment target) {
-                        mTargetReference = new WeakReference<FeedListFragment>(target);
-                }
-
-                public void handleMessage(Message msg) {
-                        super.handleMessage(msg);
-                        FeedListFragment mTarget = mTargetReference.get();
-
-                        RSSMessage mMessage = (RSSMessage) msg.obj;
-                        switch (mMessage.type) {
-                        case RSSMessage.INITIALIZE:
-                        case RSSMessage.FEEDLIST_UPDATED:
-                                mTarget.updateFeedlist(mMessage.feeds);
-                                break;
-                        case RSSMessage.CHOICE_MODE_SINGLE_FEED:
-                                mTarget.setChoiceModeSingle();
-                                break;
-                        default:
-                                break;
-                        }
-                }
-        }
-
-        private void updateFeedlist(ArrayList<Feed> feeds) {
-                mFeedAdapter.clear();
-                mFeedAdapter.addAll(feeds);
-                mFeedAdapter.notifyDataSetChanged();
-        }
-
-        private void setChoiceModeSingle() {
-                mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
-        }
+        private SimpleCursorAdapter mFeedAdapter;
 
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
@@ -75,7 +38,13 @@ public class FeedListFragment extends ListFragment {
 
                 }
 
-                mFeedAdapter = new RSSFeedAdapter(getActivity(), new ArrayList<Feed>());
+                String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
+                int[] uiBindTo = { R.id.list_item_feed_title, R.id.list_item_feed_summary, R.id.list_item_feed_updated, R.id.list_item_feed_unread };
+
+                getLoaderManager().initLoader(0, null, this);
+
+                mFeedAdapter = new RSSFeedAdapter(getActivity(), R.layout.listitem_feed, null, uiBindFrom, uiBindTo,
+                                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
                 this.setEmptyText("No feeds");
                 this.setListAdapter(mFeedAdapter);
@@ -83,7 +52,30 @@ public class FeedListFragment extends ListFragment {
 
                 mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
-                ((FragmentCallback) getActivity()).onFragmentReady(mMessageHandler);
+                ((FragmentCallback) getActivity()).onFragmentReady(this);
 
         }
+
+        public void setChoiceModeSingle() {
+                mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
+
+        public void refreshList() {
+                getLoaderManager().restartLoader(0, null, this);
+        }
+
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                String[] mProjection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
+                CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, null, null, null);
+                return mCursorLoader;
+        }
+
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+                mFeedAdapter.swapCursor(data);
+        }
+
+        public void onLoaderReset(Loader<Cursor> loader) {
+                mFeedAdapter.swapCursor(null);
+        }
+
 }

@@ -1,6 +1,5 @@
-package de.hdodenhof.feedreader.listeners;
+package de.hdodenhof.feedreader.misc;
 
-import de.hdodenhof.feedreader.models.Article;
 
 /**
  * 
@@ -18,5 +17,5 @@ public interface ArticleOnPageChangeListener {
          *                Position of the article within a list
          * 
          */
-        public void onArticleChanged(Article article, int position);
+        public void onArticleChanged(int position);
 }

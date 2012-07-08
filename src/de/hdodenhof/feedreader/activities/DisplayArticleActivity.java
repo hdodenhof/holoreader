@@ -1,25 +1,23 @@
 package de.hdodenhof.feedreader.activities;
 
-import java.util.ArrayList;
-
 import android.app.ActionBar;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.controllers.RSSController;
-import de.hdodenhof.feedreader.fragments.ArticlePagerFragment;
-import de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
+import de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener;
+import de.hdodenhof.feedreader.misc.ArticleViewPager;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.misc.RSSMessage;
-import de.hdodenhof.feedreader.models.Article;
-import de.hdodenhof.feedreader.models.Feed;
-import de.hdodenhof.feedreader.runnables.SendMessageRunnable;
+import de.hdodenhof.feedreader.providers.RSSContentProvider;
 
 /**
  * 
@@ -30,11 +28,9 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
 
         @SuppressWarnings("unused")
         private static final String TAG = DisplayArticleActivity.class.getSimpleName();
-
-        private ArrayList<Handler> mHandlers = new ArrayList<Handler>();
-        private RSSController mController;
-        private Feed mFeed;
-        private Article mArticle;
+        
+        private int mArticleID;
+        private int mFeedID;
 
         /**
          * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -47,44 +43,63 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
 
                 }
 
-                if (!getIntent().hasExtra("feedid") || !getIntent().hasExtra("articleid")) {
+                setContentView(R.layout.activity_article);
+
+                if (!getIntent().hasExtra("articleid")) {
                         Intent mIntent = new Intent(this, HomeActivity.class);
                         mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(mIntent);
                 } else {
-
-                        setContentView(R.layout.activity_article);
-
-                        mController = new RSSController(this);
-
-                        mFeed = mController.getFeed(getIntent().getIntExtra("feedid", 0));
-                        mArticle = mController.getArticle(getIntent().getIntExtra("articleid", -1));
-
-                        new ArticlePagerFragment(this);
-
-                        ActionBar mActionBar = getActionBar();
-                        mActionBar.setTitle(mFeed.getName());
-                        mActionBar.setDisplayHomeAsUpEnabled(true);
+                        mArticleID = getIntent().getIntExtra("articleid", 0);
+                        mFeedID = queryFeedID(mArticleID);
                 }
+
+                new ArticleViewPager(this);
+
+                ActionBar mActionBar = getActionBar();
+                mActionBar.setTitle(queryFeedName(mFeedID));
+                mActionBar.setDisplayHomeAsUpEnabled(true);
 
         }
 
         /**
-         * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.os.Handler)
+         * 
+         * @param feedID
+         * @return
          */
-        public void onFragmentReady(Handler handler) {
-                mHandlers.add(handler);
+        private String queryFeedName(int feedID) {
+                Uri mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_FEEDS, String.valueOf(feedID));
+                String[] mProjection = { FeedDAO._ID, FeedDAO.NAME };
 
-                ArrayList<Feed> mFeeds = new ArrayList<Feed>();
-                mFeeds.add(mFeed);
+                Cursor mCursor = getContentResolver().query(mBaseUri, mProjection, null, null, null);
+                mCursor.moveToFirst();
+                String mFeedName = mCursor.getString(mCursor.getColumnIndex(FeedDAO.NAME));
+                mCursor.close();
 
-                RSSMessage mMessage = new RSSMessage();
-                mMessage.feeds = mFeeds;
-                mMessage.feed = mFeed;
-                mMessage.article = mArticle;
-                mMessage.type = RSSMessage.INITIALIZE;
+                return mFeedName;
+        }
 
-                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
+        /**
+         * 
+         * @param articleID
+         * @return
+         */
+        private int queryFeedID(int articleID) {
+                Uri mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, String.valueOf(articleID));
+                String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID };
+
+                Cursor mCursor = getContentResolver().query(mBaseUri, mProjection, null, null, null);
+                mCursor.moveToFirst();
+                int mFeedID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO.FEEDID));
+                mCursor.close();
+
+                return mFeedID;
+        }
+
+        /**
+         * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.support.v4.app.Fragment)
+         */
+        public void onFragmentReady(Fragment fragment) {
         }
 
         /**
@@ -103,7 +118,7 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
                 case android.R.id.home:
                         Intent mIntent = new Intent(this, DisplayFeedActivity.class);
                         mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        mIntent.putExtra("feedid", mFeed.getId());
+                        mIntent.putExtra("feedid", mFeedID);
                         startActivity(mIntent);
                         return true;
                 default:
@@ -122,12 +137,10 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
         }
 
         /**
-         * @see de.hdodenhof.feedreader.listeners.ArticleOnPageChangeListener#
-         * onArticleChanged(de.hdodenhof.feedreader.models.Article, int)
+         * @see de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener# onArticleChanged(int)
          */
-        public void onArticleChanged(Article article, int position) {
-                article.setRead(true);
-                mController.updateArticle(article);
+        public void onArticleChanged(int position) {
+             // TODO: mark read
         }
 
 }

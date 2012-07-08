@@ -2,15 +2,18 @@ package de.hdodenhof.feedreader.tasks;
 
 import java.util.Date;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 
-import de.hdodenhof.feedreader.controllers.RSSController;
-import de.hdodenhof.feedreader.handlers.FeedHandler;
 import de.hdodenhof.feedreader.helpers.SAXHelper;
-import de.hdodenhof.feedreader.models.Feed;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
+import de.hdodenhof.feedreader.providers.RSSContentProvider;
+import de.hdodenhof.feedreader.saxhandlers.FeedHandler;
 
 /**
  * 
@@ -24,26 +27,29 @@ public class AddFeedTask extends AsyncTask<String, Void, Void> {
         
         private Handler mMainUIHandler;
         private Context mContext;
-        private Feed mFeed;
 
         public AddFeedTask(Handler mainUIHandler, Context context) {
                 this.mMainUIHandler = mainUIHandler;
                 this.mContext = context;
-                this.mFeed = new Feed();
         }
 
         protected Void doInBackground(String... params) {
 
-                mFeed.setUrl(params[0]);
-                RSSController mController = new RSSController(mContext);
+                String mURL = params[0];
 
                 try {
-                        SAXHelper mSAXHelper = new SAXHelper(mFeed.getUrl(), new FeedHandler());
+                        SAXHelper mSAXHelper = new SAXHelper(mURL, new FeedHandler());
                         String mName = (String) mSAXHelper.parse();
-
-                        mFeed.setName(mName);
-                        mFeed.setUpdated(new Date());
-                        mController.addFeed(mFeed);
+                        
+                        ContentResolver mContentResolver = mContext.getContentResolver();
+                        ContentValues mContentValues = new ContentValues();
+                        
+                        mContentValues.put(FeedDAO.NAME, mName);
+                        mContentValues.put(FeedDAO.URL, mURL);
+                        mContentValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
+                        mContentValues.put(FeedDAO.UNREAD, 0);
+                        
+                        mContentResolver.insert(RSSContentProvider.URI_FEEDS, mContentValues);
 
                 } catch (Exception e) {
                         e.printStackTrace();

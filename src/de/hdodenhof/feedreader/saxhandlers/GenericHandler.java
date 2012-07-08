@@ -1,4 +1,4 @@
-package de.hdodenhof.feedreader.handlers;
+package de.hdodenhof.feedreader.saxhandlers;
 
 /**
  * 

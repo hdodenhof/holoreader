@@ -9,9 +9,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import de.hdodenhof.feedreader.daos.ArticleDAO;
-import de.hdodenhof.feedreader.daos.FeedDAO;
-
 /**
  * 
  * @author Henning Dodenhof
@@ -23,10 +20,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         private static final String TAG = SQLiteHelper.class.getSimpleName();
 
         private static final String DATABASE_NAME = "feedreader";
-        private static final int DATABASE_VERSION = 5;
+        private static final int DATABASE_VERSION = 6;
 
         private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
-                        + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT, " + FeedDAO.UPDATED + " TEXT);";
+                        + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT, " + FeedDAO.UPDATED + " TEXT, " + FeedDAO.UNREAD + " TEXT);";
 
         private static final String ARTICLE_TABLE_CREATE = "CREATE TABLE " + ArticleDAO.TABLE + " (" + ArticleDAO._ID + " integer primary key autoincrement, "
                         + ArticleDAO.FEEDID + " integer , " + ArticleDAO.GUID + " TEXT , " + ArticleDAO.PUBDATE + " TEXT , " + ArticleDAO.TITLE + " TEXT , "
@@ -49,12 +46,13 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 database.execSQL(ARTICLE_TABLE_CREATE);
 
                 for (String[] mData : mDummydata) {
-                        ContentValues mValues = new ContentValues();
-                        mValues.put(FeedDAO.NAME, mData[0]);
-                        mValues.put(FeedDAO.URL, mData[1]);
-                        mValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
-
-                        database.insert(FeedDAO.TABLE, null, mValues);
+                        ContentValues mContentValues = new ContentValues();
+                        mContentValues.put(FeedDAO.NAME, mData[0]);
+                        mContentValues.put(FeedDAO.URL, mData[1]);
+                        mContentValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
+                        mContentValues.put(FeedDAO.UNREAD, 0);
+                        
+                        database.insert(FeedDAO.TABLE, null, mContentValues);
                 }
         }
 
@@ -63,6 +61,31 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 db.execSQL("DROP TABLE IF EXISTS " + FeedDAO.TABLE);
                 db.execSQL("DROP TABLE IF EXISTS " + ArticleDAO.TABLE);
                 onCreate(db);
+        }
+        
+        public class FeedDAO {
+
+                public static final String TABLE = "feeds";
+                public static final String _ID = "_id";
+                public static final String NAME = "name";
+                public static final String URL = "url";
+                public static final String UPDATED = "updated";
+                public static final String UNREAD = "unread";
+
+        }
+
+        public class ArticleDAO {
+
+                public static final String TABLE = "articles";
+                public static final String _ID = "_id";
+                public static final String FEEDID = "feedid";
+                public static final String GUID = "guid";
+                public static final String PUBDATE = "pubdate";
+                public static final String TITLE = "title";
+                public static final String SUMMARY = "summary";
+                public static final String CONTENT = "content";
+                public static final String READ = "read";
+
         }
 
         public static String fromDate(Date date) {

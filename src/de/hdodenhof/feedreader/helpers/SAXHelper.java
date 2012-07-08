@@ -12,7 +12,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.hdodenhof.feedreader.handlers.GenericHandler;
+import de.hdodenhof.feedreader.saxhandlers.GenericHandler;
 
 /**
  * 

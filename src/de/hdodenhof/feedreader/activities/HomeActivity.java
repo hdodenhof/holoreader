@@ -1,15 +1,16 @@
 package de.hdodenhof.feedreader.activities;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,14 +21,15 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 
 import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.adapters.RSSAdapter;
-import de.hdodenhof.feedreader.controllers.RSSController;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
+import de.hdodenhof.feedreader.fragments.FeedListFragment;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
+import de.hdodenhof.feedreader.listadapters.RSSAdapter;
+import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
+import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.misc.RSSMessage;
-import de.hdodenhof.feedreader.models.Article;
-import de.hdodenhof.feedreader.models.Feed;
-import de.hdodenhof.feedreader.runnables.SendMessageRunnable;
+import de.hdodenhof.feedreader.providers.RSSContentProvider;
 import de.hdodenhof.feedreader.tasks.AddFeedTask;
 import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
 
@@ -41,12 +43,11 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         @SuppressWarnings("unused")
         private static final String TAG = FragmentActivity.class.getSimpleName();
 
-        private ArrayList<Handler> mHandlers = new ArrayList<Handler>();
         private boolean mTwoPane = false;
         private ProgressDialog mSpinner;
         private ProgressDialog mProgresBar;
-        private RSSController mController;
-        private ArrayList<Feed> mFeeds;
+        private ArticleListFragment mArticleListFragment;
+        private FeedListFragment mFeedListFragment;
 
         /**
          * Handles messages from AsyncTasks started within this activity
@@ -67,18 +68,16 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                         switch (msg.what) {
                         case 1:
                                 // added feed
-                                mTarget.feedAdded();
-                                break;
-                        case 2:
-                                // updated single feed
-                                mTarget.feedUpdated();
+                                mTarget.callbackFeedAdded();
                                 break;
                         case 3:
                                 // refreshed feeds
-                                mTarget.feedsRefreshed();
+                                mTarget.callbackFeedsRefreshed();
+                                break;
                         case 9:
                                 // refresh progress bar
-                                mTarget.updateProgress(msg.arg1);
+                                mTarget.callbackUpdateProgress(msg.arg1);
+                                break;
                         default:
                                 break;
                         }
@@ -88,31 +87,31 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         /**
          * Update feed list and dismiss spinner after new feed has been added
          */
-        private void feedAdded() {
-                reloadFeeds();
+        private void callbackFeedAdded() {
+             // TODO refresh seems unnecessary
+                mFeedListFragment.refreshList();
+                if (mTwoPane){
+                        mArticleListFragment.refreshList();
+                }
                 mSpinner.dismiss();
         }
 
         /**
-         * Dismiss spinner after feed has been updated
+         * Update feed list and dismiss progress bar after feeds have been refreshed
          */
-        private void feedUpdated() {
-                mSpinner.dismiss();
-        }
-
-        /**
-         * Update feed list and dismiss progress bar after feeds have been
-         * refreshed
-         */
-        private void feedsRefreshed() {
-                reloadFeeds();
+        private void callbackFeedsRefreshed() {
+                // TODO refresh seems unnecessary
+                mFeedListFragment.refreshList();
+                if (mTwoPane){
+                        mArticleListFragment.refreshList();
+                }
                 mProgresBar.dismiss();
         }
 
         /**
          * Update progress bar during feeds refresh
          */
-        private void updateProgress(int progress) {
+        private void callbackUpdateProgress(int progress) {
                 mProgresBar.setProgress(progress);
         }
 
@@ -129,10 +128,8 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
                 setContentView(R.layout.activity_home);
 
-                mController = new RSSController(this);
-                mFeeds = mController.getFeeds();
-
-                ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
+                mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
+                mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
                 if (mArticleListFragment != null) {
                         mTwoPane = true;
                 }
@@ -140,39 +137,12 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         }
 
         /**
-         * Reloads all feeds from the database and sends them to all fragments
+         * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.support.v4.app.Fragment)
          */
-        private void reloadFeeds() {
-                mFeeds = mController.getFeeds();
-
-                RSSMessage mMessage = new RSSMessage();
-                mMessage.type = RSSMessage.FEEDLIST_UPDATED;
-                mMessage.feeds = mFeeds;
-
-                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
-        }
-
-        /**
-         * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.os.Handler)
-         */
-        public void onFragmentReady(Handler handler) {
-                mHandlers.add(handler);
-                RSSMessage mMessage;
-
-                if (mTwoPane) {
-                        mMessage = new RSSMessage();
-                        mMessage.type = RSSMessage.CHOICE_MODE_SINGLE_FEED;
-
-                        // TODO only set CHOICE_MODE_SINGLE on feed list and not
-                        // on article list
-                        new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
+        public void onFragmentReady(Fragment fragment) {
+                if (mTwoPane && fragment instanceof FeedListFragment) {
+                        ((FeedListFragment) fragment).setChoiceModeSingle();
                 }
-
-                mMessage = new RSSMessage();
-                mMessage.type = RSSMessage.INITIALIZE;
-                mMessage.feeds = mFeeds;
-
-                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
         }
 
         /**
@@ -198,16 +168,28 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
          * Starts an AsyncTask to refresh all feeds currently in the database
          */
         private void refreshFeeds() {
+                
+                
                 mProgresBar = new ProgressDialog(this);
                 mProgresBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
                 mProgresBar.setMessage("Loading...");
                 mProgresBar.setCancelable(false);
                 mProgresBar.setProgress(0);
-                mProgresBar.setMax(mFeeds.size());
+                mProgresBar.setMax(queryFeedCount());
                 mProgresBar.show();
 
                 RefreshFeedsTask mRefreshFeedsTask = new RefreshFeedsTask(mAsyncHandler, this);
                 mRefreshFeedsTask.execute();
+        }
+        
+        private int queryFeedCount(){
+                String[] mProjection = { FeedDAO._ID };
+
+                Cursor mCursor = getContentResolver().query(RSSContentProvider.URI_FEEDS, mProjection, null, null, null);
+                int mCount = mCursor.getCount();
+                mCursor.close();
+
+                return mCount;                
         }
 
         /**
@@ -239,48 +221,46 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         }
 
         /**
-         * Updates all fragments or launches a new activity (depending on the
-         * activities current layout) whenever a feed or article in one of the
-         * fragments has been clicked on
+         * Updates all fragments or launches a new activity (depending on the activities current layout) whenever a feed or article in one of the fragments has
+         * been clicked on
          * 
-         * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView,
-         *      android.view.View, int, long)
+         * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
          */
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                RSSAdapter adapter = (RSSAdapter) parent.getAdapter();
+                RSSAdapter mAdapter = (RSSAdapter) parent.getAdapter();
+                Cursor mCursor;
+                int mFeedID;
 
-                switch (adapter.getType()) {
+                switch (mAdapter.getType()) {
                 case RSSAdapter.TYPE_FEED:
-                        Feed mFeed = (Feed) parent.getItemAtPosition(position);
+                        mCursor = ((RSSFeedAdapter) mAdapter).getCursor();
+                        mCursor.moveToPosition(position);
+                        mFeedID = mCursor.getInt(mCursor.getColumnIndex(FeedDAO._ID));
 
-                        if (!mTwoPane) {
-                                Intent mIntent = new Intent(this, DisplayFeedActivity.class);
-                                mIntent.putExtra("feedid", mFeed.getId());
-                                startActivity(mIntent);
+                        if (mTwoPane) {
+                                mArticleListFragment.selectFeed(mFeedID);
                         } else {
-                                RSSMessage mMessage = new RSSMessage();
-                                mMessage.type = RSSMessage.FEED_SELECTED;
-                                mMessage.feeds = mFeeds;
-                                mMessage.feed = mFeed;
-
-                                new Thread(new SendMessageRunnable(mHandlers, mMessage, 0)).start();
+                                Intent mIntent = new Intent(this, DisplayFeedActivity.class);
+                                mIntent.putExtra("feedid", mFeedID);
+                                startActivity(mIntent);
                         }
                         break;
 
                 case RSSAdapter.TYPE_ARTICLE:
-                        Article mArticle = (Article) parent.getItemAtPosition(position);
+                        mCursor = ((RSSArticleAdapter) mAdapter).getCursor();
+                        mCursor.moveToPosition(position);
+                        int mArticleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
+                        mFeedID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO.FEEDID));
 
                         Intent mIntent = new Intent(this, DisplayFeedActivity.class);
-                        mIntent.putExtra("articleid", mArticle.getId());
-                        mIntent.putExtra("feedid", mArticle.getFeedId());
+                        mIntent.putExtra("articleid", mArticleID);
+                        mIntent.putExtra("feedid", mFeedID);
                         startActivity(mIntent);
-
                         break;
 
                 default:
                         break;
                 }
-
         }
 
         /**

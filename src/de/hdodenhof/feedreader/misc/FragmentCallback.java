@@ -1,6 +1,7 @@
 package de.hdodenhof.feedreader.misc;
 
-import android.os.Handler;
+import android.support.v4.app.Fragment;
+
 
 /**
  * 
@@ -10,12 +11,12 @@ import android.os.Handler;
 public interface FragmentCallback {
         /**
          * Is called from within an RSSFragment's onViewCreated method and
-         * initializes the calling fragment
+         * inotifies the hosting actitivy about its state
          * 
-         * @param handler
-         *                The fragments handler
+         * @param fragment
+         *                The calling fragment
          */
-        public void onFragmentReady(Handler handler);
+        public void onFragmentReady(Fragment fragment);
 
         /**
          * 

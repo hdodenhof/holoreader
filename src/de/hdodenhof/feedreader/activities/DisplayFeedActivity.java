@@ -1,9 +1,11 @@
 package de.hdodenhof.feedreader.activities;
 
+import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -41,6 +43,7 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
         /**
          * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
          */
+        @SuppressLint("NewApi")
         @Override
         public void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
@@ -66,9 +69,13 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
                         mArticlePagerFragment = new ArticleViewPager(this);
                 }
 
-                ActionBar mActionBar = getActionBar();
-                mActionBar.setTitle(queryFeedName(mFeedID));
-                mActionBar.setDisplayHomeAsUpEnabled(true);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                        ActionBar mActionBar = getActionBar();
+                        mActionBar.setTitle(queryFeedName(mFeedID));
+                        mActionBar.setDisplayHomeAsUpEnabled(true);
+                } else {
+                        setTitle(queryFeedName(mFeedID));
+                }
         }
 
         /**
@@ -164,6 +171,6 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
         public void onArticleChanged(int position) {
                 // TODO: mark read
                 ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
-                mArticleListFragment.changePosition(position); 
+                mArticleListFragment.changePosition(position);
         }
 }

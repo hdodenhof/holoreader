@@ -2,8 +2,10 @@ package de.hdodenhof.feedreader.fragments;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -48,12 +50,17 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
                 getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
         }
 
+        @SuppressLint("NewApi")
         public void changePosition(int position) {
                 if (mInitialized) {
                         if (mArticlesListView.getCheckedItemPosition() != position) {
                                 int mPosition = (position - 1 < 0) ? 0 : position - 1;
-                                mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 500);
-                                mArticlesListView.setItemChecked(position, true);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                                        mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 500);
+                                        mArticlesListView.setItemChecked(position, true);
+                                } else {
+                                        mArticlesListView.setSelection(position);
+                                }
                         }
                 }
         }
@@ -61,7 +68,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         public void setChoiceModeSingle() {
                 mArticlesListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         }
-        
+
         public void refreshList() {
                 getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
         }
@@ -73,8 +80,8 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
                 if (savedInstanceState != null) {
 
                 }
-                
-                if(getActivity().getIntent().hasExtra("feedid")){
+
+                if (getActivity().getIntent().hasExtra("feedid")) {
                         mCursorFilter = "feed/" + getActivity().getIntent().getIntExtra("feedid", 0);
                 }
 

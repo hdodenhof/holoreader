@@ -47,7 +47,6 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         private ProgressDialog mSpinner;
         private ProgressDialog mProgresBar;
         private ArticleListFragment mArticleListFragment;
-        private FeedListFragment mFeedListFragment;
 
         /**
          * Handles messages from AsyncTasks started within this activity
@@ -88,11 +87,6 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
          * Update feed list and dismiss spinner after new feed has been added
          */
         private void callbackFeedAdded() {
-             // TODO refresh seems unnecessary
-                mFeedListFragment.refreshList();
-                if (mTwoPane){
-                        mArticleListFragment.refreshList();
-                }
                 mSpinner.dismiss();
         }
 
@@ -100,11 +94,6 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
          * Update feed list and dismiss progress bar after feeds have been refreshed
          */
         private void callbackFeedsRefreshed() {
-                // TODO refresh seems unnecessary
-                mFeedListFragment.refreshList();
-                if (mTwoPane){
-                        mArticleListFragment.refreshList();
-                }
                 mProgresBar.dismiss();
         }
 
@@ -128,7 +117,6 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
                 setContentView(R.layout.activity_home);
 
-                mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
                 mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
                 if (mArticleListFragment != null) {
                         mTwoPane = true;

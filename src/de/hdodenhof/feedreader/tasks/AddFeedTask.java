@@ -47,7 +47,6 @@ public class AddFeedTask extends AsyncTask<String, Void, Void> {
                         mContentValues.put(FeedDAO.NAME, mName);
                         mContentValues.put(FeedDAO.URL, mURL);
                         mContentValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
-                        mContentValues.put(FeedDAO.UNREAD, 0);
                         
                         mContentResolver.insert(RSSContentProvider.URI_FEEDS, mContentValues);
 

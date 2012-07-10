@@ -249,6 +249,7 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                 case RSSAdapter.TYPE_ARTICLE:
                         mCursor = ((RSSArticleAdapter) mAdapter).getCursor();
                         mCursor.moveToPosition(position);
+
                         int mArticleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
                         mFeedID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO.FEEDID));
 

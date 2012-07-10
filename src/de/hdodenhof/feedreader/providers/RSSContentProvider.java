@@ -186,6 +186,7 @@ public class RSSContentProvider extends ContentProvider {
                         } else {
                                 mRowsUpdated = mDatabase.update(FeedDAO.TABLE, values, FeedDAO._ID + "=" + mID + " and " + selection, selectionArgs);
                         }
+                        getContext().getContentResolver().notifyChange(URI_FEEDS, null);
                         break;
                 case ARTICLES:
                         mRowsUpdated = mDatabase.update(ArticleDAO.TABLE, values, selection, selectionArgs);
@@ -197,6 +198,7 @@ public class RSSContentProvider extends ContentProvider {
                         } else {
                                 mRowsUpdated = mDatabase.update(ArticleDAO.TABLE, values, ArticleDAO._ID + "=" + mID + " and " + selection, selectionArgs);
                         }
+                        getContext().getContentResolver().notifyChange(URI_ARTICLES, null);
                         break;
                 default:
                         throw new IllegalArgumentException("Unknown URI: " + uri);

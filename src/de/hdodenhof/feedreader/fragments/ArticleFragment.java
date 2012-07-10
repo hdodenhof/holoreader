@@ -49,7 +49,7 @@ public class ArticleFragment extends Fragment {
                 super.onCreate(savedInstanceState);
                 
                 Bundle args = getArguments();
-                String title = args.getString(ArticleDAO.TITLE);
+                String title = args.getString(ArticleDAO.TITLE);                
                 String content = args.getString(ArticleDAO.CONTENT);
                 String pubdate= args.getString(ArticleDAO.PUBDATE);
                 

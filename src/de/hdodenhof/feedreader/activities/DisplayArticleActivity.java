@@ -2,6 +2,8 @@ package de.hdodenhof.feedreader.activities;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.helpers.SQLiteHelper;
 import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
 import de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener;
@@ -145,8 +148,29 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
         /**
          * @see de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener# onArticleChanged(int)
          */
-        public void onArticleChanged(int position) {
-             // TODO: mark read
+        public void onArticleChanged(int articleID, int position) {
+                new Thread(new MarkReadRunnable(articleID)).start();
+        }
+
+        /**
+         * 
+         */
+        private class MarkReadRunnable implements Runnable {
+                int mArticleID;
+
+                public MarkReadRunnable(int articleID) {
+                        this.mArticleID = articleID;
+                }
+
+                public void run() {
+                        ContentResolver mContentResolver = getContentResolver();
+                        ContentValues mContentValues = new ContentValues();
+                        Uri mUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, String.valueOf(mArticleID));
+                        
+                        mContentValues.put(ArticleDAO.READ, SQLiteHelper.fromBoolean(true));
+                        
+                        mContentResolver.update(mUri, mContentValues, null, null);
+                }
         }
 
 }

@@ -84,7 +84,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         }
 
         public void onPageSelected(int position) {
-                ((ArticleOnPageChangeListener) mContext).onArticleChanged(position);
+                ((ArticleOnPageChangeListener) mContext).onArticleChanged(mPagerAdapter.getArticleID(position), position);
         }
 
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -172,6 +172,16 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
                         this.mCursor = cursor;
                         notifyDataSetChanged();
+                }
+                
+                public int getArticleID(int position){
+                        int mCursorPosition = mCursor.getPosition();
+                        
+                        mCursor.moveToPosition(position);
+                        int mArticleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
+                        mCursor.moveToPosition(mCursorPosition);
+                        
+                        return mArticleID;                        
                 }
 
         }

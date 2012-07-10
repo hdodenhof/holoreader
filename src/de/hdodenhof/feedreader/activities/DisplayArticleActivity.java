@@ -2,8 +2,7 @@ package de.hdodenhof.feedreader.activities;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.content.ContentResolver;
-import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -16,12 +15,12 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper;
 import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
 import de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener;
 import de.hdodenhof.feedreader.misc.ArticleViewPager;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
+import de.hdodenhof.feedreader.misc.MarkReadRunnable;
 import de.hdodenhof.feedreader.providers.RSSContentProvider;
 
 /**
@@ -33,7 +32,7 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
 
         @SuppressWarnings("unused")
         private static final String TAG = DisplayArticleActivity.class.getSimpleName();
-        
+
         private int mArticleID;
         private int mFeedID;
 
@@ -61,11 +60,11 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
                 }
 
                 new ArticleViewPager(this);
-                
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB){
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                         ActionBar mActionBar = getActionBar();
                         mActionBar.setTitle(queryFeedName(mFeedID));
-                        mActionBar.setDisplayHomeAsUpEnabled(true);                        
+                        mActionBar.setDisplayHomeAsUpEnabled(true);
                 } else {
                         setTitle(queryFeedName(mFeedID));
                 }
@@ -149,28 +148,7 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
          * @see de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener# onArticleChanged(int)
          */
         public void onArticleChanged(int articleID, int position) {
-                new Thread(new MarkReadRunnable(articleID)).start();
-        }
-
-        /**
-         * 
-         */
-        private class MarkReadRunnable implements Runnable {
-                int mArticleID;
-
-                public MarkReadRunnable(int articleID) {
-                        this.mArticleID = articleID;
-                }
-
-                public void run() {
-                        ContentResolver mContentResolver = getContentResolver();
-                        ContentValues mContentValues = new ContentValues();
-                        Uri mUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, String.valueOf(mArticleID));
-                        
-                        mContentValues.put(ArticleDAO.READ, SQLiteHelper.fromBoolean(true));
-                        
-                        mContentResolver.update(mUri, mContentValues, null, null);
-                }
+                new Thread(new MarkReadRunnable((Context) this, articleID)).start();
         }
 
 }

@@ -20,14 +20,21 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         private static final String TAG = SQLiteHelper.class.getSimpleName();
 
         private static final String DATABASE_NAME = "feedreader";
-        private static final int DATABASE_VERSION = 6;
+        private static final int DATABASE_VERSION = 7;
 
         private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
-                        + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT, " + FeedDAO.UPDATED + " TEXT, " + FeedDAO.UNREAD + " TEXT);";
+                        + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT, " + FeedDAO.UPDATED + " TEXT);";
 
         private static final String ARTICLE_TABLE_CREATE = "CREATE TABLE " + ArticleDAO.TABLE + " (" + ArticleDAO._ID + " integer primary key autoincrement, "
-                        + ArticleDAO.FEEDID + " integer , " + ArticleDAO.GUID + " TEXT , " + ArticleDAO.PUBDATE + " TEXT , " + ArticleDAO.TITLE + " TEXT , "
-                        + ArticleDAO.SUMMARY + " TEXT , " + ArticleDAO.CONTENT + " TEXT , " + ArticleDAO.READ + " INTEGER);";
+                        + ArticleDAO.FEEDID + " integer, " + ArticleDAO.GUID + " TEXT, " + ArticleDAO.PUBDATE + " TEXT, " + ArticleDAO.TITLE + " TEXT , "
+                        + ArticleDAO.SUMMARY + " TEXT, " + ArticleDAO.CONTENT + " TEXT, " + ArticleDAO.READ + " INTEGER);";
+
+        private static final String FEED_VIEW_CREATE = "CREATE VIEW " + FeedDAO.VIEW + " AS SELECT " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE
+                        + "." + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ", " + FeedDAO.TABLE + "." + FeedDAO.UPDATED + ", COUNT("
+                        + ArticleDAO.TABLE + "." + ArticleDAO._ID + ") AS " + FeedDAO.UNREAD + " FROM " + FeedDAO.TABLE + " LEFT OUTER JOIN " + ArticleDAO.TABLE
+                        + " ON " + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "." + FeedDAO._ID + " AND " + ArticleDAO.TABLE + "."
+                        + ArticleDAO.READ + " = 0 GROUP BY " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE + "." + FeedDAO.NAME + ", "
+                        + FeedDAO.TABLE + "." + FeedDAO.URL + ", " + FeedDAO.TABLE + "." + FeedDAO.UPDATED + ";";
 
         private static final String mDummydata[][] = { { "t3n News", "http://t3n.de/news/feed" },
                         { "Gründerszene.de - Infos für Gründer, Unternehmer, StartUps | Gründerszene", "http://www.gruenderszene.de/feed/" },
@@ -44,14 +51,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         public void onCreate(SQLiteDatabase database) {
                 database.execSQL(FEED_TABLE_CREATE);
                 database.execSQL(ARTICLE_TABLE_CREATE);
+                database.execSQL(FEED_VIEW_CREATE);
 
                 for (String[] mData : mDummydata) {
                         ContentValues mContentValues = new ContentValues();
                         mContentValues.put(FeedDAO.NAME, mData[0]);
                         mContentValues.put(FeedDAO.URL, mData[1]);
                         mContentValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
-                        mContentValues.put(FeedDAO.UNREAD, 0);
-                        
+
                         database.insert(FeedDAO.TABLE, null, mContentValues);
                 }
         }
@@ -60,9 +67,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
                 db.execSQL("DROP TABLE IF EXISTS " + FeedDAO.TABLE);
                 db.execSQL("DROP TABLE IF EXISTS " + ArticleDAO.TABLE);
+                db.execSQL("DROP VIEW IF EXISTS " + FeedDAO.VIEW);
                 onCreate(db);
         }
-        
+
         public class FeedDAO {
 
                 public static final String TABLE = "feeds";
@@ -71,6 +79,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                 public static final String URL = "url";
                 public static final String UPDATED = "updated";
                 public static final String UNREAD = "unread";
+
+                public static final String VIEW = "feeds_view";
 
         }
 

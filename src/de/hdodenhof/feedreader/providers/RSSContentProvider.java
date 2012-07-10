@@ -61,10 +61,10 @@ public class RSSContentProvider extends ContentProvider {
                 int mURIType = sURIMatcher.match(uri);
                 switch (mURIType) {
                 case FEEDS:
-                        mQueryBuilder.setTables(FeedDAO.TABLE);
+                        mQueryBuilder.setTables(FeedDAO.VIEW);
                         break;
                 case FEED_ID:
-                        mQueryBuilder.setTables(FeedDAO.TABLE);
+                        mQueryBuilder.setTables(FeedDAO.VIEW);
                         mQueryBuilder.appendWhere(FeedDAO._ID + "=" + uri.getLastPathSegment());
                         break;
                 case ARTICLES:
@@ -117,6 +117,9 @@ public class RSSContentProvider extends ContentProvider {
                 }
 
                 getContext().getContentResolver().notifyChange(uri, null);
+                if (mURIType == ARTICLES){
+                        getContext().getContentResolver().notifyChange(URI_FEEDS, null);
+                }
 
                 return mURI;
         }
@@ -199,6 +202,9 @@ public class RSSContentProvider extends ContentProvider {
                                 mRowsUpdated = mDatabase.update(ArticleDAO.TABLE, values, ArticleDAO._ID + "=" + mID + " and " + selection, selectionArgs);
                         }
                         getContext().getContentResolver().notifyChange(URI_ARTICLES, null);
+                        if (values.containsKey(ArticleDAO.READ)){
+                                getContext().getContentResolver().notifyChange(URI_FEEDS, null);
+                        }
                         break;
                 default:
                         throw new IllegalArgumentException("Unknown URI: " + uri);

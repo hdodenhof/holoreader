@@ -36,10 +36,6 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         private String[] mBaseSelectionArgs = new String[1];
         private boolean mScrollTop = false;
 
-        public void updateFeedlist() {
-                getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
-        }
-
         public void selectFeed(int feedID) {
                 mBaseSelectionArgs[0] = String.valueOf(feedID);
                 mScrollTop = true;

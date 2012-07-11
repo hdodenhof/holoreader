@@ -1,5 +1,7 @@
 package de.hdodenhof.feedreader.fragments;
 
+import java.util.Date;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -16,7 +18,6 @@ import android.widget.TextView;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
@@ -30,41 +31,30 @@ public class ArticleFragment extends Fragment {
         @SuppressWarnings("unused")
         private static final String TAG = ArticleFragment.class.getSimpleName();
 
-        private Article mArticle;
+        private String mTitle;
+        private String mContent;
+        private Date mPubdate;
 
-        public static ArticleFragment newInstance(){
+        public static ArticleFragment newInstance() {
                 ArticleFragment mArticleFragmentInstance = new ArticleFragment();
-                return mArticleFragmentInstance;
-        }
-        
-        public static ArticleFragment newInstance(Article article) {
-                ArticleFragment mArticleFragmentInstance = new ArticleFragment();
-                mArticleFragmentInstance.mArticle = article;
-
                 return mArticleFragmentInstance;
         }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
-                
+
                 Bundle args = getArguments();
-                String title = args.getString(ArticleDAO.TITLE);                
-                String content = args.getString(ArticleDAO.CONTENT);
-                String pubdate= args.getString(ArticleDAO.PUBDATE);
-                
-                mArticle = new Article();
-                mArticle.setTitle(title);
-                mArticle.setContent(content);
-                mArticle.setPubDate(SQLiteHelper.toDate(pubdate));
-                
+                mTitle = args.getString(ArticleDAO.TITLE);
+                mContent = args.getString(ArticleDAO.CONTENT);
+                mPubdate = SQLiteHelper.toDate(args.getString(ArticleDAO.PUBDATE));
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-                View mContentView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
-                
-                if (mArticle != null) {
+                View mArticleView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
+
+                if (mTitle != null && mContent != null && mPubdate != null) {
                         int mViewWidth;
 
                         Display display = getActivity().getWindowManager().getDefaultDisplay();
@@ -81,23 +71,23 @@ public class ArticleFragment extends Fragment {
                         // TODO Remove fixed value
                         int mContentWidth = Math.round((mViewWidth - 40) / displayMetrics.density);
 
-                        Document doc = Jsoup.parse(mArticle.getContent());
+                        Document doc = Jsoup.parse(mContent);
                         doc.head().append("<style type=\"text/css\">img { max-width: " + String.valueOf(mContentWidth) + "; height: auto}</style>");
 
-                        TextView mHeader = (TextView) mContentView.findViewById(R.id.article_header);
-                        mHeader.setText(mArticle.getTitle());
+                        TextView mTitleView = (TextView) mArticleView.findViewById(R.id.article_header);
+                        mTitleView.setText(mTitle);
 
-                        TextView mPubDate = (TextView) mContentView.findViewById(R.id.article_pubdate);
-                        CharSequence mFormattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", mArticle.getPubDate());
-                        mPubDate.setText(mFormattedPubdate);
+                        TextView mPubdateView = (TextView) mArticleView.findViewById(R.id.article_pubdate);
+                        CharSequence mFormattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", mPubdate);
+                        mPubdateView.setText(mFormattedPubdate);
 
-                        WebView mText = (WebView) mContentView.findViewById(R.id.article_text);
-                        mText.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);
+                        WebView mContentVIew = (WebView) mArticleView.findViewById(R.id.article_text);
+                        mContentVIew.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);
 
-                        mContentView.scrollTo(0, 0);
+                        mArticleView.scrollTo(0, 0);
                 }
 
-                return mContentView;
+                return mArticleView;
 
         }
 

@@ -321,27 +321,27 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                                 XmlPullParser mPullParser = mParserFactory.newPullParser();
                                 mPullParser.setInput(mInputStream, null);
 
-                                int eventType = mPullParser.getEventType();
+                                int mEventType = mPullParser.getEventType();
                                 
-                                while (eventType != XmlPullParser.END_DOCUMENT) {
-                                        if (eventType == XmlPullParser.START_TAG) {
+                                while (mEventType != XmlPullParser.END_DOCUMENT) {
+                                        if (mEventType == XmlPullParser.START_TAG) {
                                                 if (mPullParser.getName().equalsIgnoreCase("title")) {
                                                         mIsTitle = true;
                                                 }
 
-                                        } else if (eventType == XmlPullParser.END_TAG) {
+                                        } else if (mEventType == XmlPullParser.END_TAG) {
                                                 if (mPullParser.getName().equalsIgnoreCase("title")) {
                                                         mIsTitle = false;
                                                 }
 
-                                        } else if (eventType == XmlPullParser.TEXT) {
+                                        } else if (mEventType == XmlPullParser.TEXT) {
                                                 if (mIsTitle) {
                                                         mName = mPullParser.getText();
                                                         break;
                                                 }
 
                                         }
-                                        eventType = mPullParser.next();
+                                        mEventType = mPullParser.next();
                                 }
                                 mInputStream.close();
 

@@ -1,7 +1,5 @@
 package de.hdodenhof.feedreader.fragments;
 
-import java.util.ArrayList;
-
 import android.annotation.SuppressLint;
 import android.database.Cursor;
 import android.os.Build;
@@ -18,7 +16,6 @@ import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.models.Feed;
 import de.hdodenhof.feedreader.providers.RSSContentProvider;
 
 /**
@@ -39,7 +36,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         private String[] mBaseSelectionArgs = new String[1];
         private boolean mScrollTop = false;
 
-        public void updateFeedlist(ArrayList<Feed> feeds) {
+        public void updateFeedlist() {
                 getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
         }
 

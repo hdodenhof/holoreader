@@ -24,7 +24,6 @@ public class RSSContentProvider extends ContentProvider {
         public static final int FEED_ID = 120;
         public static final int ARTICLES = 210;
         public static final int ARTICLE_ID = 220;
-        public static final int ARTICLE_FEED_ID = 230;
 
         private static final String BASE_PATH_FEEDS = "feeds";
         private static final String BASE_PATH_ARTICLES = "articles";
@@ -44,7 +43,6 @@ public class RSSContentProvider extends ContentProvider {
                 sURIMatcher.addURI(AUTHORITY, BASE_PATH_FEEDS + "/#", FEED_ID);
                 sURIMatcher.addURI(AUTHORITY, BASE_PATH_ARTICLES, ARTICLES);
                 sURIMatcher.addURI(AUTHORITY, BASE_PATH_ARTICLES + "/#", ARTICLE_ID);
-                sURIMatcher.addURI(AUTHORITY, BASE_PATH_ARTICLES + "/feed/#", ARTICLE_FEED_ID);
         }
 
         @Override
@@ -73,10 +71,6 @@ public class RSSContentProvider extends ContentProvider {
                 case ARTICLE_ID:
                         mQueryBuilder.setTables(ArticleDAO.TABLE);
                         mQueryBuilder.appendWhere(ArticleDAO._ID + "=" + uri.getLastPathSegment());
-                        break;
-                case ARTICLE_FEED_ID:
-                        mQueryBuilder.setTables(ArticleDAO.TABLE);
-                        mQueryBuilder.appendWhere(ArticleDAO.FEEDID + "=" + uri.getLastPathSegment());
                         break;
                 default:
                         throw new IllegalArgumentException("Unknown URI: " + uri);

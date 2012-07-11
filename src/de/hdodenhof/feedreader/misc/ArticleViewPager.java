@@ -88,8 +88,10 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         }
 
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                Uri mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, "feed/" + mFeedID);
-                CursorLoader mCursorLoader = new CursorLoader(mContext, mBaseUri, mProjection, null, null, null);
+                String mSelection = "feedid = ?";
+                String mSelectionArgs[] = { String.valueOf(mFeedID) };
+                
+                CursorLoader mCursorLoader = new CursorLoader(mContext, RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, null);
                 return mCursorLoader;
         }
 

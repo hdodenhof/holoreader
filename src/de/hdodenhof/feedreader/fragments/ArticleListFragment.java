@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import android.annotation.SuppressLint;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -37,7 +36,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         private RSSArticleAdapter mArticleAdapter;
         private boolean mInitialized = false;
 
-        private String mCursorFilter;
+        private String[] mBaseSelectionArgs = new String[1];
         private boolean mScrollTop = false;
 
         public void updateFeedlist(ArrayList<Feed> feeds) {
@@ -45,7 +44,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         }
 
         public void selectFeed(int feedID) {
-                mCursorFilter = "feed/" + String.valueOf(feedID);
+                mBaseSelectionArgs[0] = String.valueOf(feedID);
                 mScrollTop = true;
                 getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
         }
@@ -82,7 +81,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
                 }
 
                 if (getActivity().getIntent().hasExtra("feedid")) {
-                        mCursorFilter = "feed/" + getActivity().getIntent().getIntExtra("feedid", 0);
+                        mBaseSelectionArgs[0] = String.valueOf(String.valueOf(getActivity().getIntent().getIntExtra("feedid", 0)));
                 }
 
                 String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
@@ -105,15 +104,17 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         }
 
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                Uri mBaseUri;
-                if (mCursorFilter != null) {
-                        mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, mCursorFilter);
-                } else {
-                        mBaseUri = RSSContentProvider.URI_ARTICLES;
-                }
+                String mBaseSelection = "feedid = ?";
+                String mSelection = null;
+                String mSelectionArgs[] = null;
+                
+                if (mBaseSelectionArgs[0] != null) {
+                        mSelection = mBaseSelection;
+                        mSelectionArgs = mBaseSelectionArgs;
+                }                 
 
                 String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
-                CursorLoader mCursorLoader = new CursorLoader(getActivity(), mBaseUri, mProjection, null, null, null);
+                CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, null);
                 return mCursorLoader;
         }
 

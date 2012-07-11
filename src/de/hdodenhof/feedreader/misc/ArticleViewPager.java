@@ -15,8 +15,8 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleFragment;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
-import de.hdodenhof.feedreader.providers.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
 /**
  * 

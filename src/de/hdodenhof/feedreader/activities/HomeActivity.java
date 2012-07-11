@@ -35,18 +35,18 @@ import android.widget.EditText;
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
 import de.hdodenhof.feedreader.fragments.FeedListFragment;
-import de.hdodenhof.feedreader.helpers.SAXHelper;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
 import de.hdodenhof.feedreader.listadapters.RSSAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.models.Article;
-import de.hdodenhof.feedreader.providers.RSSContentProvider;
-import de.hdodenhof.feedreader.saxhandlers.ArticleHandler;
-import de.hdodenhof.feedreader.saxhandlers.FeedHandler;
+import de.hdodenhof.feedreader.parser.ArticleHandler;
+import de.hdodenhof.feedreader.parser.FeedHandler;
+import de.hdodenhof.feedreader.parser.SAXHelper;
+import de.hdodenhof.feedreader.provider.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.SQLiteHelper;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
 /**
  * 

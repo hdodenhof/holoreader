@@ -5,9 +5,9 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 
-import de.hdodenhof.feedreader.helpers.SQLiteHelper;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
-import de.hdodenhof.feedreader.providers.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.SQLiteHelper;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
 public class MarkReadRunnable implements Runnable {
         Context mContext;

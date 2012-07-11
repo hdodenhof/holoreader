@@ -27,7 +27,7 @@
         <activity android:name=".activities.DisplayArticleActivity" />
 
         <provider
-            android:name=".providers.RSSContentProvider"
+            android:name=".provider.RSSContentProvider"
             android:authorities="de.hdodenhof.feedreader.RSSProvider"
             android:exported="false" >
         </provider>

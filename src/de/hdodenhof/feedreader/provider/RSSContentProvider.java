@@ -1,4 +1,4 @@
-package de.hdodenhof.feedreader.providers;
+package de.hdodenhof.feedreader.provider;
 
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -10,9 +10,8 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.text.TextUtils;
 
-import de.hdodenhof.feedreader.helpers.SQLiteHelper;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
 public class RSSContentProvider extends ContentProvider {
 

@@ -1,4 +1,4 @@
-package de.hdodenhof.feedreader.saxhandlers;
+package de.hdodenhof.feedreader.parser;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

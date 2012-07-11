@@ -10,8 +10,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
+import de.hdodenhof.feedreader.provider.SQLiteHelper;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
 /**
  * 

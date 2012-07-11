@@ -19,15 +19,15 @@ import android.widget.AdapterView.OnItemClickListener;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.FeedDAO;
 import de.hdodenhof.feedreader.listadapters.RSSAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener;
 import de.hdodenhof.feedreader.misc.ArticleViewPager;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.misc.MarkReadRunnable;
-import de.hdodenhof.feedreader.providers.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
 /**
  * 

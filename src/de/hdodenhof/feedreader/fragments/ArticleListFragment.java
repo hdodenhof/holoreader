@@ -13,10 +13,10 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.helpers.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.providers.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
 /**
  * 

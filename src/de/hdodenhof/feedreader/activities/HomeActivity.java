@@ -1,6 +1,8 @@
 package de.hdodenhof.feedreader.activities;
 
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -9,6 +11,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -41,7 +45,6 @@ import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.models.Article;
 import de.hdodenhof.feedreader.parser.ArticleHandler;
-import de.hdodenhof.feedreader.parser.FeedHandler;
 import de.hdodenhof.feedreader.parser.SAXHelper;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper;
@@ -306,10 +309,41 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                 protected Void doInBackground(String... params) {
 
                         String mURL = params[0];
+                        String mName = "";
 
                         try {
-                                SAXHelper mSAXHelper = new SAXHelper(mURL, new FeedHandler());
-                                String mName = (String) mSAXHelper.parse();
+                                boolean mIsTitle = false; 
+                                
+                                InputStream mInputStream = new URL(mURL).openConnection().getInputStream();
+
+                                XmlPullParserFactory mParserFactory = XmlPullParserFactory.newInstance();
+                                mParserFactory.setNamespaceAware(true);
+                                XmlPullParser mPullParser = mParserFactory.newPullParser();
+                                mPullParser.setInput(mInputStream, null);
+
+                                int eventType = mPullParser.getEventType();
+                                
+                                while (eventType != XmlPullParser.END_DOCUMENT) {
+                                        if (eventType == XmlPullParser.START_TAG) {
+                                                if (mPullParser.getName().equalsIgnoreCase("title")) {
+                                                        mIsTitle = true;
+                                                }
+
+                                        } else if (eventType == XmlPullParser.END_TAG) {
+                                                if (mPullParser.getName().equalsIgnoreCase("title")) {
+                                                        mIsTitle = false;
+                                                }
+
+                                        } else if (eventType == XmlPullParser.TEXT) {
+                                                if (mIsTitle) {
+                                                        mName = mPullParser.getText();
+                                                        break;
+                                                }
+
+                                        }
+                                        eventType = mPullParser.next();
+                                }
+                                mInputStream.close();
 
                                 ContentResolver mContentResolver = mContext.getContentResolver();
                                 ContentValues mContentValues = new ContentValues();

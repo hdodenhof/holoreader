@@ -55,22 +55,26 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
         String mUpdated = cursor.getString(cursor.getColumnIndex(FeedDAO.UPDATED));
         String mUnread = cursor.getString(cursor.getColumnIndex(FeedDAO.UNREAD));
 
-        final TextView mFeedTitle = (TextView) view.findViewById(R.id.list_item_feed_title);
-        final TextView mFeedSummary = (TextView) view.findViewById(R.id.list_item_feed_summary);
-        final TextView mFeedUpdated = (TextView) view.findViewById(R.id.list_item_feed_updated);
-        final TextView mFeedUnread = (TextView) view.findViewById(R.id.list_item_feed_unread);
+        final TextView mTitleView = (TextView) view.findViewById(R.id.list_item_feed_title);
+        final TextView mSummaryView = (TextView) view.findViewById(R.id.list_item_feed_summary);
+        final TextView mUpdatedView = (TextView) view.findViewById(R.id.list_item_feed_updated);
+        final TextView mUnreadView = (TextView) view.findViewById(R.id.list_item_feed_unread);
 
-        if (mFeedTitle != null) {
-            mFeedTitle.setText(mName);
+        if (mTitleView != null) {
+            mTitleView.setText(mName);
         }
-        if (mFeedSummary != null) {
-            mFeedSummary.setText(mURL);
+        if (mSummaryView != null) {
+            mSummaryView.setText(mURL);
         }
-        if (mFeedUpdated != null) {
-            mFeedUpdated.setText("Refreshed: " + DateFormat.format("E, dd MMM yyyy - kk:mm", SQLiteHelper.toDate(mUpdated)));
+        if (mUpdatedView != null) {
+            String mParsedUpdated = "";
+            if(mUpdated != null){
+                mParsedUpdated = DateFormat.format("E, dd MMM yyyy - kk:mm", SQLiteHelper.toDate(mUpdated)).toString();
+            }
+            mUpdatedView.setText("Last Update: " + mParsedUpdated);
         }
-        if (mFeedUnread != null) {
-            mFeedUnread.setText("Unread: " + mUnread);
+        if (mUnreadView != null) {
+            mUnreadView.setText("Unread: " + mUnread);
         }
 
         return view;

@@ -20,21 +20,21 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String TAG = SQLiteHelper.class.getSimpleName();
 
     private static final String DATABASE_NAME = "feedreader";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 8;
 
     private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
-            + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT, " + FeedDAO.UPDATED + " TEXT);";
+            + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT);";
 
     private static final String ARTICLE_TABLE_CREATE = "CREATE TABLE " + ArticleDAO.TABLE + " (" + ArticleDAO._ID + " integer primary key autoincrement, "
             + ArticleDAO.FEEDID + " integer, " + ArticleDAO.GUID + " TEXT, " + ArticleDAO.PUBDATE + " TEXT, " + ArticleDAO.TITLE + " TEXT , "
             + ArticleDAO.SUMMARY + " TEXT, " + ArticleDAO.CONTENT + " TEXT, " + ArticleDAO.READ + " INTEGER);";
 
     private static final String FEED_VIEW_CREATE = "CREATE VIEW " + FeedDAO.VIEW + " AS SELECT " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE
-            + "." + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ", " + FeedDAO.TABLE + "." + FeedDAO.UPDATED + ", COUNT(" + ArticleDAO.TABLE
-            + "." + ArticleDAO._ID + ") AS " + FeedDAO.UNREAD + " FROM " + FeedDAO.TABLE + " LEFT OUTER JOIN " + ArticleDAO.TABLE + " ON " + ArticleDAO.TABLE
-            + "." + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "." + FeedDAO._ID + " AND " + ArticleDAO.TABLE + "." + ArticleDAO.READ + " = 0 GROUP BY "
-            + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE + "." + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ", " + FeedDAO.TABLE
-            + "." + FeedDAO.UPDATED + ";";
+            + "." + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ", MAX(" + ArticleDAO.TABLE + "." + ArticleDAO.PUBDATE + ") AS "
+            + FeedDAO.UPDATED + ", COUNT(" + ArticleDAO.TABLE + "." + ArticleDAO._ID + ") AS " + FeedDAO.UNREAD + " FROM " + FeedDAO.TABLE
+            + " LEFT OUTER JOIN " + ArticleDAO.TABLE + " ON " + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "." + FeedDAO._ID
+            + " AND " + ArticleDAO.TABLE + "." + ArticleDAO.READ + " = 0 GROUP BY " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE + "."
+            + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ";";
 
     private static final String mDummydata[][] = { { "t3n News", "http://t3n.de/news/feed" },
             { "Gründerszene.de - Infos für Gründer, Unternehmer, StartUps | Gründerszene", "http://www.gruenderszene.de/feed/" },
@@ -57,7 +57,6 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             ContentValues mContentValues = new ContentValues();
             mContentValues.put(FeedDAO.NAME, mData[0]);
             mContentValues.put(FeedDAO.URL, mData[1]);
-            mContentValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
 
             database.insert(FeedDAO.TABLE, null, mContentValues);
         }

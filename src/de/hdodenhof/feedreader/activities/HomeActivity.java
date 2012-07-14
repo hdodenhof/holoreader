@@ -6,7 +6,6 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -340,7 +339,6 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
                 mContentValues.put(FeedDAO.NAME, mName);
                 mContentValues.put(FeedDAO.URL, mURL);
-                mContentValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
 
                 mContentResolver.insert(RSSContentProvider.URI_FEEDS, mContentValues);
 

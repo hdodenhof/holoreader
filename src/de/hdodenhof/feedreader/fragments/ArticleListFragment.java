@@ -107,7 +107,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         }
 
         String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
-        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, null);
+        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, ArticleDAO.PUBDATE + " DESC");
         return mCursorLoader;
     }
 

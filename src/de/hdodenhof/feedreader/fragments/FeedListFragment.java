@@ -62,7 +62,7 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] mProjection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
-        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, null, null, null);
+        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, null, null, FeedDAO.UPDATED + " DESC");
         return mCursorLoader;
     }
 

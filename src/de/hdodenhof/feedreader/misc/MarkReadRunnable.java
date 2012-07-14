@@ -10,21 +10,21 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
 public class MarkReadRunnable implements Runnable {
-        Context mContext;
-        int mArticleID;
+    Context mContext;
+    int mArticleID;
 
-        public MarkReadRunnable(Context context, int articleID) {
-                this.mContext = context;
-                this.mArticleID = articleID;
-        }
+    public MarkReadRunnable(Context context, int articleID) {
+        this.mContext = context;
+        this.mArticleID = articleID;
+    }
 
-        public void run() {
-                ContentResolver mContentResolver = mContext.getContentResolver();
-                ContentValues mContentValues = new ContentValues();
-                Uri mUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, String.valueOf(mArticleID));
+    public void run() {
+        ContentResolver mContentResolver = mContext.getContentResolver();
+        ContentValues mContentValues = new ContentValues();
+        Uri mUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, String.valueOf(mArticleID));
 
-                mContentValues.put(ArticleDAO.READ, SQLiteHelper.fromBoolean(true));
+        mContentValues.put(ArticleDAO.READ, SQLiteHelper.fromBoolean(true));
 
-                mContentResolver.update(mUri, mContentValues, null, null);
-        }
+        mContentResolver.update(mUri, mContentValues, null, null);
+    }
 }

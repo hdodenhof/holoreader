@@ -46,7 +46,7 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
 
         mFeedAdapter = new RSSFeedAdapter(getActivity(), R.layout.listitem_feed, null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
-        this.setEmptyText("No feeds");
+        this.setEmptyText("No feeds with unread articles");
         this.setListAdapter(mFeedAdapter);
         mFeedsListView = getListView();
 

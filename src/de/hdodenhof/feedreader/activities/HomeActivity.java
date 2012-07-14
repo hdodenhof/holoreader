@@ -22,6 +22,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -519,10 +520,11 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
                     ContentValues[] mContentValuesArray = new ContentValues[mContentValuesArrayList.size()];
                     mContentValuesArray = mContentValuesArrayList.toArray(mContentValuesArray);
-
                     mContentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, mContentValuesArray);
 
-                    // TODO: set lastUpdate on Feed
+                    ContentValues mContentValues = new ContentValues();
+                    mContentValues.put(FeedDAO.UPDATED, SQLiteHelper.fromDate(new Date()));
+                    mContentResolver.update(ContentUris.withAppendedId(RSSContentProvider.URI_FEEDS, Long.parseLong(mFeed[0])), mContentValues, null, null);
                     
                     publishProgress(mFeeds.indexOf(mFeed) + 1);
                 }

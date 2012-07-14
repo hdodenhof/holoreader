@@ -315,8 +315,6 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
             String mName = "";
 
             try {
-                boolean mIsTitle = false;
-
                 InputStream mInputStream = new URL(mURL).openConnection().getInputStream();
 
                 XmlPullParserFactory mParserFactory = XmlPullParserFactory.newInstance();
@@ -329,20 +327,9 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                 while (mEventType != XmlPullParser.END_DOCUMENT) {
                     if (mEventType == XmlPullParser.START_TAG) {
                         if (mPullParser.getName().equalsIgnoreCase("title")) {
-                            mIsTitle = true;
-                        }
-
-                    } else if (mEventType == XmlPullParser.END_TAG) {
-                        if (mPullParser.getName().equalsIgnoreCase("title")) {
-                            mIsTitle = false;
-                        }
-
-                    } else if (mEventType == XmlPullParser.TEXT) {
-                        if (mIsTitle) {
-                            mName = mPullParser.getText();
+                            mName = mPullParser.nextText();
                             break;
                         }
-
                     }
                     mEventType = mPullParser.next();
                 }
@@ -401,34 +388,30 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                 mSimpleDateFormats[i].setTimeZone(TimeZone.getTimeZone("GMT"));
             }
 
-            ContentResolver mContentResolver = mContext.getContentResolver();
-
             try {
+                ContentResolver mContentResolver = mContext.getContentResolver();
+                ArrayList<String[]> mFeeds = new ArrayList<String[]>();
+
+                XmlPullParserFactory mParserFactory = XmlPullParserFactory.newInstance();
+                mParserFactory.setNamespaceAware(true);
+                
                 String[] mProjection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL };
                 Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_FEEDS, mProjection, null, null, null);
-
-                ArrayList<String[]> mFeeds = new ArrayList<String[]>();
 
                 mCursor.moveToFirst();
                 do {
                     mFeeds.add(new String[] { mCursor.getString(mCursor.getColumnIndex(FeedDAO._ID)), mCursor.getString(mCursor.getColumnIndex(FeedDAO.URL)) });
                 } while (mCursor.moveToNext());
+                mCursor.close();
 
-                boolean mIsArticle = false;
-
-                XmlPullParserFactory mParserFactory = XmlPullParserFactory.newInstance();
-                mParserFactory.setNamespaceAware(true);
-
-                int i = 1;
                 for (String[] mFeed : mFeeds) {
+                    boolean mIsArticle = false;
                     ArrayList<ContentValues> mContentValuesArrayList = new ArrayList<ContentValues>();
 
                     InputStream mInputStream = new URL(mFeed[1]).openConnection().getInputStream();
 
                     XmlPullParser mPullParser = mParserFactory.newPullParser();
                     mPullParser.setInput(mInputStream, null);
-
-                    String mCurrentTag;
 
                     String mTitle = null;
                     String mSummary = null;
@@ -440,7 +423,8 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
                     while (mEventType != XmlPullParser.END_DOCUMENT) {
                         if (mEventType == XmlPullParser.START_TAG) {
-                            mCurrentTag = mPullParser.getName();
+                            String mCurrentTag = mPullParser.getName();
+                            
                             if (mCurrentTag.equalsIgnoreCase("item") || mCurrentTag.equalsIgnoreCase("entry")) {
                                 mIsArticle = true;
                             } else if (mCurrentTag.equalsIgnoreCase("title") && mIsArticle == true) {
@@ -469,7 +453,8 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                             }
 
                         } else if (mEventType == XmlPullParser.END_TAG) {
-                            mCurrentTag = mPullParser.getName();
+                            String mCurrentTag = mPullParser.getName();
+                            
                             if (mCurrentTag.equalsIgnoreCase("item") || mCurrentTag.equalsIgnoreCase("entry")) {
                                 mIsArticle = false;
 
@@ -519,12 +504,11 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                     ContentValues[] mContentValuesArray = new ContentValues[mContentValuesArrayList.size()];
                     mContentValuesArray = mContentValuesArrayList.toArray(mContentValuesArray);
 
+                    // TODO: update instead of insert if applicable, set lastUpdate on Feed
                     mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + "=?", new String[] { mFeed[0] });
                     mContentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, mContentValuesArray);
-
-                    // TODO: update instead of insert if applicable, set lastUpdate on Feed
-
-                    publishProgress(i++);
+                    
+                    publishProgress(mFeeds.indexOf(mFeed)+1);
                 }
 
             } catch (Exception e) {

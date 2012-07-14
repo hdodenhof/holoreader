@@ -62,7 +62,8 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] mProjection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
-        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, null, null, FeedDAO.UPDATED + " DESC");
+        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, FeedDAO.UNREAD + " > 0", null, FeedDAO.UPDATED
+                + " DESC"); // for some reason using SelectionArgs in this query won't work
         return mCursorLoader;
     }
 

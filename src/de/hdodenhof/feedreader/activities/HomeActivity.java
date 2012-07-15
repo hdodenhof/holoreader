@@ -25,6 +25,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -62,11 +63,15 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
     @SuppressWarnings("unused")
     private static final String TAG = FragmentActivity.class.getSimpleName();
+    private static final String PREFS_NAME = "Feedreader";
 
     private boolean mTwoPane = false;
+    private boolean mUnreadOnly;
     private ProgressDialog mSpinner;
     private ProgressDialog mProgresBar;
     private ArticleListFragment mArticleListFragment;
+    private FeedListFragment mFeedListFragment;
+    private SharedPreferences mPreferences;
 
     /**
      * Handles messages from AsyncTasks started within this activity
@@ -137,11 +142,26 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
         setContentView(R.layout.activity_home);
 
+        mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
         mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
         if (mArticleListFragment != null) {
             mTwoPane = true;
         }
 
+        mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+        invalidateOptionsMenu();
+
+        mFeedListFragment.setUnreadOnly(mUnreadOnly);
+        if (mTwoPane) {
+            mArticleListFragment.setUnreadOnly(mUnreadOnly);
+        }
     }
 
     /**
@@ -158,6 +178,13 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
      */
     public boolean isDualPane() {
         return mTwoPane;
+    }
+    
+    /**
+     * @see de.hdodenhof.feedreader.misc.FragmentCallback#isPrimaryFragment(android.support.v4.app.Fragment)
+     */
+    public boolean isPrimaryFragment(Fragment fragment){
+       return fragment instanceof FeedListFragment; 
     }
 
     /**
@@ -253,16 +280,23 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
             }
             break;
 
+        // DualPane layout only
         case RSSAdapter.TYPE_ARTICLE:
             mCursor = ((RSSArticleAdapter) mAdapter).getCursor();
             mCursor.moveToPosition(position);
 
             int mArticleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
-            mFeedID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO.FEEDID));
+
+            ArrayList<String> mArticles = new ArrayList<String>();
+
+            mCursor.moveToFirst();
+            do {
+                mArticles.add(mCursor.getString(mCursor.getColumnIndex(ArticleDAO._ID)));
+            } while (mCursor.moveToNext());
 
             Intent mIntent = new Intent(this, DisplayFeedActivity.class);
             mIntent.putExtra("articleid", mArticleID);
-            mIntent.putExtra("feedid", mFeedID);
+            mIntent.putStringArrayListExtra("articles", mArticles);
             startActivity(mIntent);
             break;
 
@@ -278,6 +312,11 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater mMenuInflater = getMenuInflater();
         mMenuInflater.inflate(R.menu.main, menu);
+
+        if (!mUnreadOnly) {
+            menu.getItem(2).setIcon(R.drawable.checkbox_checked);
+        }
+
         return true;
     }
 
@@ -292,6 +331,23 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
             return true;
         case R.id.item_add:
             showAddDialog();
+            return true;
+        case R.id.item_toggle:
+            mUnreadOnly = !mUnreadOnly;
+
+            SharedPreferences.Editor mEditor = mPreferences.edit();
+            mEditor.putBoolean("unreadonly", mUnreadOnly);
+            mEditor.commit();
+
+            if (mUnreadOnly) {
+                item.setIcon(R.drawable.checkbox_unchecked);
+            } else {
+                item.setIcon(R.drawable.checkbox_checked);
+            }
+            mFeedListFragment.setUnreadOnly(mUnreadOnly);
+            if (mTwoPane) {
+                mArticleListFragment.setUnreadOnly(mUnreadOnly);
+            }
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -518,7 +574,7 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                     ContentValues[] mContentValuesArray = new ContentValues[mContentValuesArrayList.size()];
                     mContentValuesArray = mContentValuesArrayList.toArray(mContentValuesArray);
                     mContentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, mContentValuesArray);
-                
+
                     publishProgress(mFeeds.indexOf(mFeed) + 1);
                 }
 

@@ -21,4 +21,6 @@ public interface FragmentCallback {
      * @return True if fragment is part of a dual pane layout, false is not
      */
     public boolean isDualPane();
+    
+    public boolean isPrimaryFragment(Fragment fragment);
 }

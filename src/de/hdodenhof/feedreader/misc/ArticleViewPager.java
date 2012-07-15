@@ -1,7 +1,8 @@
 package de.hdodenhof.feedreader.misc;
 
+import java.util.ArrayList;
+
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -34,7 +35,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     private ArticlePagerAdapter mPagerAdapter;
     private ViewPager mPager;
     private int mSelectedArticleID = -1;
-    private int mFeedID;
+    private ArrayList<String> mArticles = new ArrayList<String>();
     private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.CONTENT };
 
     public void changePosition(int position) {
@@ -46,8 +47,8 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     public ArticleViewPager(FragmentActivity context) {
         this.mContext = context;
 
-        int mArticleID = mContext.getIntent().getIntExtra("articleid", 0);
-        mFeedID = queryFeedID(mArticleID);
+        mArticles = mContext.getIntent().getStringArrayListExtra("articles");
+        mSelectedArticleID = mContext.getIntent().getIntExtra("articleid", 0);
 
         mContext.getSupportLoaderManager().initLoader(LOADER, null, this);
 
@@ -56,25 +57,6 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         mPager = (ViewPager) mContext.findViewById(R.id.viewpager_article);
         mPager.setAdapter(mPagerAdapter);
         mPager.setOnPageChangeListener(this);
-
-        mSelectedArticleID = mArticleID;
-    }
-
-    /**
-     * 
-     * @param articleID
-     * @return
-     */
-    private int queryFeedID(int articleID) {
-        Uri mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, String.valueOf(articleID));
-        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID };
-
-        Cursor mCursor = mContext.getContentResolver().query(mBaseUri, mProjection, null, null, null);
-        mCursor.moveToFirst();
-        int mFeedID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO.FEEDID));
-        mCursor.close();
-
-        return mFeedID;
     }
 
     public void onPageScrollStateChanged(int state) {
@@ -88,10 +70,15 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String mSelection = "feedid = ?";
-        String mSelectionArgs[] = { String.valueOf(mFeedID) };
+        String mSelection = ArticleDAO._ID + " IN (";
+        for (int i = 0; i < mArticles.size() - 1; i++) {
+            mSelection = mSelection + "?, ";
+        }
+        mSelection = mSelection + "?)";
+        String[] mSelectionArgs = mArticles.toArray(new String[mArticles.size()]);
 
-        CursorLoader mCursorLoader = new CursorLoader(mContext, RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, null);
+        CursorLoader mCursorLoader = new CursorLoader(mContext, RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, ArticleDAO.PUBDATE
+                + " DESC");
         return mCursorLoader;
     }
 

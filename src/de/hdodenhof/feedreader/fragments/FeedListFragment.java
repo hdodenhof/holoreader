@@ -1,5 +1,7 @@
 package de.hdodenhof.feedreader.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -26,10 +28,12 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
 
     @SuppressWarnings("unused")
     private static final String TAG = FeedListFragment.class.getSimpleName();
+    private static final String PREFS_NAME = "Feedreader";
     private static final int LOADER = 10;
 
     private ListView mFeedsListView;
     private SimpleCursorAdapter mFeedAdapter;
+    private boolean mUnreadOnly = true;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -38,6 +42,9 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
         if (savedInstanceState != null) {
 
         }
+        
+        SharedPreferences mPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUnreadOnly = mPreferences.getBoolean("unreadonly", true); 
 
         String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
         int[] uiBindTo = { R.id.list_item_feed_title, R.id.list_item_feed_summary, R.id.list_item_feed_updated, R.id.list_item_feed_unread };
@@ -46,7 +53,7 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
 
         mFeedAdapter = new RSSFeedAdapter(getActivity(), R.layout.listitem_feed, null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
-        this.setEmptyText("No feeds with unread articles");
+        this.setEmptyText("Loading feeds...");
         this.setListAdapter(mFeedAdapter);
         mFeedsListView = getListView();
 
@@ -60,15 +67,25 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
         mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
 
+    public void setUnreadOnly(boolean unreadOnly) {
+        mUnreadOnly = unreadOnly;
+        getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
+    }
+
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] mProjection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
-        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, FeedDAO.UNREAD + " > 0", null, FeedDAO.UPDATED
-                + " DESC"); // for some reason using SelectionArgs in this query won't work
+        String mSelection = null;
+        if (mUnreadOnly) {
+            mSelection = FeedDAO.UNREAD + " > 0";
+        }
+        // for some reason using SelectionArgs in this query won't work
+        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, mSelection, null, FeedDAO.UPDATED + " DESC");
         return mCursorLoader;
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mFeedAdapter.swapCursor(data);
+        this.setEmptyText("No unread feeds");
     }
 
     public void onLoaderReset(Loader<Cursor> loader) {

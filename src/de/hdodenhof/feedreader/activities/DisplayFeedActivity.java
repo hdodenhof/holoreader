@@ -1,9 +1,12 @@
 package de.hdodenhof.feedreader.activities;
 
+import java.util.ArrayList;
+
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
@@ -38,9 +41,12 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayFeedActivity.class.getSimpleName();
+    private static final String PREFS_NAME = "Feedreader";
 
     private boolean mTwoPane = false;
-    private ArticleViewPager mArticlePagerFragment = null;
+    private boolean mUnreadOnly;
+    private ArticleViewPager mArticlePagerFragment;
+    SharedPreferences mPreferences;
 
     /**
      * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -56,13 +62,12 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
 
         }
 
-        if (!getIntent().hasExtra("feedid")) {
-            Intent mIntent = new Intent(this, HomeActivity.class);
-            mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(mIntent);
-        } else {
+        if (getIntent().hasExtra("feedid")) {
             mFeedID = getIntent().getIntExtra("feedid", 0);
         }
+
+        mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
 
         setContentView(R.layout.activity_feed);
 
@@ -86,15 +91,19 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
      * @return
      */
     private String queryFeedName(int feedID) {
-        Uri mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_FEEDS, String.valueOf(feedID));
-        String[] mProjection = { FeedDAO._ID, FeedDAO.NAME };
+        if (feedID != 0) {
+            Uri mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_FEEDS, String.valueOf(feedID));
+            String[] mProjection = { FeedDAO._ID, FeedDAO.NAME };
 
-        Cursor mCursor = getContentResolver().query(mBaseUri, mProjection, null, null, null);
-        mCursor.moveToFirst();
-        String mFeedName = mCursor.getString(mCursor.getColumnIndex(FeedDAO.NAME));
-        mCursor.close();
+            Cursor mCursor = getContentResolver().query(mBaseUri, mProjection, null, null, null);
+            mCursor.moveToFirst();
+            String mFeedName = mCursor.getString(mCursor.getColumnIndex(FeedDAO.NAME));
+            mCursor.close();
 
-        return mFeedName;
+            return mFeedName;
+        } else {
+            return "";
+        }
     }
 
     /**
@@ -112,6 +121,13 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
     public boolean isDualPane() {
         return mTwoPane;
     }
+    
+    /**
+     * @see de.hdodenhof.feedreader.misc.FragmentCallback#isPrimaryFragment(android.support.v4.app.Fragment)
+     */
+    public boolean isPrimaryFragment(Fragment fragment){
+       return fragment instanceof ArticleListFragment; 
+    }
 
     /**
      * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
@@ -123,6 +139,21 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
             Intent mIntent = new Intent(this, HomeActivity.class);
             mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(mIntent);
+            return true;
+        case R.id.item_toggle:
+            mUnreadOnly = !mUnreadOnly;
+
+            SharedPreferences.Editor mEditor = mPreferences.edit();
+            mEditor.putBoolean("unreadonly", mUnreadOnly);
+            mEditor.commit();
+
+            if (mUnreadOnly) {
+                item.setIcon(R.drawable.checkbox_unchecked);
+            } else {
+                item.setIcon(R.drawable.checkbox_checked);
+            }
+            ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
+            mArticleListFragment.setUnreadOnly(mUnreadOnly);
             return true;
         default:
             return super.onOptionsItemSelected(item);
@@ -136,6 +167,13 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater mMenuInflater = getMenuInflater();
         mMenuInflater.inflate(R.menu.settings, menu);
+
+        if (mTwoPane) {
+            menu.removeItem(R.id.item_toggle);
+        } else if (!mUnreadOnly) {
+            menu.getItem(0).setIcon(R.drawable.checkbox_checked);
+        }
+
         return true;
     }
 
@@ -157,8 +195,16 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
                 mCursor.moveToPosition(position);
                 int mArticleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
 
+                ArrayList<String> mArticles = new ArrayList<String>();
+
+                mCursor.moveToFirst();
+                do {
+                    mArticles.add(mCursor.getString(mCursor.getColumnIndex(ArticleDAO._ID)));
+                } while (mCursor.moveToNext());
+
                 Intent mIntent = new Intent(this, DisplayArticleActivity.class);
                 mIntent.putExtra("articleid", mArticleID);
+                mIntent.putStringArrayListExtra("articles", mArticles);
                 startActivity(mIntent);
             }
             break;

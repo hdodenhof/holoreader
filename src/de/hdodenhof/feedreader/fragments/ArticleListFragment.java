@@ -1,6 +1,11 @@
 package de.hdodenhof.feedreader.fragments;
 
+import java.util.ArrayList;
+
 import android.annotation.SuppressLint;
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,17 +32,22 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
 
     @SuppressWarnings("unused")
     private static final String TAG = ArticleListFragment.class.getSimpleName();
+    private static final String PREFS_NAME = "Feedreader";
     private static final int LOADER = 20;
 
     private ListView mArticlesListView;
     private RSSArticleAdapter mArticleAdapter;
     private boolean mInitialized = false;
+    private boolean mUnreadOnly = true;
+    private boolean mTwoPane = false;
+    private boolean mThisIsPrimaryFragment = false;
 
-    private String[] mBaseSelectionArgs = new String[1];
+    private int mSelectedFeed = 0;
+    private ArrayList<String> mArticles;
     private boolean mScrollTop = false;
 
     public void selectFeed(int feedID) {
-        mBaseSelectionArgs[0] = String.valueOf(feedID);
+        mSelectedFeed = feedID;
         mScrollTop = true;
         getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
     }
@@ -61,7 +71,8 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         mArticlesListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
     }
 
-    public void refreshList() {
+    public void setUnreadOnly(boolean unreadOnly) {
+        mUnreadOnly = unreadOnly;
         getActivity().getSupportLoaderManager().restartLoader(LOADER, null, this);
     }
 
@@ -74,8 +85,18 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         }
 
         if (getActivity().getIntent().hasExtra("feedid")) {
-            mBaseSelectionArgs[0] = String.valueOf(String.valueOf(getActivity().getIntent().getIntExtra("feedid", 0)));
+            mSelectedFeed = getActivity().getIntent().getIntExtra("feedid", mSelectedFeed);
         }
+
+        if (getActivity().getIntent().hasExtra("articles")) {
+            mArticles = getActivity().getIntent().getStringArrayListExtra("articles");
+        }
+
+        SharedPreferences mPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+
+        mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
+        mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
 
         String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
         int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_summary, R.id.list_item_entry_read };
@@ -85,29 +106,104 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         mArticleAdapter = new RSSArticleAdapter(getActivity(), R.layout.listitem_article, null, uiBindFrom, uiBindTo,
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
-        this.setEmptyText("No articles");
+        this.setEmptyText("Loading articles...");
         this.setListAdapter(mArticleAdapter);
         mArticlesListView = getListView();
 
         mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
         mInitialized = true;
+
         ((FragmentCallback) getActivity()).onFragmentReady(this);
 
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String mBaseSelection = "feedid = ?";
         String mSelection = null;
         String mSelectionArgs[] = null;
 
-        if (mBaseSelectionArgs[0] != null) {
-            mSelection = mBaseSelection;
-            mSelectionArgs = mBaseSelectionArgs;
+        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
+        CursorLoader mCursorLoader = null;
+
+        if (mTwoPane) {
+            // DualPane
+            if (mThisIsPrimaryFragment) {
+                // FeedListActivity
+                // articles in Intent
+
+                mSelection = ArticleDAO._ID + " IN (";
+                for (int i = 0; i < mArticles.size() - 1; i++) {
+                    mSelection = mSelection + "?, ";
+                }
+                mSelection = mSelection + "?)";
+                mSelectionArgs = mArticles.toArray(new String[mArticles.size()]);
+
+                mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, ArticleDAO.PUBDATE
+                        + " DESC");
+
+            } else {
+                // HomeActivity
+                if (mSelectedFeed == 0) {
+                    // first call no feedID in Intent
+
+                    if (mUnreadOnly) {
+                        mSelection = "read = 0";
+                    }
+
+                    mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs,
+                            ArticleDAO.PUBDATE + " DESC");
+
+                } else {
+                    // feedID in Intent
+
+                    mSelection = ArticleDAO.FEEDID + " = ?";
+                    mSelectionArgs = new String[] { String.valueOf(mSelectedFeed) };
+
+                    if (mUnreadOnly) {
+                        mSelection = mSelection + " AND read = 0";
+                    }
+
+                    mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs,
+                            ArticleDAO.PUBDATE + " DESC");
+
+                }
+            }
+        } else {
+            // SinglePane
+            // feedID in Intent
+
+            mSelection = ArticleDAO.FEEDID + " = ?";
+            mSelectionArgs = new String[] { String.valueOf(mSelectedFeed) };
+
+            if (mUnreadOnly) {
+                mSelection = mSelection + " AND read = 0";
+            }
+
+            mArticles = new ArrayList<String>();
+
+            ContentResolver mContentResolver = getActivity().getContentResolver();
+            Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID }, mSelection, mSelectionArgs, null);
+
+            if (mCursor.getCount() > 0) {
+                mCursor.moveToFirst();
+                do {
+                    mArticles.add(mCursor.getString(mCursor.getColumnIndex(ArticleDAO._ID)));
+                } while (mCursor.moveToNext());
+            }
+            mCursor.close();
+
+            mSelection = ArticleDAO._ID + " IN (";
+            for (int i = 0; i < mArticles.size() - 1; i++) {
+                mSelection = mSelection + "?, ";
+            }
+            mSelection = mSelection + "?)";
+            mSelectionArgs = mArticles.toArray(new String[mArticles.size()]);
+
+            mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, ArticleDAO.PUBDATE
+                    + " DESC");
+
         }
 
-        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
-        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, ArticleDAO.PUBDATE + " DESC");
         return mCursorLoader;
     }
 
@@ -117,6 +213,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
             mArticlesListView.scrollTo(0, 0);
             mScrollTop = false;
         }
+        this.setEmptyText("No unread articles");
     }
 
     public void onLoaderReset(Loader<Cursor> loader) {

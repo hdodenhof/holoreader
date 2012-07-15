@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
@@ -116,6 +115,13 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
     public boolean isDualPane() {
         return false;
     }
+    
+    /**
+     * @see de.hdodenhof.feedreader.misc.FragmentCallback#isPrimaryFragment(android.support.v4.app.Fragment)
+     */
+    public boolean isPrimaryFragment(Fragment fragment){
+       return true; 
+    }
 
     /**
      * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
@@ -139,9 +145,10 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater mMenuInflater = getMenuInflater();
-        mMenuInflater.inflate(R.menu.settings, menu);
-        return true;
+//        MenuInflater mMenuInflater = getMenuInflater();
+//        mMenuInflater.inflate(R.menu.settings, menu);
+//        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     /**

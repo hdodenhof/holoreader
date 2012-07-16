@@ -16,9 +16,9 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:lineSpacingMultiplier="1.1"
-        android:maxLines="1"
+        android:maxLines="?listViewTitleMaxLines"
         android:textColor="?android:attr/textColorPrimary"
-        android:textSize="18sp"
+        android:textSize="?listViewTitleTextSize"
         android:textStyle="bold" />
 
     <TextView
@@ -29,8 +29,8 @@
         android:layout_below="@id/list_item_entry_title"
         android:ellipsize="end"
         android:lineSpacingMultiplier="1.2"
-        android:minLines="2"
         android:maxLines="3"
+        android:minLines="2"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="16sp" />
 

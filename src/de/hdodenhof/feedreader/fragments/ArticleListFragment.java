@@ -99,7 +99,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
 
         String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
-        int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_summary, R.id.list_item_entry_read };
+        int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_summary, R.layout.listitem_article };
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 

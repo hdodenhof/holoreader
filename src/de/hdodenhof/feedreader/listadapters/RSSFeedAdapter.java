@@ -68,13 +68,17 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
         }
         if (mUpdatedView != null) {
             String mParsedUpdated = "";
-            if(mUpdated != null){
+            if (mUpdated != null) {
                 mParsedUpdated = DateFormat.format("E, dd MMM yyyy - kk:mm", SQLiteHelper.toDate(mUpdated)).toString();
             }
             mUpdatedView.setText("Last Update: " + mParsedUpdated);
         }
         if (mUnreadView != null) {
-            mUnreadView.setText("Unread: " + mUnread);
+            if (!mUnread.equals("0")) {
+                mUnreadView.setText(mUnread);
+            } else {
+                mUnreadView.setText("");
+            }
         }
 
         return view;

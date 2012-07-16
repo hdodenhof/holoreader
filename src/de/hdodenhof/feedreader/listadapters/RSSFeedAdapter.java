@@ -93,18 +93,18 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
     }
     
     private String formatToYesterdayOrToday(Date date) {
-        Calendar today = Calendar.getInstance();
-        Calendar yesterday = Calendar.getInstance();
-        yesterday.add(Calendar.DATE, -1);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
+        Calendar mToday = Calendar.getInstance();
+        Calendar mYesterday = Calendar.getInstance();
+        mYesterday.add(Calendar.DATE, -1);
+        Calendar mCalendar = Calendar.getInstance();
+        mCalendar.setTime(date);
         
-        SimpleDateFormat timeFormatter = new SimpleDateFormat("kk:mm");
+        SimpleDateFormat mTimeFormatter = new SimpleDateFormat("kk:mm");
 
-        if (calendar.get(Calendar.YEAR) == today.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
-            return "Today, " + timeFormatter.format(date);
-        } else if (calendar.get(Calendar.YEAR) == yesterday.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR)) {
-            return "Yesterday, " + timeFormatter.format(date);
+        if (mCalendar.get(Calendar.YEAR) == mToday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mToday.get(Calendar.DAY_OF_YEAR)) {
+            return "Today, " + mTimeFormatter.format(date);
+        } else if (mCalendar.get(Calendar.YEAR) == mYesterday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mYesterday.get(Calendar.DAY_OF_YEAR)) {
+            return "Yesterday, " + mTimeFormatter.format(date);
         } else {
             return DateFormat.format("MMM dd, kk:mm", date).toString();
         }

@@ -13,7 +13,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleFragment;
@@ -73,9 +72,6 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
     public void onPageSelected(int position) {
         int mNewArticle = mPagerAdapter.getArticleID(position);
-
-        Log.v(TAG, "onPageSelected, position: " + position + ", mSelectedArticle: " + mSelectedArticleID + ", mNewArticle: " + mNewArticle);
-
         ((ArticleOnPageChangeListener) mContext).onArticleChanged(mSelectedArticleID, mNewArticle, position);
         mSelectedArticleID = mNewArticle;
     }

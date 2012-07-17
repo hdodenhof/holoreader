@@ -136,6 +136,9 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
     }
 
+    /**
+     * @see android.support.v4.app.FragmentActivity#onResume()
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -207,22 +210,38 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         }
     }
 
+    /**
+     * Queries the number of available feeds
+     * 
+     * @return Number of Feeds
+     */
     private int queryFeedCount() {
-        String[] mProjection = { FeedDAO._ID };
-
-        Cursor mCursor = getContentResolver().query(RSSContentProvider.URI_FEEDS, mProjection, null, null, null);
+        Cursor mCursor = getContentResolver().query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID }, null, null, null);
         int mCount = mCursor.getCount();
         mCursor.close();
 
         return mCount;
     }
 
+    /**
+     * Checks the devices connectivity
+     * 
+     * @return True if connection is available, false if not
+     */
     private boolean isConnected() {
         ConnectivityManager mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
         return mNetworkInfo == null ? false : mNetworkInfo.isAvailable();
     }
 
+    /**
+     * Shows a simple dialog
+     * 
+     * @param title
+     *            Dialog title
+     * @param message
+     *            Dialog message
+     */
     private void showDialog(String title, String message) {
         AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
         mAlertDialog.setTitle(title);

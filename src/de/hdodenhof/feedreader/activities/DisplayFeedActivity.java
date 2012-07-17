@@ -26,7 +26,8 @@ import de.hdodenhof.feedreader.listadapters.RSSAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.misc.ArticleViewPager;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.misc.OnPositionChangedListener;
+import de.hdodenhof.feedreader.misc.MarkReadRunnable;
+import de.hdodenhof.feedreader.misc.OnArticleChangedListener;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
@@ -36,7 +37,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayFeedActivity extends FragmentActivity implements FragmentCallback, OnPositionChangedListener, OnItemClickListener {
+public class DisplayFeedActivity extends FragmentActivity implements FragmentCallback, OnArticleChangedListener, OnItemClickListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayFeedActivity.class.getSimpleName();
@@ -44,6 +45,7 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
 
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
+    private int mCurrentArticle = -1;
     private ArticleViewPager mArticlePagerFragment;
     SharedPreferences mPreferences;
 
@@ -81,6 +83,17 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
             mActionBar.setDisplayHomeAsUpEnabled(true);
         } else {
             setTitle(queryFeedName(mFeedID));
+        }
+    }
+
+    /**
+     * @see android.support.v4.app.FragmentActivity#onPause()
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mCurrentArticle != -1) {
+            new Thread(new MarkReadRunnable((Context) this, mCurrentArticle)).start();
         }
     }
 
@@ -213,10 +226,15 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
     }
 
     /**
-     * @see de.hdodenhof.feedreader.misc.OnPositionChangedListener#onArticleChanged(int)
+     * @see de.hdodenhof.feedreader.misc.OnArticleChangedListener#onArticleChanged(int)
      */
-    public void onPositionChanged(int position) {
+    public void onArticleChanged(int oldArticle, int currentArticle, int position) {
         ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
         mArticleListFragment.changePosition(position);
+        
+        if (oldArticle != -1) {
+            new Thread(new MarkReadRunnable((Context) this, oldArticle)).start();
+        }
+        mCurrentArticle = currentArticle;
     }
 }

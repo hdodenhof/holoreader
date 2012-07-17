@@ -2,6 +2,7 @@ package de.hdodenhof.feedreader.activities;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -15,7 +16,8 @@ import android.view.MenuItem;
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.misc.ArticleViewPager;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.misc.OnPositionChangedListener;
+import de.hdodenhof.feedreader.misc.MarkReadRunnable;
+import de.hdodenhof.feedreader.misc.OnArticleChangedListener;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
@@ -25,13 +27,14 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayArticleActivity extends FragmentActivity implements FragmentCallback, OnPositionChangedListener {
+public class DisplayArticleActivity extends FragmentActivity implements FragmentCallback, OnArticleChangedListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayArticleActivity.class.getSimpleName();
 
     private int mArticleID;
     private int mFeedID;
+    private int mCurrentArticle;
 
     /**
      * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -64,6 +67,17 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
             mActionBar.setDisplayHomeAsUpEnabled(true);
         } else {
             setTitle(queryFeedName(mFeedID));
+        }
+    }
+    
+    /**
+     * @see android.support.v4.app.FragmentActivity#onPause()
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mCurrentArticle != -1) {
+            new Thread(new MarkReadRunnable((Context) this, mCurrentArticle)).start();
         }
     }
 
@@ -150,9 +164,14 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
     }
 
     /**
-     * @see de.hdodenhof.feedreader.misc.OnPositionChangedListener# onArticleChanged(int)
+     * @see de.hdodenhof.feedreader.misc.OnArticleChangedListener
      */
-    public void onPositionChanged(int position) {
+    public void onArticleChanged(int oldArticle, int currentArticle, int position) {
+        if (oldArticle != -1) {
+            new Thread(new MarkReadRunnable((Context) this, oldArticle)).start();
+        }
+        
+        mCurrentArticle = currentArticle;
     }
 
 }

@@ -5,7 +5,7 @@ package de.hdodenhof.feedreader.misc;
  * @author Henning Dodenhof
  * 
  */
-public interface OnPositionChangedListener {
+public interface OnArticleChangedListener {
     /**
      * Is called from within the ArticlePagerFragment after the visible article changed
      * 
@@ -15,5 +15,5 @@ public interface OnPositionChangedListener {
      *            Position of the article within a list
      * 
      */
-    public void onPositionChanged(int position);
+    public void onArticleChanged(int oldArticle, int currentArticle, int position);
 }

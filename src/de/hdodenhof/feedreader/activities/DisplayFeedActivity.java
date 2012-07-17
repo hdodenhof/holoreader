@@ -24,10 +24,9 @@ import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
 import de.hdodenhof.feedreader.listadapters.RSSAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
-import de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener;
 import de.hdodenhof.feedreader.misc.ArticleViewPager;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.misc.MarkReadRunnable;
+import de.hdodenhof.feedreader.misc.OnPositionChangedListener;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
@@ -37,7 +36,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayFeedActivity extends FragmentActivity implements FragmentCallback, ArticleOnPageChangeListener, OnItemClickListener {
+public class DisplayFeedActivity extends FragmentActivity implements FragmentCallback, OnPositionChangedListener, OnItemClickListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayFeedActivity.class.getSimpleName();
@@ -214,14 +213,10 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
     }
 
     /**
-     * @see de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener#onArticleChanged(int)
+     * @see de.hdodenhof.feedreader.misc.OnPositionChangedListener#onArticleChanged(int)
      */
-    public void onArticleChanged(int oldArticleID, int newArticleID, int position) {
+    public void onPositionChanged(int position) {
         ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
         mArticleListFragment.changePosition(position);
-      
-        if (oldArticleID != -1) {
-            new Thread(new MarkReadRunnable((Context) this, oldArticleID)).start();
-        }
     }
 }

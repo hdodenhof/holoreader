@@ -2,7 +2,6 @@ package de.hdodenhof.feedreader.activities;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,10 +13,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener;
 import de.hdodenhof.feedreader.misc.ArticleViewPager;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
-import de.hdodenhof.feedreader.misc.MarkReadRunnable;
+import de.hdodenhof.feedreader.misc.OnPositionChangedListener;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
@@ -27,7 +25,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayArticleActivity extends FragmentActivity implements FragmentCallback, ArticleOnPageChangeListener {
+public class DisplayArticleActivity extends FragmentActivity implements FragmentCallback, OnPositionChangedListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayArticleActivity.class.getSimpleName();
@@ -152,12 +150,9 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
     }
 
     /**
-     * @see de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener# onArticleChanged(int)
+     * @see de.hdodenhof.feedreader.misc.OnPositionChangedListener# onArticleChanged(int)
      */
-    public void onArticleChanged(int oldArticleID, int newArticleID, int position) {
-        if (oldArticleID != -1){
-            new Thread(new MarkReadRunnable((Context) this, oldArticleID)).start();
-        }
+    public void onPositionChanged(int position) {
     }
 
 }

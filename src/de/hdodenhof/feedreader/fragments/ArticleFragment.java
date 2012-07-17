@@ -53,7 +53,7 @@ public class ArticleFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View mArticleView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
-
+        
         if (mTitle != null && mContent != null && mPubdate != null) {
             int mViewWidth;
 

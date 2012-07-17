@@ -10,6 +10,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -161,12 +163,12 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
     public boolean isDualPane() {
         return mTwoPane;
     }
-    
+
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#isPrimaryFragment(android.support.v4.app.Fragment)
      */
-    public boolean isPrimaryFragment(Fragment fragment){
-       return fragment instanceof FeedListFragment; 
+    public boolean isPrimaryFragment(Fragment fragment) {
+        return fragment instanceof FeedListFragment;
     }
 
     /**
@@ -185,17 +187,24 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
      * Starts an AsyncTask to refresh all feeds currently in the database
      */
     private void refreshFeeds() {
+        boolean mIsConnected = isConnected();
 
-        mProgresBar = new ProgressDialog(this);
-        mProgresBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        mProgresBar.setMessage("Loading...");
-        mProgresBar.setCancelable(false);
-        mProgresBar.setProgress(0);
-        mProgresBar.setMax(queryFeedCount());
-        mProgresBar.show();
+        if (mIsConnected) {
 
-        RefreshFeedsTask mRefreshFeedsTask = new RefreshFeedsTask(mAsyncHandler, this);
-        mRefreshFeedsTask.execute();
+            mProgresBar = new ProgressDialog(this);
+            mProgresBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            mProgresBar.setMessage("Loading...");
+            mProgresBar.setCancelable(false);
+            mProgresBar.setProgress(0);
+            mProgresBar.setMax(queryFeedCount());
+            mProgresBar.show();
+
+            RefreshFeedsTask mRefreshFeedsTask = new RefreshFeedsTask(mAsyncHandler, this);
+            mRefreshFeedsTask.execute();
+
+        } else {
+            showDialog("No connection", "You are not connected to the internet, please retry later.");
+        }
     }
 
     private int queryFeedCount() {
@@ -208,32 +217,51 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
         return mCount;
     }
 
+    private boolean isConnected() {
+        ConnectivityManager mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+        return mNetworkInfo == null ? false : mNetworkInfo.isAvailable();
+    }
+
+    private void showDialog(String title, String message) {
+        AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
+        mAlertDialog.setTitle(title);
+        mAlertDialog.setMessage(message);
+        mAlertDialog.setPositiveButton("OK", null);
+        mAlertDialog.show();
+    }
+
     /**
      * Shows a dialog to add a new feed URL
      */
     private void showAddDialog() {
-        AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
+        boolean mIsConnected = isConnected();
 
-        mAlertDialog.setTitle("Add feed");
-        mAlertDialog.setMessage("Input Feed URL");
+        if (mIsConnected) {
+            AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
 
-        final EditText mInput = new EditText(this);
-        mInput.setText("http://t3n.de/news/feed");
-        mAlertDialog.setView(mInput);
+            mAlertDialog.setTitle("Add feed");
+            mAlertDialog.setMessage("Input Feed URL");
 
-        mAlertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                String value = mInput.getText().toString();
-                addFeed(value);
-            }
-        });
+            final EditText mInput = new EditText(this);
+            mInput.setText("http://t3n.de/news/feed");
+            mAlertDialog.setView(mInput);
 
-        mAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-            }
-        });
+            mAlertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    String value = mInput.getText().toString();
+                    addFeed(value);
+                }
+            });
 
-        mAlertDialog.show();
+            mAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+            mAlertDialog.show();
+        } else {
+            showDialog("No connection", "You are not connected to the internet, please retry later.");
+        }
     }
 
     /**

@@ -20,7 +20,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String TAG = SQLiteHelper.class.getSimpleName();
 
     private static final String DATABASE_NAME = "feedreader";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
             + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT);";
@@ -31,10 +31,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String FEED_VIEW_CREATE = "CREATE VIEW " + FeedDAO.VIEW + " AS SELECT " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE
             + "." + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ", MAX(" + ArticleDAO.TABLE + "." + ArticleDAO.PUBDATE + ") AS "
-            + FeedDAO.UPDATED + ", COUNT(" + ArticleDAO.TABLE + "." + ArticleDAO._ID + ") AS " + FeedDAO.UNREAD + " FROM " + FeedDAO.TABLE
-            + " LEFT OUTER JOIN " + ArticleDAO.TABLE + " ON " + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "." + FeedDAO._ID
-            + " AND " + ArticleDAO.TABLE + "." + ArticleDAO.READ + " = 0 GROUP BY " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE + "."
-            + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ";";
+            + FeedDAO.UPDATED + ", COUNT(" + ArticleDAO.TABLE + "." + ArticleDAO._ID + ")-SUM(" + ArticleDAO.TABLE + "." + ArticleDAO.READ + " = 1) AS "
+            + FeedDAO.UNREAD + " FROM " + FeedDAO.TABLE + " LEFT OUTER JOIN " + ArticleDAO.TABLE + " ON " + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = "
+            + FeedDAO.TABLE + "." + FeedDAO._ID + " GROUP BY " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE + "." + FeedDAO.NAME + ", "
+            + FeedDAO.TABLE + "." + FeedDAO.URL + ";";
 
     private static final String mDummydata[][] = { { "t3n News", "http://t3n.de/news/feed" },
             { "Gründerszene.de - Infos für Gründer, Unternehmer, StartUps | Gründerszene", "http://www.gruenderszene.de/feed/" },

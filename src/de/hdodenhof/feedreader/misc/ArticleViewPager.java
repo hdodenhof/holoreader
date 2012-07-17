@@ -37,7 +37,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     private ArticlePagerAdapter mPagerAdapter;
     private ViewPager mPager;
     private int mPreselectedArticleID = -1;
-    private int mSelectedArticleID = -1;
+    private int mCurrentArticleID = -1;
     private int mCurrentState;
     private ArrayList<String> mArticles = new ArrayList<String>();
     private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.CONTENT };
@@ -71,9 +71,9 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     }
 
     public void onPageSelected(int position) {
-        int mNewArticle = mPagerAdapter.getArticleID(position);
-        ((ArticleOnPageChangeListener) mContext).onArticleChanged(mSelectedArticleID, mNewArticle, position);
-        mSelectedArticleID = mNewArticle;
+        int mNewArticleID = mPagerAdapter.getArticleID(position);
+        ((ArticleOnPageChangeListener) mContext).onArticleChanged(mCurrentArticleID, mNewArticleID, position);
+        mCurrentArticleID = mNewArticleID;
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

@@ -78,7 +78,7 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
             mUpdatedView.setText("Last Update: " + mParsedUpdated);
         }
         if (mUnreadView != null) {
-            if (!mUnread.equals("0")) {
+            if (mUnread != null && !mUnread.equals("0")) {
                 mUnreadView.setText(mUnread);
             } else {
                 mUnreadView.setText("");

@@ -34,13 +34,16 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
     private static final String TAG = ArticleListFragment.class.getSimpleName();
     private static final String PREFS_NAME = "Feedreader";
     private static final int LOADER = 20;
+    private static final int STATE_LOADING = 1;
+    private static final int STATE_LOADED = 2;
 
     private ListView mArticlesListView;
     private RSSArticleAdapter mArticleAdapter;
-    private boolean mInitialized = false;
     private boolean mUnreadOnly = true;
     private boolean mTwoPane = false;
     private boolean mThisIsPrimaryFragment = false;
+    private int mCurrentState;
+    private int mChangeToPosition = -1;
 
     private int mSelectedFeed = 0;
     private ArrayList<String> mArticles;
@@ -54,7 +57,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
 
     @SuppressLint("NewApi")
     public void changePosition(int position) {
-        if (mInitialized) {
+        if (mCurrentState == STATE_LOADED) {
             if (mArticlesListView.getCheckedItemPosition() != position) {
                 int mPosition = (position - 1 < 0) ? 0 : position - 1;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -64,6 +67,8 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
                     mArticlesListView.setSelection(position);
                 }
             }
+        } else {
+            mChangeToPosition = position;
         }
     }
 
@@ -80,6 +85,8 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        mCurrentState = STATE_LOADING;
+        
         if (savedInstanceState != null) {
 
         }
@@ -111,8 +118,6 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         mArticlesListView = getListView();
 
         mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
-
-        mInitialized = true;
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);
 
@@ -214,6 +219,13 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
             mScrollTop = false;
         }
         this.setEmptyText("No unread articles");
+        
+        mCurrentState = STATE_LOADED;
+        
+        if (mChangeToPosition != -1){
+            changePosition(mChangeToPosition);
+            mChangeToPosition = -1;
+        }
     }
 
     public void onLoaderReset(Loader<Cursor> loader) {

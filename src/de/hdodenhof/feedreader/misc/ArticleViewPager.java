@@ -94,10 +94,13 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         if (mCurrentState == STATE_LOADING) {
             if (mPreselectedArticleID != -1) {
                 int mPreselectedPosition = queryPosition(data, mPreselectedArticleID);
-                mPager.setCurrentItem(mPreselectedPosition, false);
+                if(mPreselectedPosition != 0){
+                    mPager.setCurrentItem(mPreselectedPosition, false);
+                } else {
+                    onPageSelected(0);
+                }
             } else {
-                mPager.setCurrentItem(0, false);
-                this.onPageSelected(0);
+                onPageSelected(0);
             }
             mCurrentState = STATE_LOADED;
         }

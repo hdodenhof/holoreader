@@ -154,8 +154,10 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
     /**
      * @see de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener# onArticleChanged(int)
      */
-    public void onArticleChanged(int articleID, int position) {
-        new Thread(new MarkReadRunnable((Context) this, articleID)).start();
+    public void onArticleChanged(int oldArticleID, int newArticleID, int position) {
+        if (oldArticleID != -1){
+            new Thread(new MarkReadRunnable((Context) this, oldArticleID)).start();
+        }
     }
 
 }

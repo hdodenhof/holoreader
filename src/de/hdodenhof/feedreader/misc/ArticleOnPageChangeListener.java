@@ -15,5 +15,5 @@ public interface ArticleOnPageChangeListener {
      *            Position of the article within a list
      * 
      */
-    public void onArticleChanged(int articleID, int position);
+    public void onArticleChanged(int oldArticleID, int newArticleID, int position);
 }

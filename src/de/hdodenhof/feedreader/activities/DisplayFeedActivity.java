@@ -121,12 +121,12 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
     public boolean isDualPane() {
         return mTwoPane;
     }
-    
+
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#isPrimaryFragment(android.support.v4.app.Fragment)
      */
-    public boolean isPrimaryFragment(Fragment fragment){
-       return fragment instanceof ArticleListFragment; 
+    public boolean isPrimaryFragment(Fragment fragment) {
+        return fragment instanceof ArticleListFragment;
     }
 
     /**
@@ -216,10 +216,12 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
     /**
      * @see de.hdodenhof.feedreader.misc.ArticleOnPageChangeListener#onArticleChanged(int)
      */
-    public void onArticleChanged(int articleID, int position) {
+    public void onArticleChanged(int oldArticleID, int newArticleID, int position) {
         ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
         mArticleListFragment.changePosition(position);
-
-        new Thread(new MarkReadRunnable((Context) this, articleID)).start();
+      
+        if (oldArticleID != -1) {
+            new Thread(new MarkReadRunnable((Context) this, oldArticleID)).start();
+        }
     }
 }

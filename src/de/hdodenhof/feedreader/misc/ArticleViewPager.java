@@ -13,6 +13,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleFragment;
@@ -30,11 +31,15 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     @SuppressWarnings("unused")
     private static final String TAG = ArticleViewPager.class.getSimpleName();
     private static final int LOADER = 30;
+    private static final int STATE_LOADING = 1;
+    private static final int STATE_LOADED = 2;
 
     private FragmentActivity mContext;
     private ArticlePagerAdapter mPagerAdapter;
     private ViewPager mPager;
+    private int mPreselectedArticleID = -1;
     private int mSelectedArticleID = -1;
+    private int mCurrentState;
     private ArrayList<String> mArticles = new ArrayList<String>();
     private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.CONTENT };
 
@@ -46,9 +51,10 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
     public ArticleViewPager(FragmentActivity context) {
         this.mContext = context;
+        this.mCurrentState = STATE_LOADING;
 
         mArticles = mContext.getIntent().getStringArrayListExtra("articles");
-        mSelectedArticleID = mContext.getIntent().getIntExtra("articleid", 0);
+        mPreselectedArticleID = mContext.getIntent().getIntExtra("articleid", 0);
 
         mContext.getSupportLoaderManager().initLoader(LOADER, null, this);
 
@@ -66,7 +72,12 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     }
 
     public void onPageSelected(int position) {
-        ((ArticleOnPageChangeListener) mContext).onArticleChanged(mPagerAdapter.getArticleID(position), position);
+        int mNewArticle = mPagerAdapter.getArticleID(position);
+
+        Log.v(TAG, "onPageSelected, position: " + position + ", mSelectedArticle: " + mSelectedArticleID + ", mNewArticle: " + mNewArticle);
+
+        ((ArticleOnPageChangeListener) mContext).onArticleChanged(mSelectedArticleID, mNewArticle, position);
+        mSelectedArticleID = mNewArticle;
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -84,9 +95,15 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mPagerAdapter.swapCursor(data);
-        if (mSelectedArticleID != -1) {
-            mPager.setCurrentItem(queryPosition(data, mSelectedArticleID), false);
-            mSelectedArticleID = -1;
+        if (mCurrentState == STATE_LOADING) {
+            if (mPreselectedArticleID != -1) {
+                int mPreselectedPosition = queryPosition(data, mPreselectedArticleID);
+                mPager.setCurrentItem(mPreselectedPosition, false);
+            } else {
+                mPager.setCurrentItem(0, false);
+                this.onPageSelected(0);
+            }
+            mCurrentState = STATE_LOADED;
         }
     }
 

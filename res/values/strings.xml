@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">Feedreader</string>
     <string name="rss_icon_desc">RSS Icon</string>
+    <string name="refresh_spinner_desc">Spinner</string>
 </resources>

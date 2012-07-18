@@ -2,9 +2,12 @@ package de.hdodenhof.feedreader.activities;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,13 +20,17 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
@@ -36,7 +43,7 @@ import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 import de.hdodenhof.feedreader.tasks.AddFeedTask;
-import de.hdodenhof.feedreader.tasks.RefreshFeedsTask;
+import de.hdodenhof.feedreader.tasks.RefreshFeedTask;
 
 /**
  * 
@@ -52,10 +59,11 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
     private ProgressDialog mSpinner;
-    private ProgressDialog mProgresBar;
     private ArticleListFragment mArticleListFragment;
     private FeedListFragment mFeedListFragment;
     private SharedPreferences mPreferences;
+    private HashSet<Integer> mFeedsUpdating;
+    private MenuItem mRefreshItem;
 
     /**
      * Handles messages from AsyncTasks started within this activity
@@ -78,13 +86,9 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
                 // added feed
                 mTarget.callbackFeedAdded();
                 break;
-            case 3:
-                // refreshed feeds
-                mTarget.callbackFeedsRefreshed();
-                break;
-            case 9:
-                // refresh progress bar
-                mTarget.callbackUpdateProgress(msg.arg1);
+            case 2:
+                // feed refresh
+                mTarget.callbackFeedRefresh(msg.arg1);
                 break;
             default:
                 break;
@@ -100,17 +104,15 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
     }
 
     /**
-     * Update feed list and dismiss progress bar after feeds have been refreshed
+     * Update list of running tasks and dismiss spinner when all tasks are done
      */
-    private void callbackFeedsRefreshed() {
-        mProgresBar.dismiss();
-    }
-
-    /**
-     * Update progress bar during feeds refresh
-     */
-    private void callbackUpdateProgress(int progress) {
-        mProgresBar.setProgress(progress);
+    @SuppressLint("NewApi")
+    private void callbackFeedRefresh(int feedID) {
+        mFeedsUpdating.remove(feedID);
+        if (mFeedsUpdating.size() == 0) {
+            mRefreshItem.getActionView().clearAnimation();
+            mRefreshItem.setActionView(null);
+        }
     }
 
     /**
@@ -187,40 +189,56 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
     }
 
     /**
-     * Starts an AsyncTask to refresh all feeds currently in the database
+     * Spawns AsyncTasks to refresh all feeds
+     * 
+     * @param item
+     *            MenuItem that holds the refresh animation
      */
-    private void refreshFeeds() {
+    @SuppressLint("NewApi")
+    private void refreshFeeds(MenuItem item) {
         boolean mIsConnected = isConnected();
 
         if (mIsConnected) {
+            mRefreshItem = item;
 
-            mProgresBar = new ProgressDialog(this);
-            mProgresBar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            mProgresBar.setMessage("Loading...");
-            mProgresBar.setCancelable(false);
-            mProgresBar.setProgress(0);
-            mProgresBar.setMax(queryFeedCount());
-            mProgresBar.show();
+            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            ImageView iv = (ImageView) inflater.inflate(R.layout.view_refresh, null);
 
-            RefreshFeedsTask mRefreshFeedsTask = new RefreshFeedsTask(mAsyncHandler, this);
-            mRefreshFeedsTask.execute();
+            Animation rotation = AnimationUtils.loadAnimation(this, R.anim.rotate);
+            rotation.setRepeatCount(Animation.INFINITE);
+            iv.startAnimation(rotation);
 
+            mRefreshItem.setActionView(iv);
+
+            mFeedsUpdating = queryFeeds();
+            for (Integer mFeedID : mFeedsUpdating) {
+                new RefreshFeedTask(mAsyncHandler, this).execute(mFeedID);
+            }
         } else {
             showDialog("No connection", "You are not connected to the internet, please retry later.");
         }
     }
 
     /**
-     * Queries the number of available feeds
+     * Queries all feed ids
      * 
-     * @return Number of Feeds
+     * @return All feed ids in a HashMap
      */
-    private int queryFeedCount() {
-        Cursor mCursor = getContentResolver().query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID }, null, null, null);
-        int mCount = mCursor.getCount();
+    private HashSet<Integer> queryFeeds() {
+        HashSet<Integer> mFeedsUpdating = new HashSet<Integer>();
+
+        ContentResolver mContentResolver = getContentResolver();
+        Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL }, null, null, null);
+
+        if (mCursor.getCount() > 0) {
+            mCursor.moveToFirst();
+            do {
+                mFeedsUpdating.add(mCursor.getInt(mCursor.getColumnIndex(FeedDAO._ID)));
+            } while (mCursor.moveToNext());
+        }
         mCursor.close();
 
-        return mCount;
+        return mFeedsUpdating;
     }
 
     /**
@@ -356,7 +374,7 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.item_refresh:
-            refreshFeeds();
+            refreshFeeds(item);
             return true;
         case R.id.item_add:
             showAddDialog();

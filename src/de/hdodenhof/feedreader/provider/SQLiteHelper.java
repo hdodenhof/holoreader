@@ -20,14 +20,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String TAG = SQLiteHelper.class.getSimpleName();
 
     private static final String DATABASE_NAME = "feedreader";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
 
     private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
             + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT);";
 
     private static final String ARTICLE_TABLE_CREATE = "CREATE TABLE " + ArticleDAO.TABLE + " (" + ArticleDAO._ID + " integer primary key autoincrement, "
             + ArticleDAO.FEEDID + " integer, " + ArticleDAO.GUID + " TEXT, " + ArticleDAO.PUBDATE + " TEXT, " + ArticleDAO.TITLE + " TEXT , "
-            + ArticleDAO.SUMMARY + " TEXT, " + ArticleDAO.CONTENT + " TEXT, " + ArticleDAO.READ + " INTEGER);";
+            + ArticleDAO.SUMMARY + " TEXT, " + ArticleDAO.CONTENT + " TEXT, " + ArticleDAO.IMAGE + " TEXT, " + ArticleDAO.READ + " INTEGER);";
 
     private static final String FEED_VIEW_CREATE = "CREATE VIEW " + FeedDAO.VIEW + " AS SELECT " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE
             + "." + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ", MAX(" + ArticleDAO.TABLE + "." + ArticleDAO.PUBDATE + ") AS "
@@ -93,6 +93,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         public static final String TITLE = "title";
         public static final String SUMMARY = "summary";
         public static final String CONTENT = "content";
+        public static final String IMAGE = "image";
         public static final String READ = "read";
 
     }

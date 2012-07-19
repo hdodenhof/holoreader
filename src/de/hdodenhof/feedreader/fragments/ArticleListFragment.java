@@ -86,7 +86,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         super.onActivityCreated(savedInstanceState);
 
         mCurrentState = STATE_LOADING;
-        
+
         if (savedInstanceState != null) {
 
         }
@@ -105,13 +105,13 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
         mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
 
-        String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
-        int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_summary, R.layout.listitem_article };
+        String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE, ArticleDAO.READ };
+        int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_summary, R.id.list_item_entry_image, R.layout.listitem_article };
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
         mArticleAdapter = new RSSArticleAdapter(getActivity(), R.layout.listitem_article, null, uiBindFrom, uiBindTo,
-                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (mTwoPane && !mThisIsPrimaryFragment) ? true : false);
 
         this.setEmptyText("Loading articles...");
         this.setListAdapter(mArticleAdapter);
@@ -127,7 +127,7 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         String mSelection = null;
         String mSelectionArgs[] = null;
 
-        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.READ };
+        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE, ArticleDAO.READ };
         CursorLoader mCursorLoader = null;
 
         if (mTwoPane) {
@@ -219,10 +219,10 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
             mScrollTop = false;
         }
         this.setEmptyText("No unread articles");
-        
+
         mCurrentState = STATE_LOADED;
-        
-        if (mChangeToPosition != -1){
+
+        if (mChangeToPosition != -1) {
             changePosition(mChangeToPosition);
             mChangeToPosition = -1;
         }

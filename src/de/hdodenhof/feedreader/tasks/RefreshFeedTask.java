@@ -192,6 +192,9 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                 summary = mContentSummary;
             }
         }
+        
+        Element mImage = mDocument.select("img").first();
+        String mImageURL = mImage.absUrl("src");
 
         ContentValues mContentValues = new ContentValues();
 
@@ -201,6 +204,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         mContentValues.put(ArticleDAO.TITLE, title);
         mContentValues.put(ArticleDAO.SUMMARY, summary);
         mContentValues.put(ArticleDAO.CONTENT, content);
+        mContentValues.put(ArticleDAO.IMAGE, mImageURL);
         mContentValues.put(ArticleDAO.READ, 0);
 
         return mContentValues;

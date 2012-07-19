@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
+import android.support.v4.util.LruCache;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,6 +35,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     private int mLayout;
     private boolean mIncludeImages;
+    private LruCache<String, Bitmap> mImageCache = new LruCache<String, Bitmap>(50);
 
     public RSSArticleAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags, boolean includeImages) {
         super(context, layout, c, from, to, flags);
@@ -68,11 +70,17 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         }
 
         if (mIncludeImages && mArticleImage != null && mImageURL != null && mImageURL != "") {
-            if (cancelPotentialDownload(mImageURL, mArticleImage)) {
-                ImageDownloaderTask mTask = new ImageDownloaderTask(mArticleImage);
-                DownloadedDrawable mDownloadedDrawable = new DownloadedDrawable(mTask);
-                mArticleImage.setImageDrawable(mDownloadedDrawable);
-                mTask.execute(mImageURL);
+            Bitmap mImage = mImageCache.get(mImageURL);
+            if (mImage == null){
+                if (cancelPotentialDownload(mImageURL, mArticleImage)) {
+                    ImageDownloaderTask mTask = new ImageDownloaderTask(mArticleImage);
+                    DownloadedDrawable mDownloadedDrawable = new DownloadedDrawable(mTask);
+                    mArticleImage.setImageDrawable(mDownloadedDrawable);
+                    mTask.execute(mImageURL);
+                }                
+            } else {
+                cancelPotentialDownload(mImageURL, mArticleImage);
+                mArticleImage.setImageBitmap(mImage);
             }
         }
     }
@@ -122,6 +130,10 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         protected void onPostExecute(Bitmap bitmap) {
             if (isCancelled()) {
                 bitmap = null;
+            }
+
+            if (bitmap != null) {
+                mImageCache.put(mURL, bitmap);
             }
 
             if (mImageViewReference != null) {

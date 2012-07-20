@@ -9,13 +9,14 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+
+import com.actionbarsherlock.app.SherlockListFragment;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
@@ -28,7 +29,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
  * @author Henning Dodenhof
  * 
  */
-public class ArticleListFragment extends ListFragment implements LoaderCallbacks<Cursor> {
+public class ArticleListFragment extends SherlockListFragment implements LoaderCallbacks<Cursor> {
 
     @SuppressWarnings("unused")
     private static final String TAG = ArticleListFragment.class.getSimpleName();
@@ -126,7 +127,8 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         String mSelection = null;
         String mSelectionArgs[] = null;
 
-        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE, ArticleDAO.PUBDATE, ArticleDAO.READ };
+        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE,
+                ArticleDAO.PUBDATE, ArticleDAO.READ };
         CursorLoader mCursorLoader = null;
 
         if (mTwoPane) {

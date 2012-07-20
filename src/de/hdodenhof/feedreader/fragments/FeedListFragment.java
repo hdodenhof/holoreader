@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -12,6 +11,8 @@ import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+
+import com.actionbarsherlock.app.SherlockListFragment;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
@@ -24,7 +25,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cursor> {
+public class FeedListFragment extends SherlockListFragment implements LoaderCallbacks<Cursor> {
 
     @SuppressWarnings("unused")
     private static final String TAG = FeedListFragment.class.getSimpleName();
@@ -42,9 +43,9 @@ public class FeedListFragment extends ListFragment implements LoaderCallbacks<Cu
         if (savedInstanceState != null) {
 
         }
-        
+
         SharedPreferences mPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        mUnreadOnly = mPreferences.getBoolean("unreadonly", true); 
+        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
 
         String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
         int[] uiBindTo = { R.id.list_item_feed_title, R.id.list_item_feed_summary, R.id.list_item_feed_updated, R.id.list_item_feed_unread };

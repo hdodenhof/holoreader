@@ -1,17 +1,16 @@
 package de.hdodenhof.feedreader.activities;
 
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.view.Menu;
-import android.view.MenuItem;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.misc.ArticleViewPager;
@@ -27,7 +26,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayArticleActivity extends FragmentActivity implements FragmentCallback, OnArticleChangedListener {
+public class DisplayArticleActivity extends SherlockFragmentActivity implements FragmentCallback, OnArticleChangedListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayArticleActivity.class.getSimpleName();
@@ -39,7 +38,6 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
     /**
      * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
      */
-    @SuppressLint("NewApi")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,15 +59,11 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
 
         new ArticleViewPager(this);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            ActionBar mActionBar = getActionBar();
-            mActionBar.setTitle(queryFeedName(mFeedID));
-            mActionBar.setDisplayHomeAsUpEnabled(true);
-        } else {
-            setTitle(queryFeedName(mFeedID));
-        }
+        ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setTitle(queryFeedName(mFeedID));
+        mActionBar.setDisplayHomeAsUpEnabled(true);
     }
-    
+
     /**
      * @see android.support.v4.app.FragmentActivity#onPause()
      */
@@ -127,12 +121,12 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
     public boolean isDualPane() {
         return false;
     }
-    
+
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#isPrimaryFragment(android.support.v4.app.Fragment)
      */
-    public boolean isPrimaryFragment(Fragment fragment){
-       return true; 
+    public boolean isPrimaryFragment(Fragment fragment) {
+        return true;
     }
 
     /**
@@ -157,9 +151,9 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-//        MenuInflater mMenuInflater = getMenuInflater();
-//        mMenuInflater.inflate(R.menu.settings, menu);
-//        return true;
+        // MenuInflater mMenuInflater = getSupportMenuInflater();
+        // mMenuInflater.inflate(R.menu.settings, menu);
+        // return true;
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -170,7 +164,7 @@ public class DisplayArticleActivity extends FragmentActivity implements Fragment
         if (oldArticle != -1) {
             new Thread(new MarkReadRunnable((Context) this, oldArticle)).start();
         }
-        
+
         mCurrentArticle = currentArticle;
     }
 

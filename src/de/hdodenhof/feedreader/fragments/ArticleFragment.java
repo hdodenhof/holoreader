@@ -6,7 +6,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -15,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.widget.TextView;
+
+import com.actionbarsherlock.app.SherlockFragment;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
@@ -26,7 +27,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
  * @author Henning Dodenhof
  * 
  */
-public class ArticleFragment extends Fragment {
+public class ArticleFragment extends SherlockFragment {
 
     @SuppressWarnings("unused")
     private static final String TAG = ArticleFragment.class.getSimpleName();
@@ -53,7 +54,7 @@ public class ArticleFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View mArticleView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
-        
+
         if (mTitle != null && mContent != null && mPubdate != null) {
             int mViewWidth;
 

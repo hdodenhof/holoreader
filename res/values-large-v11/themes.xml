@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Default" parent="@android:style/Theme.Holo.Light">
+    <style name="Default" parent="Theme.Sherlock.Light">
         <item name="headerTextSize">?android:attr/textAppearanceLarge</item>
         <item name="listViewTitleTextSize">20sp</item>
         <item name="listViewMetaTextSize">14sp</item>

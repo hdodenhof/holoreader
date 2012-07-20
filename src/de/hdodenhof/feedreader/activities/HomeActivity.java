@@ -19,11 +19,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -31,6 +27,12 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.ImageView;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
+import com.actionbarsherlock.view.Window;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
@@ -50,10 +52,10 @@ import de.hdodenhof.feedreader.tasks.RefreshFeedTask;
  * @author Henning Dodenhof
  * 
  */
-public class HomeActivity extends FragmentActivity implements FragmentCallback, OnItemClickListener {
+public class HomeActivity extends SherlockFragmentActivity implements FragmentCallback, OnItemClickListener {
 
     @SuppressWarnings("unused")
-    private static final String TAG = FragmentActivity.class.getSimpleName();
+    private static final String TAG = HomeActivity.class.getSimpleName();
     private static final String PREFS_NAME = "Feedreader";
 
     private boolean mTwoPane = false;
@@ -126,6 +128,9 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
 
         }
 
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        setProgressBarIndeterminateVisibility(true);
+
         setContentView(R.layout.activity_home);
 
         mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
@@ -194,7 +199,6 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
      * @param item
      *            MenuItem that holds the refresh animation
      */
-    @SuppressLint("NewApi")
     private void refreshFeeds(MenuItem item) {
         boolean mIsConnected = isConnected();
 
@@ -357,7 +361,7 @@ public class HomeActivity extends FragmentActivity implements FragmentCallback, 
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater mMenuInflater = getMenuInflater();
+        MenuInflater mMenuInflater = getSupportMenuInflater();
         mMenuInflater.inflate(R.menu.main, menu);
 
         if (!mUnreadOnly) {

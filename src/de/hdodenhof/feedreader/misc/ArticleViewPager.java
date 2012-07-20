@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -13,6 +11,9 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+
+import com.actionbarsherlock.app.SherlockFragment;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleFragment;
@@ -33,7 +34,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     private static final int STATE_LOADING = 1;
     private static final int STATE_LOADED = 2;
 
-    private FragmentActivity mContext;
+    private SherlockFragmentActivity mContext;
     private ArticlePagerAdapter mPagerAdapter;
     private ViewPager mPager;
     private int mPreselectedArticleID = -1;
@@ -48,7 +49,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         }
     }
 
-    public ArticleViewPager(FragmentActivity context) {
+    public ArticleViewPager(SherlockFragmentActivity context) {
         this.mContext = context;
         this.mCurrentState = STATE_LOADING;
 
@@ -94,7 +95,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         if (mCurrentState == STATE_LOADING) {
             if (mPreselectedArticleID != -1) {
                 int mPreselectedPosition = queryPosition(data, mPreselectedArticleID);
-                if(mPreselectedPosition != 0){
+                if (mPreselectedPosition != 0) {
                     mPager.setCurrentItem(mPreselectedPosition, false);
                 } else {
                     onPageSelected(0);
@@ -141,13 +142,13 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         }
 
         @Override
-        public Fragment getItem(int position) {
+        public SherlockFragment getItem(int position) {
             if (mCursor == null) {
                 return null;
             }
 
             mCursor.moveToPosition(position);
-            Fragment mFragment;
+            SherlockFragment mFragment;
             try {
                 mFragment = ArticleFragment.newInstance();
             } catch (Exception mException) {
@@ -190,5 +191,5 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         }
 
     }
-    
+
 }

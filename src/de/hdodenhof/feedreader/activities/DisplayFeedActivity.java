@@ -2,23 +2,22 @@ package de.hdodenhof.feedreader.activities;
 
 import java.util.ArrayList;
 
-import android.annotation.SuppressLint;
-import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+
+import com.actionbarsherlock.app.ActionBar;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
+import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
@@ -37,7 +36,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayFeedActivity extends FragmentActivity implements FragmentCallback, OnArticleChangedListener, OnItemClickListener {
+public class DisplayFeedActivity extends SherlockFragmentActivity implements FragmentCallback, OnArticleChangedListener, OnItemClickListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayFeedActivity.class.getSimpleName();
@@ -52,7 +51,6 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
     /**
      * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
      */
-    @SuppressLint("NewApi")
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,13 +75,9 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
             mArticlePagerFragment = new ArticleViewPager(this);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            ActionBar mActionBar = getActionBar();
-            mActionBar.setTitle(queryFeedName(mFeedID));
-            mActionBar.setDisplayHomeAsUpEnabled(true);
-        } else {
-            setTitle(queryFeedName(mFeedID));
-        }
+        ActionBar mActionBar = getSupportActionBar();
+        mActionBar.setTitle(queryFeedName(mFeedID));
+        mActionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     /**
@@ -177,7 +171,7 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater mMenuInflater = getMenuInflater();
+        MenuInflater mMenuInflater = getSupportMenuInflater();
         mMenuInflater.inflate(R.menu.settings, menu);
 
         if (mTwoPane) {
@@ -231,7 +225,7 @@ public class DisplayFeedActivity extends FragmentActivity implements FragmentCal
     public void onArticleChanged(int oldArticle, int currentArticle, int position) {
         ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
         mArticleListFragment.changePosition(position);
-        
+
         if (oldArticle != -1) {
             new Thread(new MarkReadRunnable((Context) this, oldArticle)).start();
         }

@@ -60,6 +60,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             ContentResolver mContentResolver = mContext.getContentResolver();
             ArrayList<ContentValues> mContentValuesArrayList = new ArrayList<ContentValues>();
             ArrayList<String> mExistingArticles = new ArrayList<String>();
+            Date mNewestArticleDate = null;
 
             boolean mIsArticle = false;
             String mTitle = null;
@@ -73,12 +74,15 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
             mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?", new String[] { SQLiteHelper.fromDate(mArticleNotOlderThan), "1" });
 
-            Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID }, ArticleDAO.FEEDID
-                    + " = ?", new String[] { String.valueOf(mFeedID) }, null);
+            Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE }, ArticleDAO.FEEDID
+                    + " = ?", new String[] { String.valueOf(mFeedID) }, ArticleDAO.PUBDATE + " DESC");
             if (mCursor.getCount() > 0) {
                 mCursor.moveToFirst();
                 do {
                     mExistingArticles.add(mCursor.getString(mCursor.getColumnIndex(ArticleDAO.GUID)));
+                    if (mCursor.isFirst()){
+                        mNewestArticleDate = SQLiteHelper.toDate(mCursor.getString(mCursor.getColumnIndex(ArticleDAO.PUBDATE)));
+                    }
                 } while (mCursor.moveToNext());
             }
             mCursor.close();
@@ -114,7 +118,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                     if (mCurrentTag.equalsIgnoreCase("item") || mCurrentTag.equalsIgnoreCase("entry")) {
                         mIsArticle = false;
                         
-                        if (SQLiteHelper.toDate(mPubdate).before(mArticleNotOlderThan)){
+                        if (SQLiteHelper.toDate(mPubdate).before(mArticleNotOlderThan.before(mNewestArticleDate) ? mArticleNotOlderThan : mNewestArticleDate)){
                             break;
                         }
 

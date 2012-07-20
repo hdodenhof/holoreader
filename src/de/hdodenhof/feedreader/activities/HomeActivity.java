@@ -15,6 +15,8 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -195,6 +197,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * @param item
      *            MenuItem that holds the refresh animation
      */
+    @SuppressLint("NewApi")
     private void refreshFeeds(MenuItem item) {
         boolean mIsConnected = isConnected();
 
@@ -212,7 +215,11 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
             mFeedsUpdating = queryFeeds();
             for (Integer mFeedID : mFeedsUpdating) {
-                new RefreshFeedTask(mAsyncHandler, this).execute(mFeedID);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                    new RefreshFeedTask(mAsyncHandler, this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mFeedID);
+                } else {
+                    new RefreshFeedTask(mAsyncHandler, this).execute(mFeedID);
+                }
             }
         } else {
             showDialog("No connection", "You are not connected to the internet, please retry later.");

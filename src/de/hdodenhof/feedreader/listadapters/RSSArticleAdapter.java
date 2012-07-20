@@ -45,7 +45,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
         final int mMemoryClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
         final int mCacheSize = 1024 * 1024 * mMemoryClass / 8;
-        
+
         mImageCache = new LruCache<String, Bitmap>(mCacheSize) {
             @Override
             protected int sizeOf(String key, Bitmap bitmap) {
@@ -121,16 +121,28 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     public class ImageDownloaderTask extends AsyncTask<String, Void, Bitmap> {
         private final WeakReference<ImageView> mImageViewReference;
         private String mURL;
+        private int mImageDimension;
 
         public ImageDownloaderTask(ImageView imageView) {
             mImageViewReference = new WeakReference<ImageView>(imageView);
+            mImageDimension = (int) (120 * mContext.getResources().getDisplayMetrics().density + 0.5f);
         }
 
         @Override
         protected Bitmap doInBackground(String... params) {
             mURL = params[0];
             try {
-                return BitmapFactory.decodeStream(new URL(mURL).openConnection().getInputStream());
+                Bitmap mBitmap = BitmapFactory.decodeStream(new URL(mURL).openConnection().getInputStream());
+                float originalWidth = mBitmap.getWidth();
+                float originalHeight = mBitmap.getHeight();
+
+                if (originalHeight > mImageDimension) {
+                    int newHeight = mImageDimension;
+                    int newWidth = (int) ((newHeight / originalHeight) * originalWidth);
+                    mBitmap = Bitmap.createScaledBitmap(mBitmap, newWidth, newHeight, true);
+                }
+
+                return mBitmap;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;

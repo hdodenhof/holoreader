@@ -5,6 +5,8 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -65,8 +67,11 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             String mContent = null;
             String mGUID = null;
             String mPubdate = null;
-
+            
             String mFeedURL = queryURL(mFeedID);
+            Date mArticleNotOlderThan = maxArticleDate();
+
+            mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?", new String[] { SQLiteHelper.fromDate(mArticleNotOlderThan), "1" });
 
             Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID }, ArticleDAO.FEEDID
                     + " = ?", new String[] { String.valueOf(mFeedID) }, null);
@@ -108,6 +113,10 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
                     if (mCurrentTag.equalsIgnoreCase("item") || mCurrentTag.equalsIgnoreCase("entry")) {
                         mIsArticle = false;
+                        
+                        if (SQLiteHelper.toDate(mPubdate).before(mArticleNotOlderThan)){
+                            break;
+                        }
 
                         if (!mExistingArticles.contains(mGUID)) {
                             mContentValuesArrayList.add(prepareArticle(mFeedID, mGUID, mPubdate, mTitle, mSummary, mContent));
@@ -147,6 +156,12 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         mMainUIHandler.sendMessage(mMSG);
     }
     
+    private Date maxArticleDate(){
+        Calendar mCalendar = Calendar.getInstance();
+        mCalendar.add(Calendar.DATE, -7);
+        return mCalendar.getTime();
+    }
+
     private String queryURL(int feedID) {
         String mFeedURL = "";
         ContentResolver mContentResolver = mContext.getContentResolver();
@@ -192,7 +207,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                 summary = mContentSummary;
             }
         }
-        
+
         Element mImage = mDocument.select("img").first();
         String mImageURL = mImage.absUrl("src");
 

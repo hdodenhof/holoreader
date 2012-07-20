@@ -32,7 +32,6 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
@@ -127,9 +126,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (savedInstanceState != null) {
 
         }
-
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setProgressBarIndeterminateVisibility(true);
 
         setContentView(R.layout.activity_home);
 

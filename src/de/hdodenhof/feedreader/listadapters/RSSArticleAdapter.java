@@ -3,6 +3,7 @@ package de.hdodenhof.feedreader.listadapters;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -35,12 +36,22 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     private int mLayout;
     private boolean mIncludeImages;
-    private LruCache<String, Bitmap> mImageCache = new LruCache<String, Bitmap>(50);
+    private LruCache<String, Bitmap> mImageCache;
 
     public RSSArticleAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags, boolean includeImages) {
         super(context, layout, c, from, to, flags);
         mLayout = layout;
         mIncludeImages = includeImages;
+
+        final int mMemoryClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
+        final int mCacheSize = 1024 * 1024 * mMemoryClass / 8;
+        
+        mImageCache = new LruCache<String, Bitmap>(mCacheSize) {
+            @Override
+            protected int sizeOf(String key, Bitmap bitmap) {
+                return bitmap.getRowBytes() * bitmap.getHeight();
+            }
+        };
     }
 
     @Override
@@ -71,13 +82,13 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
         if (mIncludeImages && mArticleImage != null && mImageURL != null && mImageURL != "") {
             Bitmap mImage = mImageCache.get(mImageURL);
-            if (mImage == null){
+            if (mImage == null) {
                 if (cancelPotentialDownload(mImageURL, mArticleImage)) {
                     ImageDownloaderTask mTask = new ImageDownloaderTask(mArticleImage);
                     DownloadedDrawable mDownloadedDrawable = new DownloadedDrawable(mTask);
                     mArticleImage.setImageDrawable(mDownloadedDrawable);
                     mTask.execute(mImageURL);
-                }                
+                }
             } else {
                 cancelPotentialDownload(mImageURL, mArticleImage);
                 mArticleImage.setImageBitmap(mImage);
@@ -133,7 +144,11 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
             }
 
             if (bitmap != null) {
-                mImageCache.put(mURL, bitmap);
+                synchronized (mImageCache) {
+                    if (mImageCache.get(mURL) == null) {
+                        mImageCache.put(mURL, bitmap);
+                    }
+                }
             }
 
             if (mImageViewReference != null) {

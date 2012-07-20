@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <attr name="headerTextSize" format="reference" />
     <attr name="listViewTitleTextSize" format="dimension" />
     <attr name="listViewTitleMaxLines" format="integer" />
+    <attr name="listViewMetaTextSize" format="dimension" />
 
 </resources>

@@ -4,6 +4,7 @@
     <style name="Default" parent="@android:style/Theme.Light">
         <item name="headerTextSize">?android:attr/textAppearanceMedium</item>
         <item name="listViewTitleTextSize">18sp</item>
+        <item name="listViewMetaTextSize">12sp</item>
         <item name="listViewTitleMaxLines">1</item>
     </style>
 

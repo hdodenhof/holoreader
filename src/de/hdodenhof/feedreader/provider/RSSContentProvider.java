@@ -65,10 +65,10 @@ public class RSSContentProvider extends ContentProvider {
             mQueryBuilder.appendWhere(FeedDAO._ID + "=" + uri.getLastPathSegment());
             break;
         case ARTICLES:
-            mQueryBuilder.setTables(ArticleDAO.TABLE);
+            mQueryBuilder.setTables(ArticleDAO.VIEW);
             break;
         case ARTICLE_ID:
-            mQueryBuilder.setTables(ArticleDAO.TABLE);
+            mQueryBuilder.setTables(ArticleDAO.VIEW);
             mQueryBuilder.appendWhere(ArticleDAO._ID + "=" + uri.getLastPathSegment());
             break;
         default:

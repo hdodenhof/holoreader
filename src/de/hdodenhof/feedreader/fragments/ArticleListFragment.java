@@ -120,14 +120,13 @@ public class ArticleListFragment extends ListFragment implements LoaderCallbacks
         mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);
-
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String mSelection = null;
         String mSelectionArgs[] = null;
 
-        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE, ArticleDAO.READ };
+        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE, ArticleDAO.PUBDATE, ArticleDAO.READ };
         CursorLoader mCursorLoader = null;
 
         if (mTwoPane) {

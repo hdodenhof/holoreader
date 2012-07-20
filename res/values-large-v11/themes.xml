@@ -4,6 +4,7 @@
     <style name="Default" parent="@android:style/Theme.Holo.Light">
         <item name="headerTextSize">?android:attr/textAppearanceLarge</item>
         <item name="listViewTitleTextSize">20sp</item>
+        <item name="listViewMetaTextSize">14sp</item>
         <item name="listViewTitleMaxLines">2</item>
     </style>
 

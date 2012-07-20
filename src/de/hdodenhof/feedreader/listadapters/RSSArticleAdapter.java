@@ -2,6 +2,9 @@ package de.hdodenhof.feedreader.listadapters;
 
 import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -14,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v4.util.LruCache;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -56,13 +60,17 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+        String mFeedname = cursor.getString(cursor.getColumnIndex(ArticleDAO.FEEDNAME));
         String mTitle = cursor.getString(cursor.getColumnIndex(ArticleDAO.TITLE));
         String mSummary = cursor.getString(cursor.getColumnIndex(ArticleDAO.SUMMARY));
+        String mPubdate = formatToYesterdayOrToday(SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE))));
         String mImageURL = cursor.getString(cursor.getColumnIndex(ArticleDAO.IMAGE));
         int mRead = cursor.getInt(cursor.getColumnIndex(ArticleDAO.READ));
 
+        final TextView mArticleFeedname = (TextView) view.findViewById(R.id.list_item_entry_feed);
         final TextView mArticleTitle = (TextView) view.findViewById(R.id.list_item_entry_title);
         final TextView mArticleSummary = (TextView) view.findViewById(R.id.list_item_entry_summary);
+        final TextView mArticlePubdate = (TextView) view.findViewById(R.id.list_item_entry_date);
         final ImageView mArticleImage = (ImageView) view.findViewById(R.id.list_item_entry_image);
 
         if (mArticleTitle != null) {
@@ -71,7 +79,13 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         if (mArticleSummary != null) {
             mArticleSummary.setText(mSummary);
         }
-
+        if (mArticlePubdate != null) {
+            mArticlePubdate.setText(mPubdate);
+        }
+        if (mArticleFeedname != null) {
+            mArticleFeedname.setText(mFeedname);
+        }
+        
         if (SQLiteHelper.toBoolean(mRead)) {
             mArticleTitle.setTextColor(Color.GRAY);
             mArticleSummary.setTextColor(Color.GRAY);
@@ -116,6 +130,24 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     public int getType() {
         return RSSAdapter.TYPE_ARTICLE;
+    }
+
+    private String formatToYesterdayOrToday(Date date) {
+        Calendar mToday = Calendar.getInstance();
+        Calendar mYesterday = Calendar.getInstance();
+        mYesterday.add(Calendar.DATE, -1);
+        Calendar mCalendar = Calendar.getInstance();
+        mCalendar.setTime(date);
+
+        SimpleDateFormat mTimeFormatter = new SimpleDateFormat("kk:mm");
+
+        if (mCalendar.get(Calendar.YEAR) == mToday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mToday.get(Calendar.DAY_OF_YEAR)) {
+            return "Today, " + mTimeFormatter.format(date);
+        } else if (mCalendar.get(Calendar.YEAR) == mYesterday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mYesterday.get(Calendar.DAY_OF_YEAR)) {
+            return "Yesterday, " + mTimeFormatter.format(date);
+        } else {
+            return DateFormat.format("MMM dd, kk:mm", date).toString();
+        }
     }
 
     public class ImageDownloaderTask extends AsyncTask<String, Void, Bitmap> {

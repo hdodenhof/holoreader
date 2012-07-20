@@ -18,9 +18,18 @@
         android:layout_weight="1" >
 
         <TextView
+            android:id="@+id/list_item_entry_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="?listViewMetaTextSize" />
+
+        <TextView
             android:id="@+id/list_item_entry_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/list_item_entry_date"
+            android:layout_below="@id/list_item_entry_date"
             android:ellipsize="end"
             android:lineSpacingMultiplier="1.1"
             android:maxLines="?listViewTitleMaxLines"
@@ -40,15 +49,36 @@
             android:minLines="2"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/list_item_entry_divider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/list_item_entry_date"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:text="@string/divider"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="?listViewMetaTextSize" />
+
+        <TextView
+            android:id="@+id/list_item_entry_feed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@+id/list_item_entry_divider"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="?listViewMetaTextSize" />
     </RelativeLayout>
 
     <ImageView
         android:id="@+id/list_item_entry_image"
-        android:layout_marginLeft="20dp"
-        android:layout_height="120dp"
         android:layout_width="120dp"
-        android:scaleType="centerCrop"
+        android:layout_height="120dp"
+        android:layout_marginLeft="20dp"
         android:contentDescription="@string/image_article"
+        android:scaleType="centerCrop"
         android:visibility="gone" >
     </ImageView>
 

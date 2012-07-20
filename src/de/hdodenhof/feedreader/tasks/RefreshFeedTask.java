@@ -60,7 +60,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             ContentResolver mContentResolver = mContext.getContentResolver();
             ArrayList<ContentValues> mContentValuesArrayList = new ArrayList<ContentValues>();
             ArrayList<String> mExistingArticles = new ArrayList<String>();
-            Date mNewestArticleDate = null;
+            Date mNewestArticleDate = new Date(0);
 
             boolean mIsArticle = false;
             String mTitle = null;

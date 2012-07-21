@@ -9,6 +9,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -16,7 +17,7 @@ import android.os.Message;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
-public class AddFeedTask extends AsyncTask<String, Void, Void> {
+public class AddFeedTask extends AsyncTask<String, Void, Integer> {
 
     private Handler mMainUIHandler;
     private Context mContext;
@@ -26,7 +27,7 @@ public class AddFeedTask extends AsyncTask<String, Void, Void> {
         this.mContext = context;
     }
 
-    protected Void doInBackground(String... params) {
+    protected Integer doInBackground(String... params) {
 
         String mURL = params[0];
         String mName = "";
@@ -58,7 +59,8 @@ public class AddFeedTask extends AsyncTask<String, Void, Void> {
             mContentValues.put(FeedDAO.NAME, mName);
             mContentValues.put(FeedDAO.URL, mURL);
 
-            mContentResolver.insert(RSSContentProvider.URI_FEEDS, mContentValues);
+            Uri mNewFeed = mContentResolver.insert(RSSContentProvider.URI_FEEDS, mContentValues);
+            return Integer.parseInt(mNewFeed.getLastPathSegment());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -74,9 +76,10 @@ public class AddFeedTask extends AsyncTask<String, Void, Void> {
     }
 
     @Override
-    protected void onPostExecute(Void result) {
+    protected void onPostExecute(Integer result) {
         Message mMSG = Message.obtain();
         mMSG.what = 1;
+        mMSG.arg1 = result;
         mMainUIHandler.sendMessage(mMSG);
     }
 }

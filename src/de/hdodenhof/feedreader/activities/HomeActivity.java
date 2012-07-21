@@ -87,7 +87,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             switch (msg.what) {
             case 1:
                 // added feed
-                mTarget.callbackFeedAdded();
+                mTarget.callbackFeedAdded(msg.arg1);
                 break;
             case 2:
                 // feed refresh
@@ -102,8 +102,9 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     /**
      * Update feed list and dismiss spinner after new feed has been added
      */
-    private void callbackFeedAdded() {
+    private void callbackFeedAdded(int feedID) {
         mSpinner.dismiss();
+        refreshFeed(feedID);
     }
 
     /**
@@ -139,6 +140,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
         mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+
+        mFeedsUpdating = new HashSet<Integer>();
     }
 
     /**
@@ -197,13 +200,25 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * @param item
      *            MenuItem that holds the refresh animation
      */
-    @SuppressLint("NewApi")
-    private void refreshFeeds(MenuItem item) {
+    private void refreshFeeds() {
         boolean mIsConnected = isConnected();
 
         if (mIsConnected) {
-            mRefreshItem = item;
+            for (Integer mFeedID : queryFeeds()) {
+                refreshFeed(mFeedID);
+            }
+        } else {
+            showDialog("No connection", "You are not connected to the internet, please retry later.");
+        }
+    }
 
+    /**
+     * 
+     * @param feedID
+     */
+    @SuppressLint("NewApi")
+    private void refreshFeed(int feedID) {
+        if (mFeedsUpdating.size() == 0) {
             LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             ImageView iv = (ImageView) inflater.inflate(R.layout.view_refresh, null);
 
@@ -212,17 +227,15 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             iv.startAnimation(rotation);
 
             mRefreshItem.setActionView(iv);
-
-            mFeedsUpdating = queryFeeds();
-            for (Integer mFeedID : mFeedsUpdating) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                    new RefreshFeedTask(mAsyncHandler, this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mFeedID);
-                } else {
-                    new RefreshFeedTask(mAsyncHandler, this).execute(mFeedID);
-                }
-            }
+        }
+        if (mFeedsUpdating.contains(feedID)) {
+            return;
+        }
+        mFeedsUpdating.add(feedID);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            new RefreshFeedTask(mAsyncHandler, this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, feedID);
         } else {
-            showDialog("No connection", "You are not connected to the internet, please retry later.");
+            new RefreshFeedTask(mAsyncHandler, this).execute(feedID);
         }
     }
 
@@ -370,6 +383,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (!mUnreadOnly) {
             menu.getItem(2).setIcon(R.drawable.checkbox_checked);
         }
+        mRefreshItem = menu.getItem(0);
 
         return true;
     }
@@ -381,7 +395,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.item_refresh:
-            refreshFeeds(item);
+            refreshFeeds();
             return true;
         case R.id.item_add:
             showAddDialog();

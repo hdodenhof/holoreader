@@ -183,6 +183,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             mCursor.moveToFirst();
             mFeedURL = mCursor.getString(mCursor.getColumnIndex(FeedDAO.URL));
         }
+        mCursor.close();
         return mFeedURL;
     }
 

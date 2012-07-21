@@ -61,6 +61,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
+    private boolean mIsFirstResume = true;
     private ProgressDialog mSpinner;
     private ArticleListFragment mArticleListFragment;
     private FeedListFragment mFeedListFragment;
@@ -156,6 +157,11 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         mFeedListFragment.setUnreadOnly(mUnreadOnly);
         if (mTwoPane) {
             mArticleListFragment.setUnreadOnly(mUnreadOnly);
+        }
+
+        if (mIsFirstResume) {
+            refreshFeeds();
+            mIsFirstResume = false;
         }
     }
 

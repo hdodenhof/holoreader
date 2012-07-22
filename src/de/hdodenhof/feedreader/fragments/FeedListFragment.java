@@ -58,6 +58,8 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
         this.setListAdapter(mFeedAdapter);
         mFeedsListView = getListView();
 
+        // Setting this programmatic to be able to handle API level differences
+        mFeedsListView.setSelector(R.drawable.listview_selector);
         mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);

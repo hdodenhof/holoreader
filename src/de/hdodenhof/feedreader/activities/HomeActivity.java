@@ -222,7 +222,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     @SuppressLint("NewApi")
     private void refreshFeed(int feedID) {
         if (mFeedsUpdating.size() == 0) {
-            View mProgressAnimation = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.view_refresh, null);
+            View mProgressAnimation = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.actionview_refresh, null);
             mRefreshItem.setActionView(mProgressAnimation);
         }
         if (mFeedsUpdating.contains(feedID)) {

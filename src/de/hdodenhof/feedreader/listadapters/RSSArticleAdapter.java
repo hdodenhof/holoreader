@@ -47,15 +47,17 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         mLayout = layout;
         mIncludeImages = includeImages;
 
-        final int mMemoryClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
-        final int mCacheSize = 1024 * 1024 * mMemoryClass / 8;
+        if (mIncludeImages) {
+            final int mMemoryClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
+            final int mCacheSize = 1024 * 1024 * mMemoryClass / 8;
 
-        mImageCache = new LruCache<String, Bitmap>(mCacheSize) {
-            @Override
-            protected int sizeOf(String key, Bitmap bitmap) {
-                return bitmap.getRowBytes() * bitmap.getHeight();
-            }
-        };
+            mImageCache = new LruCache<String, Bitmap>(mCacheSize) {
+                @Override
+                protected int sizeOf(String key, Bitmap bitmap) {
+                    return bitmap.getRowBytes() * bitmap.getHeight();
+                }
+            };
+        }
     }
 
     @Override
@@ -126,6 +128,9 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
         final LayoutInflater mInflater = LayoutInflater.from(context);
         View mView = mInflater.inflate(mLayout, parent, false);
+
+        // Setting this programmatic to be able to handle API level differences
+        mView.setBackgroundResource(R.drawable.listview_background);
 
         if (mIncludeImages) {
             final ImageView mArticleImage = (ImageView) mView.findViewById(R.id.list_item_entry_image);

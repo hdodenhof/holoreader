@@ -118,6 +118,8 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
         this.setListAdapter(mArticleAdapter);
         mArticlesListView = getListView();
 
+        // Setting this programmatic to be able to handle API level differences
+        mArticlesListView.setSelector(R.drawable.listview_selector);
         mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);

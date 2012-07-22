@@ -50,6 +50,9 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
         final LayoutInflater inflater = LayoutInflater.from(context);
         View mView = inflater.inflate(mLayout, parent, false);
 
+        // Setting this programmatic to be able to handle API level differences
+        mView.setBackgroundResource(R.drawable.listview_background);
+
         return mView;
     }
 
@@ -91,14 +94,14 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
     public int getType() {
         return RSSAdapter.TYPE_FEED;
     }
-    
+
     private String formatToYesterdayOrToday(Date date) {
         Calendar mToday = Calendar.getInstance();
         Calendar mYesterday = Calendar.getInstance();
         mYesterday.add(Calendar.DATE, -1);
         Calendar mCalendar = Calendar.getInstance();
         mCalendar.setTime(date);
-        
+
         SimpleDateFormat mTimeFormatter = new SimpleDateFormat("kk:mm");
 
         if (mCalendar.get(Calendar.YEAR) == mToday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mToday.get(Calendar.DAY_OF_YEAR)) {

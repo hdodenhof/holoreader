@@ -71,6 +71,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         final TextView mArticleTitle = (TextView) view.findViewById(R.id.list_item_entry_title);
         final TextView mArticleSummary = (TextView) view.findViewById(R.id.list_item_entry_summary);
         final TextView mArticlePubdate = (TextView) view.findViewById(R.id.list_item_entry_date);
+        final TextView mArticleDivider = (TextView) view.findViewById(R.id.list_item_entry_divider);
         final ImageView mArticleImage = (ImageView) view.findViewById(R.id.list_item_entry_image);
 
         if (mArticleTitle != null) {
@@ -85,13 +86,19 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         if (mArticleFeedname != null) {
             mArticleFeedname.setText(mFeedname);
         }
-        
+
         if (SQLiteHelper.toBoolean(mRead)) {
             mArticleTitle.setTextColor(Color.GRAY);
             mArticleSummary.setTextColor(Color.GRAY);
+            mArticlePubdate.setTextColor(Color.GRAY);
+            mArticleFeedname.setTextColor(Color.GRAY);
+            mArticleDivider.setTextColor(Color.GRAY);
         } else {
             mArticleTitle.setTextColor(Color.BLACK);
             mArticleSummary.setTextColor(Color.BLACK);
+            mArticlePubdate.setTextColor(Color.BLACK);
+            mArticleFeedname.setTextColor(Color.BLACK);
+            mArticleDivider.setTextColor(Color.BLACK);
         }
 
         if (mIncludeImages && mArticleImage != null && mImageURL != null && mImageURL != "") {

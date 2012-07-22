@@ -76,7 +76,11 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         }
 
         ActionBar mActionBar = getSupportActionBar();
-        mActionBar.setTitle(queryFeedName(mFeedID));
+        if (mFeedID != 0) {
+            mActionBar.setTitle(queryFeedName(mFeedID));
+        } else {
+            mActionBar.setTitle(getResources().getText(R.string.all_feeds));
+        }
         mActionBar.setDisplayHomeAsUpEnabled(true);
     }
 

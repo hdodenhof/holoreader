@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
+import android.widget.HeaderViewListAdapter;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -325,15 +326,26 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
      */
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        RSSAdapter mAdapter = (RSSAdapter) parent.getAdapter();
+        RSSAdapter mAdapter;
+        if (parent.getAdapter() instanceof HeaderViewListAdapter) {
+            HeaderViewListAdapter mWrapperAdapter = (HeaderViewListAdapter) parent.getAdapter();
+            mAdapter = (RSSAdapter) mWrapperAdapter.getWrappedAdapter();
+        } else {
+            mAdapter = (RSSAdapter) parent.getAdapter();
+        }
+
         Cursor mCursor;
         int mFeedID;
 
         switch (mAdapter.getType()) {
         case RSSAdapter.TYPE_FEED:
-            mCursor = ((RSSFeedAdapter) mAdapter).getCursor();
-            mCursor.moveToPosition(position);
-            mFeedID = mCursor.getInt(mCursor.getColumnIndex(FeedDAO._ID));
+            if (position == 0) {
+                mFeedID = 0;
+            } else {
+                mCursor = ((RSSFeedAdapter) mAdapter).getCursor();
+                mCursor.moveToPosition(position - 1);
+                mFeedID = mCursor.getInt(mCursor.getColumnIndex(FeedDAO._ID));
+            }
 
             if (mTwoPane) {
                 mArticleListFragment.selectFeed(mFeedID);
@@ -342,6 +354,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 mIntent.putExtra("feedid", mFeedID);
                 startActivity(mIntent);
             }
+
             break;
 
         // DualPane layout only

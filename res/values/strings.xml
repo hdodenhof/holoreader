@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Feedreader</string>
     <string name="rss_icon_desc">RSS Icon</string>
-    <string name="refresh_spinner_desc">Spinner</string>
     <string name="image_article">Article Image</string>
     <string name="divider">|</string>
+    <string name="all_feeds">All feeds</string>
 </resources>

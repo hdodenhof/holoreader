@@ -180,11 +180,17 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             // SinglePane
             // feedID in Intent
 
-            mSelection = ArticleDAO.FEEDID + " = ?";
-            mSelectionArgs = new String[] { String.valueOf(mSelectedFeed) };
+            if (mSelectedFeed != 0) {
+                mSelection = ArticleDAO.FEEDID + " = ?";
+                mSelectionArgs = new String[] { String.valueOf(mSelectedFeed) };
+            }
 
             if (mUnreadOnly) {
-                mSelection = mSelection + " AND read = 0";
+                if (mSelection == null) {
+                    mSelection = "read = 0";
+                } else {
+                    mSelection = mSelection + " AND read = 0";
+                }
             }
 
             mArticles = new ArrayList<String>();

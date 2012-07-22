@@ -9,6 +9,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.View;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
@@ -54,9 +55,14 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
         mFeedAdapter = new RSSFeedAdapter(getActivity(), R.layout.listitem_feed, null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER);
 
+        mFeedsListView = getListView();
+
+        View mHeaderView = getActivity().getLayoutInflater().inflate(R.layout.listheader_feed, null);
+        mHeaderView.setBackgroundResource(R.drawable.listview_background);
+        mFeedsListView.addHeaderView(mHeaderView);
+
         this.setEmptyText("Loading feeds...");
         this.setListAdapter(mFeedAdapter);
-        mFeedsListView = getListView();
 
         // Setting this programmatic to be able to handle API level differences
         mFeedsListView.setSelector(R.drawable.listview_selector);

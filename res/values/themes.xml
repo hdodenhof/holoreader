@@ -2,10 +2,12 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="Default" parent="Theme.Sherlock.Light">
-        <item name="headerTextSize">?android:attr/textAppearanceMedium</item>
-        <item name="listViewTitleTextSize">18sp</item>
-        <item name="listViewMetaTextSize">12sp</item>
-        <item name="listViewTitleMaxLines">1</item>
+        <item name="android:listViewStyle">@style/CustomListView</item>
+    </style>
+
+    <style name="CustomListView" parent="@android:style/Widget.ListView">
+        <item name="android:divider">#808080</item>
+        <item name="android:dividerHeight">1dp</item>
     </style>
 
 </resources>

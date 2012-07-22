@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="listViewTitleTextSize">20sp</dimen>
+    <dimen name="listViewMetaTextSize">14sp</dimen>
+    <dimen name="headerTextSize">22sp</dimen>
+
+    <integer name="listViewTitleMaxLines">2</integer>
+
+</resources>

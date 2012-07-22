@@ -23,12 +23,9 @@ import android.os.Message;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
-import android.widget.ImageView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
@@ -225,14 +222,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     @SuppressLint("NewApi")
     private void refreshFeed(int feedID) {
         if (mFeedsUpdating.size() == 0) {
-            LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            ImageView iv = (ImageView) inflater.inflate(R.layout.view_refresh, null);
-
-            Animation rotation = AnimationUtils.loadAnimation(this, R.anim.rotate);
-            rotation.setRepeatCount(Animation.INFINITE);
-            iv.startAnimation(rotation);
-
-            mRefreshItem.setActionView(iv);
+            View mProgressAnimation = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.view_refresh, null);
+            mRefreshItem.setActionView(mProgressAnimation);
         }
         if (mFeedsUpdating.contains(feedID)) {
             return;

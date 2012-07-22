@@ -3,7 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:layout_weight="1"
-    android:background="@drawable/listitem_white"
+    android:background="?android:attr/activatedBackgroundIndicator"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="?listViewMetaTextSize" />
+            android:textSize="@dimen/listViewMetaTextSize" />
 
         <TextView
             android:id="@+id/list_item_entry_title"
@@ -32,9 +32,9 @@
             android:layout_below="@id/list_item_entry_date"
             android:ellipsize="end"
             android:lineSpacingMultiplier="1.1"
-            android:maxLines="?listViewTitleMaxLines"
+            android:maxLines="@integer/listViewTitleMaxLines"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="?listViewTitleTextSize"
+            android:textSize="@dimen/listViewTitleTextSize"
             android:textStyle="bold" />
 
         <TextView
@@ -59,7 +59,7 @@
             android:paddingRight="5dp"
             android:text="@string/divider"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="?listViewMetaTextSize" />
+            android:textSize="@dimen/listViewMetaTextSize" />
 
         <TextView
             android:id="@+id/list_item_entry_feed"
@@ -69,7 +69,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:textColor="?android:attr/textColorPrimary"
-            android:textSize="?listViewMetaTextSize" />
+            android:textSize="@dimen/listViewMetaTextSize" />
     </RelativeLayout>
 
     <ImageView

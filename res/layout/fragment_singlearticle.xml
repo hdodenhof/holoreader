@@ -18,7 +18,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dip"
-            android:textAppearance="?headerTextSize"
+            android:textSize="@dimen/headerTextSize"
             android:textColor="#000000"
             android:textStyle="bold" />
 

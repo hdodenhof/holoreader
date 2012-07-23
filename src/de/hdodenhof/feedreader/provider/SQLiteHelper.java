@@ -20,7 +20,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String TAG = SQLiteHelper.class.getSimpleName();
 
     private static final String DATABASE_NAME = "feedreader";
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
 
     private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
             + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT);";
@@ -29,19 +29,21 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + ArticleDAO.FEEDID + " integer, " + ArticleDAO.GUID + " TEXT, " + ArticleDAO.PUBDATE + " TEXT, " + ArticleDAO.TITLE + " TEXT , "
             + ArticleDAO.SUMMARY + " TEXT, " + ArticleDAO.CONTENT + " TEXT, " + ArticleDAO.IMAGE + " TEXT, " + ArticleDAO.READ + " INTEGER);";
 
-    private static final String FEED_VIEW_CREATE = "CREATE VIEW " + FeedDAO.VIEW + " AS SELECT " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE
-            + "." + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ", MAX(" + ArticleDAO.TABLE + "." + ArticleDAO.PUBDATE + ") AS "
-            + FeedDAO.UPDATED + ", COUNT(" + ArticleDAO.TABLE + "." + ArticleDAO._ID + ")-SUM(" + ArticleDAO.TABLE + "." + ArticleDAO.READ + " = 1) AS "
-            + FeedDAO.UNREAD + " FROM " + FeedDAO.TABLE + " LEFT OUTER JOIN " + ArticleDAO.TABLE + " ON " + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = "
-            + FeedDAO.TABLE + "." + FeedDAO._ID + " GROUP BY " + FeedDAO.TABLE + "." + FeedDAO._ID + ", " + FeedDAO.TABLE + "." + FeedDAO.NAME + ", "
-            + FeedDAO.TABLE + "." + FeedDAO.URL + ";";
+    private static final String FEED_VIEW_CREATE = "CREATE VIEW " + FeedDAO.VIEW + " AS SELECT " + FeedDAO.TABLE + "." + FeedDAO._ID + " AS " + FeedDAO._ID
+            + ", " + FeedDAO.TABLE + "." + FeedDAO.NAME + " AS " + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + " AS " + FeedDAO.URL + ", MAX("
+            + ArticleDAO.TABLE + "." + ArticleDAO.PUBDATE + ") AS " + FeedDAO.UPDATED + ", COUNT(" + ArticleDAO.TABLE + "." + ArticleDAO._ID + ")-SUM("
+            + ArticleDAO.TABLE + "." + ArticleDAO.READ + " = 1) AS " + FeedDAO.UNREAD + " FROM " + FeedDAO.TABLE + " LEFT OUTER JOIN " + ArticleDAO.TABLE
+            + " ON " + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "." + FeedDAO._ID + " GROUP BY " + FeedDAO.TABLE + "."
+            + FeedDAO._ID + ", " + FeedDAO.TABLE + "." + FeedDAO.NAME + ", " + FeedDAO.TABLE + "." + FeedDAO.URL + ";";
 
-    private static final String ARTICLE_VIEW_CREATE = "CREATE VIEW " + ArticleDAO.VIEW + " AS SELECT " + ArticleDAO.TABLE + "." + ArticleDAO._ID + ", "
-            + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + ", " + FeedDAO.TABLE + "." + FeedDAO.NAME + " AS " + ArticleDAO.FEEDNAME + ", " + ArticleDAO.TABLE
-            + "." + ArticleDAO.GUID + ", " + ArticleDAO.TABLE + "." + ArticleDAO.PUBDATE + ", " + ArticleDAO.TABLE + "." + ArticleDAO.TITLE + ", "
-            + ArticleDAO.TABLE + "." + ArticleDAO.SUMMARY + ", " + ArticleDAO.TABLE + "." + ArticleDAO.CONTENT + ", " + ArticleDAO.TABLE + "."
-            + ArticleDAO.IMAGE + ", " + ArticleDAO.TABLE + "." + ArticleDAO.READ + " FROM " + ArticleDAO.TABLE + " LEFT JOIN " + FeedDAO.TABLE + " ON "
-            + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "." + FeedDAO._ID + "";
+    private static final String ARTICLE_VIEW_CREATE = "CREATE VIEW " + ArticleDAO.VIEW + " AS SELECT " + ArticleDAO.TABLE + "." + ArticleDAO._ID + " AS "
+            + ArticleDAO._ID + ", " + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " AS " + ArticleDAO.FEEDID + ", " + FeedDAO.TABLE + "." + FeedDAO.NAME
+            + " AS " + ArticleDAO.FEEDNAME + ", " + ArticleDAO.TABLE + "." + ArticleDAO.GUID + " AS " + ArticleDAO.GUID + " , " + ArticleDAO.TABLE + "."
+            + ArticleDAO.PUBDATE + " AS " + ArticleDAO.PUBDATE + ", " + ArticleDAO.TABLE + "." + ArticleDAO.TITLE + " AS " + ArticleDAO.TITLE + ", "
+            + ArticleDAO.TABLE + "." + ArticleDAO.SUMMARY + " AS " + ArticleDAO.SUMMARY + ", " + ArticleDAO.TABLE + "." + ArticleDAO.CONTENT + " AS "
+            + ArticleDAO.CONTENT + ", " + ArticleDAO.TABLE + "." + ArticleDAO.IMAGE + " AS " + ArticleDAO.IMAGE + ", " + ArticleDAO.TABLE + "."
+            + ArticleDAO.READ + " AS " + ArticleDAO.READ + " FROM " + ArticleDAO.TABLE + " LEFT JOIN " + FeedDAO.TABLE + " ON " + ArticleDAO.TABLE + "."
+            + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "." + FeedDAO._ID + "";
 
     private static final String mDummydata[][] = { { "t3n News", "http://t3n.de/news/feed" },
             { "Gründerszene.de - Infos für Gründer, Unternehmer, StartUps | Gründerszene", "http://www.gruenderszene.de/feed/" },

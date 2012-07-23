@@ -17,6 +17,10 @@
         android:showAsAction="ifRoom"
         android:title="Toggle"/>
     <item
+        android:id="@+id/item_editfeeds"
+        android:showAsAction="never"
+        android:title="Edit Feeds"/>
+    <item
         android:id="@+id/item_settings"
         android:showAsAction="never"
         android:title="Settings"/>

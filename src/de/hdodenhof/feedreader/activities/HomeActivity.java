@@ -427,6 +427,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 mArticleListFragment.setUnreadOnly(mUnreadOnly);
             }
             return true;
+        case R.id.item_editfeeds:
+            Intent mIntent = new Intent(this, EditFeedsActivity.class);
+            startActivity(mIntent);
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }

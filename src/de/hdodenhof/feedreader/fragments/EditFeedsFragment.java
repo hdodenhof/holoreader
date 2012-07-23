@@ -26,7 +26,6 @@ import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.listadapters.EditFeedAdapter;
-import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
@@ -69,8 +68,6 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
         // Setting this programmatic to be able to handle API level differences
         mFeedsListView.setSelector(R.drawable.listview_selector);
-
-        ((FragmentCallback) getActivity()).onFragmentReady(this);
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

@@ -2,16 +2,14 @@ package de.hdodenhof.feedreader.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
-import de.hdodenhof.feedreader.misc.FragmentCallback;
 
-public class EditFeedsActivity extends SherlockFragmentActivity implements FragmentCallback {
+public class EditFeedsActivity extends SherlockFragmentActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,24 +24,6 @@ public class EditFeedsActivity extends SherlockFragmentActivity implements Fragm
         ActionBar mActionBar = getSupportActionBar();
         mActionBar.setTitle("Edit Feeds");
         mActionBar.setDisplayHomeAsUpEnabled(true);
-    }
-
-    @Override
-    public void onFragmentReady(Fragment fragment) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean isDualPane() {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    @Override
-    public boolean isPrimaryFragment(Fragment fragment) {
-        // TODO Auto-generated method stub
-        return false;
     }
 
     /**

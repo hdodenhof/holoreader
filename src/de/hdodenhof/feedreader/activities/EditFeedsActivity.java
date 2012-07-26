@@ -23,7 +23,6 @@ public class EditFeedsActivity extends SherlockFragmentActivity {
 
         ActionBar mActionBar = getSupportActionBar();
         mActionBar.setTitle("Edit Feeds");
-        mActionBar.setDisplayHomeAsUpEnabled(true);
     }
 
     /**

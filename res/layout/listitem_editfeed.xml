@@ -1,22 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <de.hdodenhof.feedreader.misc.CheckableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="72dp"
     android:layout_weight="1"
     android:gravity="center"
-    android:minHeight="?android:attr/listPreferredItemHeight"
+    android:minHeight="48dp"
     android:orientation="horizontal"
-    android:paddingBottom="5dp"
-    android:paddingLeft="10dp"
-    android:paddingRight="10dp"
-    android:paddingTop="5dp" >
+    android:padding="8dp" >
 
     <CheckBox
         android:id="@+id/list_item_editfeed_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:clickable="false"
         android:focusable="false"
-        android:clickable="false" />
+        android:paddingRight="8dp" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -24,13 +22,12 @@
         android:orientation="vertical" >
 
         <TextView
-            android:id="@+id/list_item_editfeed_title"
+            android:id="@+id/list_item_editfeed_name"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:singleLine="true"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textStyle="bold" />
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
             android:id="@+id/list_item_editfeed_url"

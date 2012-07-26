@@ -5,7 +5,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.os.Build;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
@@ -50,29 +52,36 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
         final LayoutInflater inflater = LayoutInflater.from(context);
         View mView = inflater.inflate(mLayout, parent, false);
 
-        // Setting this programmatic to be able to handle API level differences
-        mView.setBackgroundResource(R.drawable.listview_background);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            TypedArray mAttributes = context.obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
+            int mResource = mAttributes.getResourceId(0, 0);
+            mAttributes.recycle();
+
+            // setBackgroundResource resets padding
+            int mLeftPadding = mView.getPaddingLeft();
+            int mTopPadding = mView.getPaddingTop();
+            int mRightPadding = mView.getPaddingRight();
+            int mBottomPadding = mView.getPaddingBottom();
+            mView.setBackgroundResource(mResource);
+            mView.setPadding(mLeftPadding, mTopPadding, mRightPadding, mBottomPadding);
+        }
 
         return mView;
     }
 
     private View prepareView(View view, Context context, Cursor cursor) {
         String mName = cursor.getString(cursor.getColumnIndex(FeedDAO.NAME));
-        String mURL = cursor.getString(cursor.getColumnIndex(FeedDAO.URL));
         String mUpdated = cursor.getString(cursor.getColumnIndex(FeedDAO.UPDATED));
         String mUnread = cursor.getString(cursor.getColumnIndex(FeedDAO.UNREAD));
 
-        final TextView mTitleView = (TextView) view.findViewById(R.id.list_item_feed_title);
-        final TextView mSummaryView = (TextView) view.findViewById(R.id.list_item_feed_summary);
+        final TextView mNameView = (TextView) view.findViewById(R.id.list_item_feed_name);
         final TextView mUpdatedView = (TextView) view.findViewById(R.id.list_item_feed_updated);
         final TextView mUnreadView = (TextView) view.findViewById(R.id.list_item_feed_unread);
 
-        if (mTitleView != null) {
-            mTitleView.setText(mName);
+        if (mNameView != null) {
+            mNameView.setText(mName);
         }
-        if (mSummaryView != null) {
-            mSummaryView.setText(mURL);
-        }
+
         if (mUpdatedView != null) {
             String mParsedUpdated = "";
             if (mUpdated != null) {

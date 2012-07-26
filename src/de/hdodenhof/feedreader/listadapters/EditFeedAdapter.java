@@ -33,9 +33,8 @@ public class EditFeedAdapter extends SimpleCursorAdapter {
         String mName = cursor.getString(cursor.getColumnIndex(FeedDAO.NAME));
         String mURL = cursor.getString(cursor.getColumnIndex(FeedDAO.URL));
 
-        final TextView mTitleView = (TextView) view.findViewById(R.id.list_item_editfeed_title);
+        final TextView mTitleView = (TextView) view.findViewById(R.id.list_item_editfeed_name);
         final TextView mSummaryView = (TextView) view.findViewById(R.id.list_item_editfeed_url);
-        // final CheckBox mCheckbox = (CheckBox) view.findViewById(R.id.list_item_editfeed_checkbox);
 
         if (mTitleView != null) {
             mTitleView.setText(mName);
@@ -55,9 +54,6 @@ public class EditFeedAdapter extends SimpleCursorAdapter {
 
         final LayoutInflater inflater = LayoutInflater.from(context);
         View mView = inflater.inflate(mLayout, parent, false);
-
-        // Setting this programmatic to be able to handle API level differences
-        mView.setBackgroundResource(R.drawable.listview_background);
 
         return mView;
     }

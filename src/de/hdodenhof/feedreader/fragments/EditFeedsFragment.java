@@ -53,7 +53,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
         }
 
         String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.URL };
-        int[] uiBindTo = { R.id.list_item_editfeed_title, R.id.list_item_editfeed_url };
+        int[] uiBindTo = { R.id.list_item_editfeed_name, R.id.list_item_editfeed_url };
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
@@ -65,9 +65,6 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
         this.setEmptyText("Loading feeds...");
         this.setListAdapter(mFeedAdapter);
-
-        // Setting this programmatic to be able to handle API level differences
-        mFeedsListView.setSelector(R.drawable.listview_selector);
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

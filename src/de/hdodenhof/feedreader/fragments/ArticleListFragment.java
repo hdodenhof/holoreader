@@ -106,20 +106,19 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
         mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
         mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
 
-        String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE, ArticleDAO.READ };
-        int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_summary, R.id.list_item_entry_image, R.layout.listitem_article };
+        String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.IMAGE, ArticleDAO.READ };
+        int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_image, R.layout.listitem_article };
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
         mArticleAdapter = new RSSArticleAdapter(getActivity(), R.layout.listitem_article, null, uiBindFrom, uiBindTo,
-                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (mTwoPane && !mThisIsPrimaryFragment) ? true : false);
+                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (mTwoPane && !mThisIsPrimaryFragment) ? RSSArticleAdapter.MODE_EXTENDED
+                        : RSSArticleAdapter.MODE_COMPACT);
 
         this.setEmptyText("Loading articles...");
         this.setListAdapter(mArticleAdapter);
         mArticlesListView = getListView();
 
-        // Setting this programmatic to be able to handle API level differences
-        mArticlesListView.setSelector(R.drawable.listview_selector);
         mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);

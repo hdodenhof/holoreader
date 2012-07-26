@@ -2,7 +2,9 @@ package de.hdodenhof.feedreader.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -12,6 +14,7 @@ import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockListFragment;
 
@@ -48,8 +51,8 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
         SharedPreferences mPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
 
-        String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
-        int[] uiBindTo = { R.id.list_item_feed_title, R.id.list_item_feed_summary, R.id.list_item_feed_updated, R.id.list_item_feed_unread };
+        String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.UPDATED, FeedDAO.UNREAD };
+        int[] uiBindTo = { R.id.list_item_feed_name, R.id.list_item_feed_updated, R.id.list_item_feed_unread };
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
@@ -57,15 +60,31 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
         mFeedsListView = getListView();
 
-        View mHeaderView = getActivity().getLayoutInflater().inflate(R.layout.listheader_feed, null);
-        mHeaderView.setBackgroundResource(R.drawable.listview_background);
+        View mHeaderView = getActivity().getLayoutInflater().inflate(R.layout.listitem_feed, null);
+        TextView mUpdatedView = (TextView) mHeaderView.findViewById(R.id.list_item_feed_updated);
+        TextView mTitleView = (TextView) mHeaderView.findViewById(R.id.list_item_feed_name);
+        mUpdatedView.setVisibility(View.GONE);
+        mTitleView.setText(getResources().getString(R.string.all_feeds));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            TypedArray mAttributes = getActivity().obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
+            int mResource = mAttributes.getResourceId(0, 0);
+            mAttributes.recycle();
+
+            // setBackgroundResource resets padding
+            int mLeftPadding = mHeaderView.getPaddingLeft();
+            int mTopPadding = mHeaderView.getPaddingTop();
+            int mRightPadding = mHeaderView.getPaddingRight();
+            int mBottomPadding = mHeaderView.getPaddingBottom();
+            mHeaderView.setBackgroundResource(mResource);
+            mHeaderView.setPadding(mLeftPadding, mTopPadding, mRightPadding, mBottomPadding);
+        }
+
         mFeedsListView.addHeaderView(mHeaderView);
 
         this.setEmptyText("Loading feeds...");
         this.setListAdapter(mFeedAdapter);
 
-        // Setting this programmatic to be able to handle API level differences
-        mFeedsListView.setSelector(R.drawable.listview_selector);
         mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);

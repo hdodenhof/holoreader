@@ -14,7 +14,7 @@
     <View
         android:layout_width="1dp"
         android:layout_height="fill_parent"
-        android:background="#808080" />
+        android:background="?android:attr/listDivider" />
 
     <fragment
         android:id="@+id/fragment_articlelist"

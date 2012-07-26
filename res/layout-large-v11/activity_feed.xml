@@ -9,18 +9,17 @@
         android:name="de.hdodenhof.feedreader.fragments.ArticleListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1" />
+        android:layout_weight="3" />
 
     <View
         android:layout_width="1dip"
         android:layout_height="fill_parent"
-        android:background="#808080" />
+        android:background="?android:attr/listDivider" />
 
     <android.support.v4.view.ViewPager
         android:id="@+android:id/viewpager_article"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
-        android:layout_weight="3" >
-    </android.support.v4.view.ViewPager>
+        android:layout_weight="7" />
 
 </LinearLayout>

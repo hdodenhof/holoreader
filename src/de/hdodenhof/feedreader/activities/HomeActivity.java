@@ -158,7 +158,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         }
 
         if (mIsFirstResume) {
-            refreshFeeds();
+            // refreshFeeds();
             mIsFirstResume = false;
         }
     }

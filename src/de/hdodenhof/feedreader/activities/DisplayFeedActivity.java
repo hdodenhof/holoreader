@@ -84,7 +84,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         if (mFeedID != 0) {
             mActionBar.setTitle(queryFeedName(mFeedID));
         } else {
-            mActionBar.setTitle(getResources().getText(R.string.AllFeeds));
+            mActionBar.setTitle(mResources.getText(R.string.AllFeeds));
         }
         mActionBar.setDisplayHomeAsUpEnabled(true);
     }

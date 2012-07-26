@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -46,7 +48,8 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     private boolean mUnreadOnly;
     private int mCurrentArticle = -1;
     private ArticleViewPager mArticlePagerFragment;
-    SharedPreferences mPreferences;
+    private SharedPreferences mPreferences;
+    private Resources mResources;
 
     /**
      * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
@@ -60,6 +63,8 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         if (savedInstanceState != null) {
 
         }
+
+        mResources = getResources();
 
         if (getIntent().hasExtra("feedid")) {
             mFeedID = getIntent().getIntExtra("feedid", 0);
@@ -158,8 +163,10 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             mEditor.commit();
 
             if (mUnreadOnly) {
+                Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_unchecked);
             } else {
+                Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_checked);
             }
             ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);

@@ -12,6 +12,8 @@
     <string name="NegativeButton">Cancel</string>
     <string name="AddFeedDialogTitle">@string/MenuAdd</string>
     <string name="AddFeedDialogText">Input Feed URL</string>
+    <string name="ToastUnreadArticles">Show unread articles only</string>
+    <string name="ToastAllArticles">Show all articles</string>
 
     <!-- Menu -->
     <string name="MenuRefresh">Refresh Feeds</string>

@@ -22,7 +22,7 @@ public class EditFeedsActivity extends SherlockFragmentActivity {
         setContentView(R.layout.activity_editfeeds);
 
         ActionBar mActionBar = getSupportActionBar();
-        mActionBar.setTitle("Edit Feeds");
+        mActionBar.setTitle(getResources().getString(R.string.EditFeedsTitle));
     }
 
     /**

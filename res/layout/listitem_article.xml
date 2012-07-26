@@ -11,7 +11,7 @@
         android:id="@+id/list_item_entry_image"
         android:layout_width="96dp"
         android:layout_height="96dp"
-        android:contentDescription="@string/image_article"
+        android:contentDescription="@string/ArticleImageDesc"
         android:scaleType="centerCrop">
     </ImageView>
 

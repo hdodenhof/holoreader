@@ -115,7 +115,7 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
                 CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (mTwoPane && !mThisIsPrimaryFragment) ? RSSArticleAdapter.MODE_EXTENDED
                         : RSSArticleAdapter.MODE_COMPACT);
 
-        this.setEmptyText("Loading articles...");
+        this.setEmptyText(getResources().getString(R.string.LoadingArticles));
         this.setListAdapter(mArticleAdapter);
         mArticlesListView = getListView();
 
@@ -226,7 +226,7 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             mArticlesListView.scrollTo(0, 0);
             mScrollTop = false;
         }
-        this.setEmptyText("No unread articles");
+        this.setEmptyText(getResources().getString(R.string.NoUnreadArticles));
 
         mCurrentState = STATE_LOADED;
 

@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -66,6 +67,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private SharedPreferences mPreferences;
     private HashSet<Integer> mFeedsUpdating;
     private MenuItem mRefreshItem;
+    private Resources mResources;
 
     /**
      * Handles messages from AsyncTasks started within this activity
@@ -131,6 +133,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
         setContentView(R.layout.activity_home);
 
+        mResources = getResources();
+
         mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
         mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
         if (mArticleListFragment != null) {
@@ -193,7 +197,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      *            URL of the feed to fetch
      */
     private void addFeed(String feedUrl) {
-        mSpinner = ProgressDialog.show(this, "", "Please wait...", true);
+        mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PleaseWait), true);
         AddFeedTask mAddFeedTask = new AddFeedTask(mAsyncHandler, this);
         mAddFeedTask.execute(feedUrl);
     }
@@ -212,7 +216,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 refreshFeed(mFeedID);
             }
         } else {
-            showDialog("No connection", "You are not connected to the internet, please retry later.");
+            showDialog(mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
         }
     }
 
@@ -282,7 +286,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
         mAlertDialog.setTitle(title);
         mAlertDialog.setMessage(message);
-        mAlertDialog.setPositiveButton("OK", null);
+        mAlertDialog.setPositiveButton(mResources.getString(R.string.PositiveButton), null);
         mAlertDialog.show();
     }
 
@@ -295,27 +299,27 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (mIsConnected) {
             AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
 
-            mAlertDialog.setTitle("Add feed");
-            mAlertDialog.setMessage("Input Feed URL");
+            mAlertDialog.setTitle(mResources.getString(R.string.AddFeedDialogTitle));
+            mAlertDialog.setMessage(mResources.getString(R.string.AddFeedDialogText));
 
             final EditText mInput = new EditText(this);
             mInput.setText("http://t3n.de/news/feed");
             mAlertDialog.setView(mInput);
 
-            mAlertDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+            mAlertDialog.setPositiveButton(mResources.getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     String value = mInput.getText().toString();
                     addFeed(value);
                 }
             });
 
-            mAlertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            mAlertDialog.setNegativeButton(mResources.getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                 }
             });
             mAlertDialog.show();
         } else {
-            showDialog("No connection", "You are not connected to the internet, please retry later.");
+            showDialog(mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
         }
     }
 

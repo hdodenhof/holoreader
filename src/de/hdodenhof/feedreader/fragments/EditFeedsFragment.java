@@ -63,7 +63,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
         mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         mFeedsListView.setOnItemClickListener(new FeedOnItemClickListener());
 
-        this.setEmptyText("Loading feeds...");
+        this.setEmptyText(getResources().getString(R.string.LoadingFeeds));
         this.setListAdapter(mFeedAdapter);
     }
 
@@ -75,7 +75,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mFeedAdapter.swapCursor(data);
-        this.setEmptyText("No feeds");
+        this.setEmptyText(getResources().getString(R.string.NoFeeds));
     }
 
     public void onLoaderReset(Loader<Cursor> loader) {
@@ -98,21 +98,18 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
                     mActionViewVisible = true;
                 }
 
-                MenuItem mEdit = mActionMode.getMenu().getItem(0);
+                String mFeedsFound = getResources().getQuantityString(R.plurals.numberOfFeedsSelected, checkedCount, checkedCount);
+                mActionMode.setSubtitle(mFeedsFound);
 
-                switch (checkedCount) {
-                case 1:
-                    mActionMode.setSubtitle("1 feed selected");
+                MenuItem mEdit = mActionMode.getMenu().getItem(0);
+                if (checkedCount == 1) {
                     if (!mEdit.isVisible()) {
-                        mActionMode.getMenu().getItem(0).setVisible(true);
+                        mEdit.setVisible(true);
                     }
-                    break;
-                default:
-                    mActionMode.setSubtitle("" + checkedCount + " feeds selected");
+                } else {
                     if (mEdit.isVisible()) {
-                        mActionMode.getMenu().getItem(0).setVisible(false);
+                        mEdit.setVisible(false);
                     }
-                    break;
                 }
             } else {
                 mActionMode.finish();
@@ -120,7 +117,6 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
             }
 
         }
-
     }
 
     @SuppressLint("NewApi")
@@ -153,7 +149,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.editfeed_context, menu);
 
-            mode.setTitle("Select feeds to delete");
+            mode.setTitle(getResources().getString(R.string.EditFeedsCABTitle));
 
             return true;
         }

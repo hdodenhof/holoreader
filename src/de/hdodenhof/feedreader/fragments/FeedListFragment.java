@@ -64,7 +64,7 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
         TextView mUpdatedView = (TextView) mHeaderView.findViewById(R.id.list_item_feed_updated);
         TextView mTitleView = (TextView) mHeaderView.findViewById(R.id.list_item_feed_name);
         mUpdatedView.setVisibility(View.GONE);
-        mTitleView.setText(getResources().getString(R.string.all_feeds));
+        mTitleView.setText(getResources().getString(R.string.AllFeeds));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             TypedArray mAttributes = getActivity().obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
@@ -82,7 +82,7 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
         mFeedsListView.addHeaderView(mHeaderView);
 
-        this.setEmptyText("Loading feeds...");
+        this.setEmptyText(getResources().getString(R.string.LoadingFeeds));
         this.setListAdapter(mFeedAdapter);
 
         mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
@@ -113,7 +113,7 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mFeedAdapter.swapCursor(data);
-        this.setEmptyText("No unread feeds");
+        this.setEmptyText(getResources().getString(R.string.NoUnreadFeeds));
     }
 
     public void onLoaderReset(Loader<Cursor> loader) {

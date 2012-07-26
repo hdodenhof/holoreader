@@ -30,10 +30,12 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
     private static final String TAG = RSSFeedAdapter.class.getSimpleName();
 
     private int mLayout;
+    private Context mContext;
 
     public RSSFeedAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags) {
         super(context, layout, c, from, to, flags);
         mLayout = layout;
+        mContext = context;
     }
 
     @Override
@@ -87,7 +89,7 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
             if (mUpdated != null) {
                 mParsedUpdated = formatToYesterdayOrToday(SQLiteHelper.toDate(mUpdated));
             }
-            mUpdatedView.setText("Last Update: " + mParsedUpdated);
+            mUpdatedView.setText(context.getResources().getString(R.string.LastUpdate) + ": " + mParsedUpdated);
         }
         if (mUnreadView != null) {
             if (mUnread != null && !mUnread.equals("0")) {
@@ -114,9 +116,9 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
         SimpleDateFormat mTimeFormatter = new SimpleDateFormat("kk:mm");
 
         if (mCalendar.get(Calendar.YEAR) == mToday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mToday.get(Calendar.DAY_OF_YEAR)) {
-            return "Today, " + mTimeFormatter.format(date);
+            return mContext.getResources().getString(R.string.Today) + ", " + mTimeFormatter.format(date);
         } else if (mCalendar.get(Calendar.YEAR) == mYesterday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mYesterday.get(Calendar.DAY_OF_YEAR)) {
-            return "Yesterday, " + mTimeFormatter.format(date);
+            return mContext.getResources().getString(R.string.Yesterday) + ", " + mTimeFormatter.format(date);
         } else {
             return DateFormat.format("MMM dd, kk:mm", date).toString();
         }

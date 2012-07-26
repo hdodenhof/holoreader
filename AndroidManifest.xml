@@ -14,7 +14,7 @@
     <application
         android:icon="@drawable/ic_launcher"
         android:label="@string/AppName"
-        android:theme="@style/Theme.Sherlock.ForceOverflow" >
+        android:theme="@style/Default" >
         <activity
             android:name=".activities.HomeActivity"
             android:label="@string/AppName" >

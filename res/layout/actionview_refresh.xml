@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    style="@android:style/Widget.ActionButton"
+    style="@style/CustomActionButton"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
     <ProgressBar
-        style="?android:attr/indeterminateProgressStyle"
+        style="@style/CustomIndeterminateProgress"
         android:layout_width="32dp"
         android:layout_height="32dp"
-        android:layout_gravity="center"
-        tools:ignore="NewApi" />
+        android:layout_gravity="center" />
 
 </FrameLayout>

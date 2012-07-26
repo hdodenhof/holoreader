@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <style name="Default" parent="Theme.Sherlock.ForceOverflow"></style>
+
+    <style name="CustomActionButton" parent="Widget.Sherlock.ActionButton"></style>
+
+    <!-- Copied and merged from AOSP -->
+    <style name="CustomIndeterminateProgress">
+        <item name="android:indeterminateDrawable">@drawable/progress_small_holo</item>
+        <item name="android:animationResolution">33</item>
+        <item name="android:minWidth">16dip</item>
+        <item name="android:maxWidth">16dip</item>
+        <item name="android:minHeight">16dip</item>
+        <item name="android:maxHeight">16dip</item>
+    </style>
+
+</resources>

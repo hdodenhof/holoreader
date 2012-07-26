@@ -21,6 +21,10 @@
     <string name="MenuSettings">Settings</string>
     <string name="MenuEditFeeds">Edit Feeds</string>
     <string name="MenuToogleUnread">Toogle unread</string>
+    
+    <!-- Article -->
+    <!-- Using unicode to keep whitespaces, it's " - " -->
+    <string name="MetaDivider">\u0020\u2013\u0020</string>
 
     <!-- Article List -->
     <string name="LoadingArticles">Loading articles…</string>

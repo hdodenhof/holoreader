@@ -41,7 +41,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     private int mCurrentArticleID = -1;
     private int mCurrentState;
     private ArrayList<String> mArticles = new ArrayList<String>();
-    private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.CONTENT };
+    private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.CONTENT };
 
     public void changePosition(int position) {
         if (mPager.getCurrentItem() != position) {

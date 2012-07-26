@@ -29,13 +29,35 @@
             android:layout_height="1dp"
             android:background="#000000" />
 
-        <TextView
-            android:id="@+id/article_pubdate"
+        <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:paddingBottom="16dp"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="#000000" />
+            android:orientation="horizontal"
+            android:paddingBottom="16dp" >
+
+            <TextView
+                android:id="@+id/article_pubdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/article_metadivider"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/MetaDivider"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#000000" />
+
+            <TextView
+                android:id="@+id/article_feedname"
+                android:singleLine="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="#000000" />
+        </LinearLayout>
 
         <WebView
             android:id="@+id/article_text"

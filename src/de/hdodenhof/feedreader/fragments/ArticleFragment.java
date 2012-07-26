@@ -34,6 +34,7 @@ public class ArticleFragment extends SherlockFragment {
 
     private String mTitle;
     private String mContent;
+    private String mFeedname;
     private Date mPubdate;
 
     public static ArticleFragment newInstance() {
@@ -48,6 +49,7 @@ public class ArticleFragment extends SherlockFragment {
         Bundle args = getArguments();
         mTitle = args.getString(ArticleDAO.TITLE);
         mContent = args.getString(ArticleDAO.CONTENT);
+        mFeedname = args.getString(ArticleDAO.FEEDNAME);
         mPubdate = SQLiteHelper.toDate(args.getString(ArticleDAO.PUBDATE));
     }
 
@@ -81,6 +83,9 @@ public class ArticleFragment extends SherlockFragment {
             TextView mPubdateView = (TextView) mArticleView.findViewById(R.id.article_pubdate);
             CharSequence mFormattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", mPubdate);
             mPubdateView.setText(mFormattedPubdate);
+
+            TextView mFeednameView = (TextView) mArticleView.findViewById(R.id.article_feedname);
+            mFeednameView.setText(mFeedname);
 
             WebView mContentVIew = (WebView) mArticleView.findViewById(R.id.article_text);
             mContentVIew.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);

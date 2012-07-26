@@ -5,10 +5,10 @@
         android:id="@+id/item_toggle"
         android:icon="@drawable/checkbox_unchecked"
         android:showAsAction="ifRoom"
-        android:title="Toggle"/>
+        android:title="@string/MenuToogleUnread"/>
     <item
         android:id="@+id/item_settings"
         android:showAsAction="never"
-        android:title="Settings"/>
+        android:title="@string/MenuSettings"/>
 
 </menu>

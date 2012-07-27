@@ -2,6 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
+        android:id="@+id/item_spinner"
+        android:icon="@android:color/transparent"
+        android:showAsAction="always"
+        android:visible="false"/>
+    <item
         android:id="@+id/item_toggle"
         android:icon="@drawable/checkbox_unchecked"
         android:showAsAction="ifRoom"

@@ -5,6 +5,9 @@ import java.util.Date;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
@@ -13,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -55,7 +59,7 @@ public class ArticleFragment extends SherlockFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View mArticleView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
+        final View mArticleView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
 
         if (mTitle != null && mContent != null && mPubdate != null) {
             int mViewWidth;
@@ -66,13 +70,13 @@ public class ArticleFragment extends SherlockFragment {
 
             if (((FragmentCallback) getActivity()).isDualPane()) {
                 // TODO Remove fixed value
-                mViewWidth = (int) Math.round(displayMetrics.widthPixels * 0.75);
+                mViewWidth = (int) Math.round(displayMetrics.widthPixels * 0.7);
             } else {
                 mViewWidth = displayMetrics.widthPixels;
             }
 
             // TODO Remove fixed value
-            int mContentWidth = Math.round((mViewWidth - 40) / displayMetrics.density);
+            int mContentWidth = Math.round(mViewWidth / displayMetrics.density) - 16;
 
             Document doc = Jsoup.parse(mContent);
             doc.head().append("<style type=\"text/css\">img { max-width: " + String.valueOf(mContentWidth) + "; height: auto}</style>");
@@ -87,14 +91,32 @@ public class ArticleFragment extends SherlockFragment {
             TextView mFeednameView = (TextView) mArticleView.findViewById(R.id.article_feedname);
             mFeednameView.setText(mFeedname);
 
-            WebView mContentVIew = (WebView) mArticleView.findViewById(R.id.article_text);
-            mContentVIew.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);
+            WebView mContentView = (WebView) mArticleView.findViewById(R.id.article_text);
+
+            mContentView.setWebViewClient(new WebViewClient() {
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    mArticleView.postDelayed(new Runnable() {
+                        public void run() {
+                            mArticleView.findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
+                        }
+                    }, 500);
+                }
+            });
+
+            mContentView.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);
 
             mArticleView.scrollTo(0, 0);
         }
 
         return mArticleView;
 
+    }
+
+    private boolean isConnected() {
+        ConnectivityManager mConnectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
+        return mNetworkInfo == null ? false : mNetworkInfo.isAvailable();
     }
 
 }

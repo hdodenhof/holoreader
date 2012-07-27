@@ -183,7 +183,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater mMenuInflater = getSupportMenuInflater();
-        mMenuInflater.inflate(R.menu.settings, menu);
+        mMenuInflater.inflate(R.menu.feed, menu);
 
         if (mTwoPane) {
             menu.removeItem(R.id.item_toggle);

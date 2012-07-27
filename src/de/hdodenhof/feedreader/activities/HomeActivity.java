@@ -22,7 +22,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -228,8 +227,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     @SuppressLint("NewApi")
     private void refreshFeed(int feedID) {
         if (mFeedsUpdating.size() == 0) {
-            View mProgressAnimation = ((LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE)).inflate(R.layout.actionview_refresh, null);
-            mRefreshItem.setActionView(mProgressAnimation);
+            mRefreshItem.setActionView(R.layout.actionview_refresh);
         }
         if (mFeedsUpdating.contains(feedID)) {
             return;

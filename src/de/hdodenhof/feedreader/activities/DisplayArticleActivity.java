@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
@@ -151,10 +152,9 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
      */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // MenuInflater mMenuInflater = getSupportMenuInflater();
-        // mMenuInflater.inflate(R.menu.settings, menu);
-        // return true;
-        return super.onCreateOptionsMenu(menu);
+        MenuInflater mMenuInflater = getSupportMenuInflater();
+        mMenuInflater.inflate(R.menu.article, menu);
+        return true;
     }
 
     /**

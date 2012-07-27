@@ -15,8 +15,7 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -54,11 +53,13 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     private int mMode;
     private LruCache<String, Bitmap> mImageCache;
     private DiskLruImageCache mDiskImageCache;
+    private Context mContext;
 
     public RSSArticleAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags, int mode) {
         super(context, layout, c, from, to, flags);
         mLayout = layout;
         mMode = mode;
+        mContext = context;
 
         final int mMemoryClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
         final int mCacheSize = 1024 * 1024 * mMemoryClass / 8;
@@ -125,7 +126,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                 if (mImage == null) {
                     if (cancelPotentialDownload(mImageURL, mArticleImage)) {
                         ImageDownloaderTask mTask = new ImageDownloaderTask(mArticleImage);
-                        DownloadedDrawable mDownloadedDrawable = new DownloadedDrawable(mTask);
+                        DownloadedDrawable mDownloadedDrawable = new DownloadedDrawable(mTask, mContext);
                         mArticleImage.setImageDrawable(mDownloadedDrawable);
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -256,7 +257,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            if (mImageViewReference != null) {
+            if (bitmap != null && mImageViewReference != null) {
                 ImageView mImageView = mImageViewReference.get();
                 ImageDownloaderTask mImageDownloaderTask = getImageDownloaderTask(mImageView);
                 if (this == mImageDownloaderTask) {
@@ -291,11 +292,11 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         return null;
     }
 
-    private static class DownloadedDrawable extends ColorDrawable {
+    private static class DownloadedDrawable extends BitmapDrawable {
         private final WeakReference<ImageDownloaderTask> mImageDownloaderTaskReference;
 
-        public DownloadedDrawable(ImageDownloaderTask imageDownloaderTask) {
-            super(Color.TRANSPARENT);
+        public DownloadedDrawable(ImageDownloaderTask imageDownloaderTask, Context context) {
+            super(context.getResources(), (BitmapFactory.decodeResource(context.getResources(), R.drawable.placeholder)));
             mImageDownloaderTaskReference = new WeakReference<ImageDownloaderTask>(imageDownloaderTask);
         }
 

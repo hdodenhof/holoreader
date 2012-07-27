@@ -210,7 +210,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
         public ImageDownloaderTask(ImageView imageView) {
             mImageViewReference = new WeakReference<ImageView>(imageView);
-            mImageDimension = (int) (120 * mContext.getResources().getDisplayMetrics().density + 0.5f);
+            mImageDimension = (int) (96 * mContext.getResources().getDisplayMetrics().density + 0.5f);
         }
 
         @Override
@@ -221,27 +221,31 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                 float originalWidth = mBitmap.getWidth();
                 float originalHeight = mBitmap.getHeight();
 
-                if (originalHeight > mImageDimension) {
-                    int newHeight = mImageDimension;
-                    int newWidth = (int) ((newHeight / originalHeight) * originalWidth);
-                    mBitmap = Bitmap.createScaledBitmap(mBitmap, newWidth, newHeight, true);
-                }
-
-                if (!isCancelled()) {
-                    String mKey = getFileName(mURL);
-                    synchronized (mDiskImageCache) {
-                        if (mDiskImageCache.getBitmap(mKey) == null) {
-                            mDiskImageCache.put(mKey, mBitmap);
-                        }
-                    }
-                    synchronized (mImageCache) {
-                        if (mImageCache.get(mKey) == null) {
-                            mImageCache.put(mKey, mBitmap);
-                        }
-                    }
-                    return mBitmap;
-                } else {
+                if (originalHeight < mImageDimension || originalWidth < mImageDimension) {
                     return null;
+                } else {
+                    if (originalHeight > mImageDimension) {
+                        int newHeight = mImageDimension;
+                        int newWidth = (int) ((newHeight / originalHeight) * originalWidth);
+                        mBitmap = Bitmap.createScaledBitmap(mBitmap, newWidth, newHeight, true);
+                    }
+
+                    if (!isCancelled()) {
+                        String mKey = getFileName(mURL);
+                        synchronized (mDiskImageCache) {
+                            if (mDiskImageCache.getBitmap(mKey) == null) {
+                                mDiskImageCache.put(mKey, mBitmap);
+                            }
+                        }
+                        synchronized (mImageCache) {
+                            if (mImageCache.get(mKey) == null) {
+                                mImageCache.put(mKey, mBitmap);
+                            }
+                        }
+                        return mBitmap;
+                    } else {
+                        return null;
+                    }
                 }
 
             } catch (Exception e) {

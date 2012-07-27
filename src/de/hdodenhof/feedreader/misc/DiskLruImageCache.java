@@ -55,7 +55,7 @@ public class DiskLruImageCache {
     }
 
     private File getDiskCacheDir(Context context, String uniqueName) {
-        final String cachePath = Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED || isExternalStorageRemovable() ? getExternalCacheDir(
+        final String cachePath = Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED || !isExternalStorageRemovable() ? getExternalCacheDir(
                 context).getPath() : context.getCacheDir().getPath();
 
         return new File(cachePath + File.separator + uniqueName);

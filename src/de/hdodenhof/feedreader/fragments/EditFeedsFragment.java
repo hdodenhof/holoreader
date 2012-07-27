@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -171,6 +172,14 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
                     mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(mItem) });
                     mContentResolver.delete(RSSContentProvider.URI_FEEDS, FeedDAO._ID + " = ?", new String[] { String.valueOf(mItem) });
                 }
+                mode.finish();
+                return true;
+            case R.id.item_edit:
+                Cursor mFeed = (Cursor) mFeedsListView.getItemAtPosition(mFeedsListView.getCheckedItemPositions().keyAt(0));
+                FragmentManager mFragmentManager = getActivity().getSupportFragmentManager();
+                EditFeedDialog mEditFeedDialog = new EditFeedDialog(mFeed.getLong(mFeed.getColumnIndex(FeedDAO._ID)), mFeed.getString(mFeed
+                        .getColumnIndex(FeedDAO.NAME)), mFeed.getString(mFeed.getColumnIndex(FeedDAO.URL)));
+                mEditFeedDialog.show(mFragmentManager, "fragment_edit_feed_dialog");
                 mode.finish();
                 return true;
             default:

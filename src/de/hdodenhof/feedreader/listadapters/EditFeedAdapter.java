@@ -62,4 +62,5 @@ public class EditFeedAdapter extends SimpleCursorAdapter {
     public final boolean hasStableIds() {
         return true;
     }
+
 }

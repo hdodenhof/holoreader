@@ -1,11 +1,13 @@
 package de.hdodenhof.feedreader.listadapters;
 
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -28,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.misc.DiskLruImageCache;
 import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
@@ -50,6 +53,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     private int mLayout;
     private int mMode;
     private LruCache<String, Bitmap> mImageCache;
+    private DiskLruImageCache mDiskImageCache;
 
     public RSSArticleAdapter(Context context, int layout, Cursor c, String[] from, int[] to, int flags, int mode) {
         super(context, layout, c, from, to, flags);
@@ -65,8 +69,11 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                 return bitmap.getRowBytes() * bitmap.getHeight();
             }
         };
+
+        mDiskImageCache = new DiskLruImageCache(context, "images", mCacheSize * 2);
     }
 
+    @SuppressLint("NewApi")
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         String mTitle = cursor.getString(cursor.getColumnIndex(ArticleDAO.TITLE));
@@ -107,17 +114,32 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         }
 
         if (mArticleImage != null && mImageURL != null && mImageURL != "") {
-            Bitmap mImage = mImageCache.get(mImageURL);
-            if (mImage == null) {
-                if (cancelPotentialDownload(mImageURL, mArticleImage)) {
-                    ImageDownloaderTask mTask = new ImageDownloaderTask(mArticleImage);
-                    DownloadedDrawable mDownloadedDrawable = new DownloadedDrawable(mTask);
-                    mArticleImage.setImageDrawable(mDownloadedDrawable);
-                    mTask.execute(mImageURL);
+            try {
+                URL mURL = new URL(mImageURL);
+
+                String mKey = getFileName(mURL);
+                Bitmap mImage = mImageCache.get(mKey);
+                if (mImage == null) {
+                    mImage = mDiskImageCache.getBitmap(mKey);
                 }
-            } else {
-                cancelPotentialDownload(mImageURL, mArticleImage);
-                mArticleImage.setImageBitmap(mImage);
+                if (mImage == null) {
+                    if (cancelPotentialDownload(mImageURL, mArticleImage)) {
+                        ImageDownloaderTask mTask = new ImageDownloaderTask(mArticleImage);
+                        DownloadedDrawable mDownloadedDrawable = new DownloadedDrawable(mTask);
+                        mArticleImage.setImageDrawable(mDownloadedDrawable);
+
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                            mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mImageURL);
+                        } else {
+                            mTask.execute(mImageURL);
+                        }
+                    }
+                } else {
+                    cancelPotentialDownload(mImageURL, mArticleImage);
+                    mArticleImage.setImageBitmap(mImage);
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -183,7 +205,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     public class ImageDownloaderTask extends AsyncTask<String, Void, Bitmap> {
         private final WeakReference<ImageView> mImageViewReference;
-        private String mURL;
+        private URL mURL;
         private int mImageDimension;
 
         public ImageDownloaderTask(ImageView imageView) {
@@ -193,9 +215,9 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
         @Override
         protected Bitmap doInBackground(String... params) {
-            mURL = params[0];
             try {
-                Bitmap mBitmap = BitmapFactory.decodeStream(new URL(mURL).openConnection().getInputStream());
+                mURL = new URL(params[0]);
+                Bitmap mBitmap = BitmapFactory.decodeStream(mURL.openConnection().getInputStream());
                 float originalWidth = mBitmap.getWidth();
                 float originalHeight = mBitmap.getHeight();
 
@@ -205,7 +227,23 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                     mBitmap = Bitmap.createScaledBitmap(mBitmap, newWidth, newHeight, true);
                 }
 
-                return mBitmap;
+                if (!isCancelled()) {
+                    String mKey = getFileName(mURL);
+                    synchronized (mDiskImageCache) {
+                        if (mDiskImageCache.getBitmap(mKey) == null) {
+                            mDiskImageCache.put(mKey, mBitmap);
+                        }
+                    }
+                    synchronized (mImageCache) {
+                        if (mImageCache.get(mKey) == null) {
+                            mImageCache.put(mKey, mBitmap);
+                        }
+                    }
+                    return mBitmap;
+                } else {
+                    return null;
+                }
+
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
@@ -214,18 +252,6 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            if (isCancelled()) {
-                bitmap = null;
-            }
-
-            if (bitmap != null) {
-                synchronized (mImageCache) {
-                    if (mImageCache.get(mURL) == null) {
-                        mImageCache.put(mURL, bitmap);
-                    }
-                }
-            }
-
             if (mImageViewReference != null) {
                 ImageView mImageView = mImageViewReference.get();
                 ImageDownloaderTask mImageDownloaderTask = getImageDownloaderTask(mImageView);
@@ -240,8 +266,8 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         ImageDownloaderTask mImageDownloaderTask = getImageDownloaderTask(imageView);
 
         if (mImageDownloaderTask != null) {
-            String mBitmapUrl = mImageDownloaderTask.mURL;
-            if ((mBitmapUrl == null) || (!mBitmapUrl.equals(url))) {
+            URL mBitmapUrl = mImageDownloaderTask.mURL;
+            if ((mBitmapUrl == null) || (!mBitmapUrl.toString().equals(url))) {
                 mImageDownloaderTask.cancel(true);
             } else {
                 return false;
@@ -272,6 +298,34 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         public ImageDownloaderTask getImageDownloaderTask() {
             return mImageDownloaderTaskReference.get();
         }
+    }
+
+    /*
+     * From http://stackoverflow.com/a/1856542
+     */
+    private static String getFileName(URL extUrl) {
+        String mFilename = "";
+        String mPath = extUrl.getPath();
+        String[] mPathContents = mPath.split("[\\\\/]");
+        if (mPathContents != null) {
+            String mLastPart = mPathContents[mPathContents.length - 1];
+            String[] mLastPartContents = mLastPart.split("\\.");
+            if (mLastPartContents != null && mLastPartContents.length > 1) {
+                int mLastPartContentLength = mLastPartContents.length;
+                String mName = "";
+                for (int i = 0; i < mLastPartContentLength; i++) {
+                    if (i < (mLastPartContents.length - 1)) {
+                        mName += mLastPartContents[i];
+                        if (i < (mLastPartContentLength - 2)) {
+                            mName += ".";
+                        }
+                    }
+                }
+                String mExtension = mLastPartContents[mLastPartContentLength - 1];
+                mFilename = mName + "." + mExtension;
+            }
+        }
+        return mFilename;
     }
 
 }

@@ -99,16 +99,13 @@ public class ArticleFragment extends SherlockFragment {
                     mArticleView.postDelayed(new Runnable() {
                         public void run() {
                             mArticleView.findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
+                            mArticleView.scrollTo(0, 0);
                         }
                     }, 500);
                 }
             });
-
             mContentView.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);
-
-            mArticleView.scrollTo(0, 0);
         }
-
         return mArticleView;
 
     }

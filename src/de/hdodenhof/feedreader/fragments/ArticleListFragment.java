@@ -111,9 +111,8 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
-        mArticleAdapter = new RSSArticleAdapter(getActivity(), R.layout.listitem_article, null, uiBindFrom, uiBindTo,
-                CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (mTwoPane && !mThisIsPrimaryFragment) ? RSSArticleAdapter.MODE_EXTENDED
-                        : RSSArticleAdapter.MODE_COMPACT);
+        mArticleAdapter = new RSSArticleAdapter(getActivity(), null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER,
+                (mTwoPane && !mThisIsPrimaryFragment) ? RSSArticleAdapter.MODE_EXTENDED : RSSArticleAdapter.MODE_COMPACT, mTwoPane ? true : false);
 
         this.setEmptyText(getResources().getString(R.string.LoadingArticles));
         this.setListAdapter(mArticleAdapter);

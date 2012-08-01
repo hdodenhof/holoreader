@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="image_dimension_compact">96dp</dimen>
+    <dimen name="image_dimension_extended">144dp</dimen>
+
+</resources>

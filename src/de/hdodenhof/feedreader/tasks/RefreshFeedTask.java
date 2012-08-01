@@ -215,10 +215,15 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         if (summary == null) {
             String mContentSummary = mDocument.text();
             if (mContentSummary.length() > SUMMARY_MAXLENGTH) {
-                summary = mContentSummary.substring(0, SUMMARY_MAXLENGTH);
+                summary = mContentSummary.substring(0, SUMMARY_MAXLENGTH) + "[...]";
             } else {
                 summary = mContentSummary;
             }
+        }
+
+        // remove appended line breaks from summary
+        while (summary.charAt(summary.length() - 1) == '\n' || summary.charAt(summary.length() - 1) == '\r') {
+            summary = summary.substring(0, summary.length() - 1);
         }
 
         Element mImage = mDocument.select("img").first();

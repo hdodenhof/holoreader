@@ -3,13 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/article_scrollview"
     android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="fill_parent"
     android:background="#FFFFFF"
     android:fillViewport="true"
     android:scrollbars="vertical"
     tools:ignore="Overdraw" >
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -28,49 +28,52 @@
             android:id="@+id/article_header"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/progressbar"
             android:paddingBottom="8dp"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="#000000" />
 
         <View
+            android:id="@+id/article_divider"
             android:layout_width="fill_parent"
             android:layout_height="1dp"
+            android:layout_below="@id/article_header"
             android:background="#000000" />
 
-        <LinearLayout
-            android:layout_width="fill_parent"
+        <TextView
+            android:id="@+id/article_pubdate"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="16dp" >
+            android:layout_below="@id/article_divider"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#000000" />
 
-            <TextView
-                android:id="@+id/article_pubdate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#000000" />
+        <TextView
+            android:id="@+id/article_metadivider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/article_pubdate"
+            android:layout_toRightOf="@id/article_pubdate"
+            android:text="@string/MetaDivider"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#000000" />
 
-            <TextView
-                android:id="@+id/article_metadivider"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/MetaDivider"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#000000" />
-
-            <TextView
-                android:id="@+id/article_feedname"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textAppearance="?android:attr/textAppearanceSmall"
-                android:textColor="#000000" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/article_feedname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@id/article_pubdate"
+            android:layout_toRightOf="@id/article_metadivider"
+            android:singleLine="true"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textColor="#000000" />
 
         <WebView
             android:id="@+id/article_text"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_below="@id/article_pubdate"
+            android:layout_marginTop="16dp" />
+    </RelativeLayout>
 
 </de.hdodenhof.feedreader.misc.CustomScrollView>

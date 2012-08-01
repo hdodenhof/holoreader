@@ -3,8 +3,7 @@
     android:layout_width="fill_parent"
     android:layout_height="72dp"
     android:layout_weight="1"
-    android:gravity="center"
-    android:minHeight="48dp"
+    android:gravity="center_vertical"
     android:orientation="horizontal"
     android:padding="8dp" >
 
@@ -12,9 +11,9 @@
         android:id="@+id/list_item_editfeed_checkbox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
         android:clickable="false"
-        android:focusable="false"
-        android:paddingRight="8dp" />
+        android:focusable="false" />
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -33,6 +32,7 @@
             android:id="@+id/list_item_editfeed_url"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:ellipsize="end"
             android:singleLine="true"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:attr/textColorSecondary" />

@@ -187,7 +187,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         if (mTwoPane) {
             menu.removeItem(R.id.item_toggle);
         } else if (!mUnreadOnly) {
-            menu.getItem(0).setIcon(R.drawable.checkbox_checked);
+            menu.getItem(1).setIcon(R.drawable.checkbox_checked);
         }
 
         return true;

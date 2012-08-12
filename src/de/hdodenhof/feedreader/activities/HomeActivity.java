@@ -125,7 +125,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
     private void callbackError() {
         mSpinner.dismiss();
-        showDialog("An error occured", "Something went wrong while adding the feed");
+        Helpers.showDialog(this, "An error occured", "Something went wrong while adding the feed");
     }
 
     /**
@@ -219,7 +219,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 refreshFeed(mFeedID);
             }
         } else {
-            showDialog(mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
         }
     }
 
@@ -266,22 +266,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     }
 
     /**
-     * Shows a simple dialog
-     * 
-     * @param title
-     *            Dialog title
-     * @param message
-     *            Dialog message
-     */
-    private void showDialog(String title, String message) {
-        AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
-        mAlertDialog.setTitle(title);
-        mAlertDialog.setMessage(message);
-        mAlertDialog.setPositiveButton(mResources.getString(R.string.PositiveButton), null);
-        mAlertDialog.show();
-    }
-
-    /**
      * Shows a dialog to add a new feed URL
      */
     private void showAddDialog() {
@@ -310,7 +294,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             });
             mAlertDialog.show();
         } else {
-            showDialog(mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
         }
     }
 

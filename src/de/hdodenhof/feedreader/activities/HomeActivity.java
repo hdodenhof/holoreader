@@ -92,6 +92,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 // feed refresh
                 mTarget.callbackFeedRefresh(msg.arg1);
                 break;
+            case 9:
+                // something went wrong while adding a feed
+                mTarget.callbackError();
+                break;
             default:
                 break;
             }
@@ -116,6 +120,11 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             mRefreshItem.getActionView().clearAnimation();
             mRefreshItem.setActionView(null);
         }
+    }
+
+    private void callbackError() {
+        mSpinner.dismiss();
+        showDialog("An error occured", "Something went wrong while adding the feed");
     }
 
     /**

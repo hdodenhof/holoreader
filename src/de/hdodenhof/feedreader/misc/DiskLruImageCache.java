@@ -15,11 +15,8 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
-import android.util.Log;
 
 import com.jakewharton.DiskLruCache;
-
-import de.hdodenhof.feedreader.BuildConfig;
 
 /*
  * Based on http://stackoverflow.com/a/10235381
@@ -31,7 +28,6 @@ public class DiskLruImageCache {
     private int mCompressQuality = 70;
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
-    private static final String TAG = "DiskLruImageCache";
 
     public DiskLruImageCache(Context context, String uniqueName, int diskCacheSize) {
         try {
@@ -73,19 +69,10 @@ public class DiskLruImageCache {
             if (writeBitmapToFile(data, editor)) {
                 mDiskCache.flush();
                 editor.commit();
-                if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "image put on disk cache " + key);
-                }
             } else {
                 editor.abort();
-                if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "ERROR on: image put on disk cache " + key);
-                }
             }
         } catch (IOException e) {
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, "ERROR on: image put on disk cache " + key);
-            }
             try {
                 if (editor != null) {
                     editor.abort();
@@ -118,11 +105,6 @@ public class DiskLruImageCache {
                 snapshot.close();
             }
         }
-
-        if (BuildConfig.DEBUG) {
-            Log.d("cache_test_DISK_", bitmap == null ? "" : "image read from disk " + key);
-        }
-
         return bitmap;
 
     }
@@ -147,9 +129,6 @@ public class DiskLruImageCache {
     }
 
     public void clearCache() {
-        if (BuildConfig.DEBUG) {
-            Log.d("cache_test_DISK_", "disk cache CLEARED");
-        }
         try {
             mDiskCache.delete();
         } catch (IOException e) {

@@ -147,6 +147,7 @@ public class RSSContentProvider extends ContentProvider {
             break;
         case ARTICLES:
             mRowsDeleted = mDatabase.delete(ArticleDAO.TABLE, selection, selectionArgs);
+            getContext().getContentResolver().notifyChange(URI_FEEDS, null);
             break;
         case ARTICLE_ID:
             mID = uri.getLastPathSegment();
@@ -155,6 +156,8 @@ public class RSSContentProvider extends ContentProvider {
             } else {
                 mRowsDeleted = mDatabase.delete(ArticleDAO.TABLE, ArticleDAO._ID + "=" + mID + " and " + selection, selectionArgs);
             }
+            getContext().getContentResolver().notifyChange(URI_ARTICLES, null);
+            getContext().getContentResolver().notifyChange(URI_FEEDS, null);
             break;
         default:
             throw new IllegalArgumentException("Unknown URI: " + uri);

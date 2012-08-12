@@ -54,7 +54,6 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     private static final int ALPHA_STATE_DIMMED = 128;
     private static final int ALPHA_STATE_FULL = 255;
 
-    private TextView mArticleSummary;
     private int mLayout;
     private int mMode;
     private boolean mIsModeExtendedPossible;
@@ -94,7 +93,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         final TextView mArticleTitle = (TextView) view.findViewById(R.id.list_item_entry_title);
         final TextView mArticlePubdate = (TextView) view.findViewById(R.id.list_item_entry_date);
         final ImageView mArticleImage = (ImageView) view.findViewById(R.id.list_item_entry_image);
-        mArticleSummary = (TextView) view.findViewById(R.id.list_item_entry_summary);
+        final TextView mArticleSummary = (TextView) view.findViewById(R.id.list_item_entry_summary);
 
         if (mArticleTitle != null) {
             mArticleTitle.setText(mTitle);
@@ -283,6 +282,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     private void setVisible(View view) {
         view.setVisibility(View.VISIBLE);
         if (mMode == MODE_COMPACT) {
+            View mArticleSummary = ((View) view.getParent()).findViewById(R.id.list_item_entry_summary);
             RelativeLayout.LayoutParams mLayoutParams = (RelativeLayout.LayoutParams) mArticleSummary.getLayoutParams();
             mLayoutParams.addRule(RelativeLayout.BELOW, R.id.list_item_entry_image);
             mArticleSummary.setLayoutParams(mLayoutParams);
@@ -291,6 +291,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     private void setInvisible(View view) {
         if (mMode == MODE_COMPACT) {
+            View mArticleSummary = ((View) view.getParent()).findViewById(R.id.list_item_entry_summary);
             RelativeLayout.LayoutParams mLayoutParams = (RelativeLayout.LayoutParams) mArticleSummary.getLayoutParams();
             mLayoutParams.addRule(RelativeLayout.BELOW, R.id.list_item_entry_title);
             mArticleSummary.setLayoutParams(mLayoutParams);

@@ -19,6 +19,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
@@ -148,6 +149,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (mArticleListFragment != null) {
             mTwoPane = true;
         }
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
         mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
@@ -414,8 +417,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             }
             return true;
         case R.id.item_editfeeds:
-            Intent mIntent = new Intent(this, EditFeedsActivity.class);
-            startActivity(mIntent);
+            startActivity(new Intent(this, EditFeedsActivity.class));
+            return true;
+        case R.id.item_settings:
+            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         default:
             return super.onOptionsItemSelected(item);

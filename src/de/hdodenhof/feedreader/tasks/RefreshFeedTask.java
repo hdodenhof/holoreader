@@ -22,10 +22,12 @@ import org.xmlpull.v1.XmlPullParserFactory;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.text.Html;
 
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
@@ -40,8 +42,8 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
     private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
 
-    private static final int KEEP_READ_ARTICLES_DAYS = 3;
-    private static final int MAX_NEW_ARTICLES_AGE_DAYS = 7;
+    private int mKeepReadArticlesDays = 3;
+    private int mKeepUnreadArticlesDays = 7;
 
     private Handler mMainUIHandler;
     private Context mContext;
@@ -54,6 +56,10 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             mSimpleDateFormats[i] = new SimpleDateFormat(DATE_FORMATS[i], Locale.US);
             mSimpleDateFormats[i].setTimeZone(TimeZone.getTimeZone("GMT"));
         }
+
+        SharedPreferences mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mKeepReadArticlesDays = Integer.parseInt(mSharedPrefs.getString("pref_keep_read_articles_days", ""));
+        mKeepUnreadArticlesDays = Integer.parseInt(mSharedPrefs.getString("pref_keep_unread_articles_days", ""));
     }
 
     protected Integer doInBackground(Integer... params) {
@@ -76,11 +82,11 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
             // delete read articles after KEEP_READ_ARTICLES_DAYS
             mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?",
-                    new String[] { SQLiteHelper.fromDate(pastDate(KEEP_READ_ARTICLES_DAYS)), "1" });
+                    new String[] { SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)), "1" });
 
             // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
             mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ?",
-                    new String[] { SQLiteHelper.fromDate(pastDate(MAX_NEW_ARTICLES_AGE_DAYS)) });
+                    new String[] { SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
 
             Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
                     ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(mFeedID) }, ArticleDAO.PUBDATE + " DESC");
@@ -96,7 +102,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             mCursor.close();
 
             Date mMinimumDate;
-            Date mArticleNotOlderThan = pastDate(MAX_NEW_ARTICLES_AGE_DAYS);
+            Date mArticleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
 
             if (mNewestArticleDate.equals(new Date(0))) {
                 mMinimumDate = mArticleNotOlderThan;

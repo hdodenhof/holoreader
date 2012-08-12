@@ -26,7 +26,8 @@
         android:id="@+id/lbl_feedurl"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="@string/EditFeedDialogURL" />
+        android:text="@string/EditFeedDialogURL"
+        android:visibility="gone" />
 
     <EditText
         android:id="@+id/txt_feedurl"
@@ -34,6 +35,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:inputType="text"
-        android:singleLine="true" />
+        android:singleLine="true"
+        android:visibility="gone" />
 
 </LinearLayout>

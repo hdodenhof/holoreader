@@ -40,6 +40,9 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
     private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
 
+    private static final int KEEP_READ_ARTICLES_DAYS = 3;
+    private static final int MAX_NEW_ARTICLES_AGE_DAYS = 7;
+
     private Handler mMainUIHandler;
     private Context mContext;
 
@@ -70,10 +73,14 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             String mPubdate = null;
 
             String mFeedURL = queryURL(mFeedID);
-            Date mArticleNotOlderThan = maxArticleDate();
 
+            // delete read articles after KEEP_READ_ARTICLES_DAYS
             mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?",
-                    new String[] { SQLiteHelper.fromDate(mArticleNotOlderThan), "1" });
+                    new String[] { SQLiteHelper.fromDate(pastDate(KEEP_READ_ARTICLES_DAYS)), "1" });
+
+            // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
+            mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ?",
+                    new String[] { SQLiteHelper.fromDate(pastDate(MAX_NEW_ARTICLES_AGE_DAYS)) });
 
             Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
                     ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(mFeedID) }, ArticleDAO.PUBDATE + " DESC");
@@ -87,6 +94,15 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                 } while (mCursor.moveToNext());
             }
             mCursor.close();
+
+            Date mMinimumDate;
+            Date mArticleNotOlderThan = pastDate(MAX_NEW_ARTICLES_AGE_DAYS);
+
+            if (mNewestArticleDate.equals(new Date(0))) {
+                mMinimumDate = mArticleNotOlderThan;
+            } else {
+                mMinimumDate = mArticleNotOlderThan.before(mNewestArticleDate) ? mArticleNotOlderThan : mNewestArticleDate;
+            }
 
             InputStream mInputStream = new URL(mFeedURL).openConnection().getInputStream();
             XmlPullParserFactory mParserFactory = XmlPullParserFactory.newInstance();
@@ -118,13 +134,6 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
                     if (mCurrentTag.equalsIgnoreCase("item") || mCurrentTag.equalsIgnoreCase("entry")) {
                         mIsArticle = false;
-
-                        Date mMinimumDate;
-                        if (mNewestArticleDate.equals(new Date(0))) {
-                            mMinimumDate = mArticleNotOlderThan;
-                        } else {
-                            mMinimumDate = mArticleNotOlderThan.before(mNewestArticleDate) ? mArticleNotOlderThan : mNewestArticleDate;
-                        }
 
                         if (SQLiteHelper.toDate(mPubdate).before(mMinimumDate)) {
                             break;
@@ -168,9 +177,9 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         mMainUIHandler.sendMessage(mMSG);
     }
 
-    private Date maxArticleDate() {
+    private Date pastDate(int interval) {
         Calendar mCalendar = Calendar.getInstance();
-        mCalendar.add(Calendar.DATE, -7);
+        mCalendar.add(Calendar.DATE, -interval);
         return mCalendar.getTime();
     }
 

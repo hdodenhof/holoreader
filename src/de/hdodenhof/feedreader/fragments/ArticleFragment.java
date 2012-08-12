@@ -79,6 +79,7 @@ public class ArticleFragment extends SherlockFragment {
             mStyleStringBuilder.append("<style type=\"text/css\">");
             mStyleStringBuilder.append("body { padding: 0; margin: 0; }");
             mStyleStringBuilder.append("img { max-width: " + String.valueOf(mContentWidth) + "; height: auto; }");
+            mStyleStringBuilder.append("figure { margin: 0 !important; }");
             mStyleStringBuilder.append("</style>");
 
             Document doc = Jsoup.parse(mContent);

@@ -75,8 +75,14 @@ public class ArticleFragment extends SherlockFragment {
             // TODO Remove fixed value
             int mContentWidth = Math.round(mViewWidth / displayMetrics.density) - 16;
 
+            StringBuilder mStyleStringBuilder = new StringBuilder();
+            mStyleStringBuilder.append("<style type=\"text/css\">");
+            mStyleStringBuilder.append("body { padding: 0; margin: 0; }");
+            mStyleStringBuilder.append("img { max-width: " + String.valueOf(mContentWidth) + "; height: auto }");
+            mStyleStringBuilder.append("</style>");
+
             Document doc = Jsoup.parse(mContent);
-            doc.head().append("<style type=\"text/css\">img { max-width: " + String.valueOf(mContentWidth) + "; height: auto}</style>");
+            doc.head().append(mStyleStringBuilder.toString());
 
             TextView mTitleView = (TextView) mArticleView.findViewById(R.id.article_header);
             mTitleView.setText(mTitle);

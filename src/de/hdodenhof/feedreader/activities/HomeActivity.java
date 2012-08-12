@@ -14,8 +14,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -41,6 +39,7 @@ import de.hdodenhof.feedreader.listadapters.RSSAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
+import de.hdodenhof.feedreader.misc.Helpers;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
@@ -203,7 +202,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      *            MenuItem that holds the refresh animation
      */
     private void refreshFeeds() {
-        boolean mIsConnected = isConnected();
+        boolean mIsConnected = Helpers.isConnected(this);
 
         if (mIsConnected) {
             for (Integer mFeedID : queryFeeds()) {
@@ -257,17 +256,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     }
 
     /**
-     * Checks the devices connectivity
-     * 
-     * @return True if connection is available, false if not
-     */
-    private boolean isConnected() {
-        ConnectivityManager mConnectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-        return mNetworkInfo == null ? false : mNetworkInfo.isAvailable();
-    }
-
-    /**
      * Shows a simple dialog
      * 
      * @param title
@@ -287,7 +275,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * Shows a dialog to add a new feed URL
      */
     private void showAddDialog() {
-        boolean mIsConnected = isConnected();
+        boolean mIsConnected = Helpers.isConnected(this);
 
         if (mIsConnected) {
             AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);

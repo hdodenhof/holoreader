@@ -5,9 +5,6 @@ import java.util.Date;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
@@ -108,11 +105,4 @@ public class ArticleFragment extends SherlockFragment {
         return mArticleView;
 
     }
-
-    private boolean isConnected() {
-        ConnectivityManager mConnectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-        return mNetworkInfo == null ? false : mNetworkInfo.isAvailable();
-    }
-
 }

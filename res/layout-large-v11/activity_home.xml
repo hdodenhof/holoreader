@@ -9,7 +9,7 @@
         android:name="de.hdodenhof.feedreader.fragments.FeedListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="1" />
+        android:layout_weight="@integer/dualpane_homeactivity_feeds_weight" />
 
     <View
         android:layout_width="1dp"
@@ -21,6 +21,6 @@
         android:name="de.hdodenhof.feedreader.fragments.ArticleListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:layout_weight="3" />
+        android:layout_weight="@integer/dualpane_homeactivity_articles_weight" />
 
 </LinearLayout>

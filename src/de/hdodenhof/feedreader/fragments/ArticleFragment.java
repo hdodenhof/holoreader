@@ -66,13 +66,13 @@ public class ArticleFragment extends SherlockFragment {
             display.getMetrics(displayMetrics);
 
             if (((FragmentCallback) getActivity()).isDualPane()) {
-                // TODO Remove fixed value
-                mViewWidth = (int) Math.round(displayMetrics.widthPixels * 0.7);
+                float mFactor = ((float) getResources().getInteger(R.integer.dualpane_feedactivity_article_weight)) / 100;
+                mViewWidth = (int) Math.round(displayMetrics.widthPixels * mFactor);
             } else {
                 mViewWidth = displayMetrics.widthPixels;
             }
 
-            // TODO Remove fixed value
+            // content margin is 8dp left and 8dp right
             int mContentWidth = Math.round(mViewWidth / displayMetrics.density) - 16;
 
             StringBuilder mStyleStringBuilder = new StringBuilder();

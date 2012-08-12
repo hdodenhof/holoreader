@@ -47,6 +47,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
     private int mCurrentArticle = -1;
+    private int mCurrentFeed = -1;
     private ArticleViewPager mArticlePagerFragment;
     private SharedPreferences mPreferences;
     private Resources mResources;
@@ -58,8 +59,6 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        int mFeedID = 0;
-
         if (savedInstanceState != null) {
 
         }
@@ -67,7 +66,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         mResources = getResources();
 
         if (getIntent().hasExtra("feedid")) {
-            mFeedID = getIntent().getIntExtra("feedid", 0);
+            mCurrentFeed = getIntent().getIntExtra("feedid", -1);
         }
 
         mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
@@ -81,8 +80,8 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         }
 
         ActionBar mActionBar = getSupportActionBar();
-        if (mFeedID != 0) {
-            mActionBar.setTitle(queryFeedName(mFeedID));
+        if (mCurrentFeed != -1) {
+            mActionBar.setTitle(queryFeedName(mCurrentFeed));
         } else {
             mActionBar.setTitle(mResources.getText(R.string.AllFeeds));
         }
@@ -221,6 +220,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
 
                 Intent mIntent = new Intent(this, DisplayArticleActivity.class);
                 mIntent.putExtra("articleid", mArticleID);
+                mIntent.putExtra("feedid", mCurrentFeed);
                 mIntent.putStringArrayListExtra("articles", mArticles);
                 startActivity(mIntent);
             }

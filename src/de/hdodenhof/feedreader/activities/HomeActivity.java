@@ -325,7 +325,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         switch (mAdapter.getType()) {
         case RSSAdapter.TYPE_FEED:
             if (position == 0) {
-                mFeedID = 0;
+                mFeedID = -1;
             } else {
                 mCursor = ((RSSFeedAdapter) mAdapter).getCursor();
                 mCursor.moveToPosition(position - 1);

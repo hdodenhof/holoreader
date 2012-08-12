@@ -46,7 +46,7 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
     private int mCurrentState;
     private int mChangeToPosition = -1;
 
-    private int mSelectedFeed = 0;
+    private int mSelectedFeed = -1;
     private ArrayList<String> mArticles;
     private boolean mScrollTop = false;
 
@@ -149,7 +149,7 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
 
             } else {
                 // HomeActivity
-                if (mSelectedFeed == 0) {
+                if (mSelectedFeed == -1) {
                     // first call no feedID in Intent
 
                     if (mUnreadOnly) {
@@ -178,7 +178,7 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             // SinglePane
             // feedID in Intent
 
-            if (mSelectedFeed != 0) {
+            if (mSelectedFeed != -1) {
                 mSelection = ArticleDAO.FEEDID + " = ?";
                 mSelectionArgs = new String[] { String.valueOf(mSelectedFeed) };
             }

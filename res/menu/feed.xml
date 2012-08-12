@@ -12,6 +12,11 @@
         android:showAsAction="ifRoom"
         android:title="@string/MenuToogleUnread"/>
     <item
+        android:id="@+id/item_markread"
+        android:icon="@drawable/markread"
+        android:showAsAction="ifRoom"
+        android:title="@string/MenuMarkRead"/>
+    <item
         android:id="@+id/item_settings"
         android:showAsAction="never"
         android:title="@string/MenuSettings"/>

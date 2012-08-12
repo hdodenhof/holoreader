@@ -73,7 +73,9 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
     protected void onPause() {
         super.onPause();
         if (mCurrentArticle != -1) {
-            new Thread(new MarkReadRunnable((Context) this, mCurrentArticle)).start();
+            MarkReadRunnable mMarkReadRunnable = new MarkReadRunnable((Context) this);
+            mMarkReadRunnable.setArticle(mCurrentArticle);
+            new Thread(mMarkReadRunnable).start();
         }
     }
 
@@ -146,7 +148,9 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
      */
     public void onArticleChanged(int oldArticle, int currentArticle, int position) {
         if (oldArticle != -1) {
-            new Thread(new MarkReadRunnable((Context) this, oldArticle)).start();
+            MarkReadRunnable mMarkReadRunnable = new MarkReadRunnable((Context) this);
+            mMarkReadRunnable.setArticle(oldArticle);
+            new Thread(mMarkReadRunnable).start();
         }
 
         mCurrentArticle = currentArticle;

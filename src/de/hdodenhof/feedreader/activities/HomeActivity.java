@@ -40,6 +40,7 @@ import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.misc.Helpers;
+import de.hdodenhof.feedreader.misc.MarkReadRunnable;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
@@ -421,6 +422,11 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             mFeedListFragment.setUnreadOnly(mUnreadOnly);
             if (mTwoPane) {
                 mArticleListFragment.setUnreadOnly(mUnreadOnly);
+            }
+            return true;
+        case R.id.item_markread:
+            if (!mTwoPane) {
+                new Thread(new MarkReadRunnable((Context) this)).start();
             }
             return true;
         case R.id.item_editfeeds:

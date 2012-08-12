@@ -94,8 +94,11 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     @Override
     protected void onPause() {
         super.onPause();
+        // dual pane only
         if (mCurrentArticle != -1) {
-            new Thread(new MarkReadRunnable((Context) this, mCurrentArticle)).start();
+            MarkReadRunnable mMarkReadRunnable = new MarkReadRunnable((Context) this);
+            mMarkReadRunnable.setArticle(mCurrentArticle);
+            new Thread(mMarkReadRunnable).start();
         }
     }
 
@@ -171,6 +174,17 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
             mArticleListFragment.setUnreadOnly(mUnreadOnly);
             return true;
+        case R.id.item_markread:
+            if (!mTwoPane) {
+                if (mCurrentFeed == -1) {
+                    new Thread(new MarkReadRunnable((Context) this)).start();
+                } else {
+                    MarkReadRunnable mMarkReadRunnable = new MarkReadRunnable((Context) this);
+                    mMarkReadRunnable.setFeed(mCurrentFeed);
+                    new Thread(mMarkReadRunnable).start();
+                }
+            }
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -238,7 +252,9 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         mArticleListFragment.changePosition(position);
 
         if (oldArticle != -1) {
-            new Thread(new MarkReadRunnable((Context) this, oldArticle)).start();
+            MarkReadRunnable mMarkReadRunnable = new MarkReadRunnable((Context) this);
+            mMarkReadRunnable.setArticle(oldArticle);
+            new Thread(mMarkReadRunnable).start();
         }
         mCurrentArticle = currentArticle;
     }

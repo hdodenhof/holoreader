@@ -186,6 +186,9 @@ public class RSSContentProvider extends ContentProvider {
             break;
         case ARTICLES:
             mRowsUpdated = mDatabase.update(ArticleDAO.TABLE, values, selection, selectionArgs);
+            if (values.containsKey(ArticleDAO.READ)) {
+                getContext().getContentResolver().notifyChange(URI_FEEDS, null);
+            }
             break;
         case ARTICLE_ID:
             mID = uri.getLastPathSegment();

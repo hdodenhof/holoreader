@@ -9,8 +9,6 @@ import android.support.v4.app.Fragment;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
@@ -127,16 +125,6 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
         default:
             return super.onOptionsItemSelected(item);
         }
-    }
-
-    /**
-     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater mMenuInflater = getSupportMenuInflater();
-        mMenuInflater.inflate(R.menu.article, menu);
-        return true;
     }
 
     /**

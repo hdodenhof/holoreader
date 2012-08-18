@@ -151,9 +151,10 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent mIntent;
         switch (item.getItemId()) {
         case android.R.id.home:
-            Intent mIntent = new Intent(this, HomeActivity.class);
+            mIntent = new Intent(this, HomeActivity.class);
             mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(mIntent);
             return true;
@@ -183,6 +184,9 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
                     mMarkReadRunnable.setFeed(mCurrentFeed);
                     new Thread(mMarkReadRunnable).start();
                 }
+                mIntent = new Intent(this, HomeActivity.class);
+                mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(mIntent);
             }
             return true;
         default:

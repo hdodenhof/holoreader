@@ -15,6 +15,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -157,6 +158,13 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
 
         mFeedsUpdating = new HashSet<Integer>();
+
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        if (action == Intent.ACTION_VIEW) {
+            Uri data = intent.getData();
+            addFeed(data.toString());
+        }
     }
 
     /**

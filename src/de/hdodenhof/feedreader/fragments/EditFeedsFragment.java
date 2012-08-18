@@ -89,12 +89,12 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
             final int checkedCount = getCheckedItemCount();
 
             if (checkedCount > 0) {
-                MenuItem edit = mActionMode.getMenu().getItem(0);
-
                 if (mActionMode == null || mActionViewVisible == false) {
                     mActionMode = ((SherlockFragmentActivity) getActivity()).startActionMode(new FeedCallback());
                     mActionViewVisible = true;
                 }
+
+                MenuItem edit = mActionMode.getMenu().getItem(0);
 
                 String feedsFound = getResources().getQuantityString(R.plurals.numberOfFeedsSelected, checkedCount, checkedCount);
                 mActionMode.setSubtitle(feedsFound);

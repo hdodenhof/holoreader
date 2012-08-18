@@ -11,16 +11,16 @@
     <string name="PositiveButton">OK</string>
     <string name="NegativeButton">Cancel</string>
     <string name="AddFeedDialogTitle">@string/MenuAdd</string>
-    <string name="AddFeedDialogText">Input Feed URL</string>
-    <string name="ToastUnreadArticles">Show unread articles only</string>
-    <string name="ToastAllArticles">Show all articles</string>
+    <string name="AddFeedDialogText">Input feed URL</string>
+    <string name="ToastUnreadArticles">Show unread items only</string>
+    <string name="ToastAllArticles">Show all items</string>
 
     <!-- Menu -->
     <string name="MenuRefresh">Refresh Feeds</string>
     <string name="MenuAdd">Add feed</string>
     <string name="MenuSettings">Settings</string>
     <string name="MenuEditFeeds">Edit Feeds</string>
-    <string name="MenuToogleUnread">Toogle unread</string>
+    <string name="MenuToogleUnread">Toogle unread items</string>
     <string name="MenuMarkRead">Mark all as read</string>
     
     <!-- Article -->
@@ -43,12 +43,12 @@
 
     <!-- Feed editor -->
     <string name="EditFeedsCABTitle">Select feeds to edit</string>
-    <string name="EditFeedsTitle">Edit Feeds</string>
+    <string name="EditFeedsTitle">Edit feeds</string>
     <string name="EditFeedsMenuDelete">Delete selected feeds</string>
     <string name="EditFeedsMenuEdit">Edit selected feed</string>
     
     <!-- Feed edit dialog -->
-    <string name="EditFeedDialogName">Feed Name</string>
+    <string name="EditFeedDialogName">Feed name</string>
     <string name="EditFeedDialogURL">Feed URL</string>
 
     <plurals name="numberOfFeedsSelected">

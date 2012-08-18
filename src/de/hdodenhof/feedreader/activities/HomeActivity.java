@@ -74,7 +74,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     /**
      * Handles messages from AsyncTasks started within this activity
      */
-    Handler mAsyncHandler = new AsynHandler(this);
+    private Handler mAsyncHandler = new AsynHandler(this);
 
     private static class AsynHandler extends Handler {
         private final WeakReference<HomeActivity> targetReference;

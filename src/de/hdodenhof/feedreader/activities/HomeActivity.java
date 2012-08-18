@@ -181,6 +181,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             mArticleListFragment.setUnreadOnly(mUnreadOnly);
         }
 
+        if (mFeedsUpdating.size() != 0) {
+            mRefreshItem.setActionView(R.layout.actionview_refresh);
+        }
+
         long mRefreshed = mPreferences.getLong("refreshed", (new Date(0)).getTime());
         if (mRefreshed < (new Date()).getTime() - 3600000) {
             refreshFeeds(false);

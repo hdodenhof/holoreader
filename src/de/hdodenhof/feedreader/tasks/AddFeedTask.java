@@ -29,8 +29,8 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
     private Context mContext;
 
     public AddFeedTask(Handler mainUIHandler, Context context) {
-        this.mMainUIHandler = mainUIHandler;
-        this.mContext = context;
+        mMainUIHandler = mainUIHandler;
+        mContext = context;
     }
 
     protected Integer doInBackground(String... params) {

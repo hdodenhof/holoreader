@@ -61,15 +61,15 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private static final String TAG = HomeActivity.class.getSimpleName();
     private static final String PREFS_NAME = "Feedreader";
 
-    private boolean mTwoPane = false;
-    private boolean mUnreadOnly;
-    private ProgressDialog mSpinner;
+    private SharedPreferences mPreferences;
+    private Resources mResources;
     private ArticleListFragment mArticleListFragment;
     private FeedListFragment mFeedListFragment;
-    private SharedPreferences mPreferences;
+    private ProgressDialog mSpinner;
     private HashSet<Integer> mFeedsUpdating;
     private MenuItem mRefreshItem;
-    private Resources resources;
+    private boolean mTwoPane = false;
+    private boolean mUnreadOnly;
 
     /**
      * Handles messages from AsyncTasks started within this activity
@@ -127,7 +127,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     }
 
     /**
-     * Error occoured where trying to add feed
+     * Show error message when adding feed went wrong
      */
     private void callbackError() {
         mSpinner.dismiss();
@@ -140,20 +140,18 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
         setContentView(R.layout.activity_home);
 
-        resources = getResources();
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+
+        mResources = getResources();
+        mFeedsUpdating = new HashSet<Integer>();
 
         mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
         mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
         if (mArticleListFragment != null) {
             mTwoPane = true;
         }
-
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
-        mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
-
-        mFeedsUpdating = new HashSet<Integer>();
 
         Intent intent = getIntent();
         String action = intent.getAction();
@@ -217,7 +215,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      *            URL of the feed to fetch
      */
     private void addFeed(String feedUrl) {
-        mSpinner = ProgressDialog.show(this, "", resources.getString(R.string.PleaseWait), true);
+        mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PleaseWait), true);
         AddFeedTask addFeedTask = new AddFeedTask(mAsyncHandler, this);
         addFeedTask.execute(feedUrl);
     }
@@ -241,7 +239,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             }
         } else {
             if (forced) {
-                Helpers.showDialog(this, resources.getString(R.string.NoConnectionTitle), resources.getString(R.string.NoConnectionText));
+                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
             }
         }
     }
@@ -273,7 +271,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * @return HashMap of all feed ids
      */
     private HashSet<Integer> queryFeeds() {
-        HashSet<Integer> feedsUpdating = new HashSet<Integer>();
+        HashSet<Integer> feeds = new HashSet<Integer>();
 
         ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL }, null, null, null);
@@ -281,12 +279,12 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             do {
-                feedsUpdating.add(cursor.getInt(cursor.getColumnIndex(FeedDAO._ID)));
+                feeds.add(cursor.getInt(cursor.getColumnIndex(FeedDAO._ID)));
             } while (cursor.moveToNext());
         }
         cursor.close();
 
-        return feedsUpdating;
+        return feeds;
     }
 
     /**
@@ -298,44 +296,45 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (isConnected) {
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
-            alertDialog.setTitle(resources.getString(R.string.AddFeedDialogTitle));
-            alertDialog.setMessage(resources.getString(R.string.AddFeedDialogText));
+            alertDialog.setTitle(mResources.getString(R.string.AddFeedDialogTitle));
+            alertDialog.setMessage(mResources.getString(R.string.AddFeedDialogText));
 
-            final EditText mInput = new EditText(this);
-            mInput.setText("http://t3n.de/news/feed");
-            alertDialog.setView(mInput);
+            final EditText input = new EditText(this);
+            input.setText("http://t3n.de/news/feed");
+            alertDialog.setView(input);
 
-            alertDialog.setPositiveButton(resources.getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
+            alertDialog.setPositiveButton(mResources.getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
-                    String value = mInput.getText().toString();
+                    String value = input.getText().toString();
                     addFeed(value);
                 }
             });
 
-            alertDialog.setNegativeButton(resources.getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
+            alertDialog.setNegativeButton(mResources.getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                 }
             });
             alertDialog.show();
         } else {
-            Helpers.showDialog(this, resources.getString(R.string.NoConnectionTitle), resources.getString(R.string.NoConnectionText));
+            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
         }
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         RSSAdapter adapter;
+        Cursor cursor;
+
         if (parent.getAdapter() instanceof HeaderViewListAdapter) {
-            HeaderViewListAdapter wrapperAdapter = (HeaderViewListAdapter) parent.getAdapter();
-            adapter = (RSSAdapter) wrapperAdapter.getWrappedAdapter();
+            HeaderViewListAdapter wrappingAdapter = (HeaderViewListAdapter) parent.getAdapter();
+            adapter = (RSSAdapter) wrappingAdapter.getWrappedAdapter();
         } else {
             adapter = (RSSAdapter) parent.getAdapter();
         }
 
-        Cursor cursor;
-        int feedID;
-
         switch (adapter.getType()) {
         case RSSAdapter.TYPE_FEED:
+            int feedID;
+
             if (position == 0) {
                 feedID = -1;
             } else {
@@ -360,7 +359,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             cursor.moveToPosition(position);
 
             int articleID = cursor.getInt(cursor.getColumnIndex(ArticleDAO._ID));
-
             ArrayList<String> articles = new ArrayList<String>();
 
             cursor.moveToFirst();
@@ -409,10 +407,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             editor.commit();
 
             if (mUnreadOnly) {
-                Toast.makeText(this, resources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_unchecked);
             } else {
-                Toast.makeText(this, resources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_checked);
             }
             mFeedListFragment.setUnreadOnly(mUnreadOnly);

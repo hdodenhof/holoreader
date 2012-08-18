@@ -20,6 +20,9 @@ public class CustomScrollView extends ScrollView {
         super(context);
     }
 
+    /**
+     * Prevent WebView from getting focus
+     */
     @Override
     public void requestChildFocus(View child, View focused) {
         if (focused instanceof WebView) {

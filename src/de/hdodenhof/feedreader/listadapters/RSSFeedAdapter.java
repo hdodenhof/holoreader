@@ -1,9 +1,7 @@
 package de.hdodenhof.feedreader.listadapters;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.database.Cursor;
-import android.os.Build;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,21 +46,7 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
         final LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(mLayout, parent, false);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            TypedArray attributes = context.obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
-            int resource = attributes.getResourceId(0, 0);
-            attributes.recycle();
-
-            // setBackgroundResource resets padding
-            int paddingLeft = view.getPaddingLeft();
-            int paddingTop = view.getPaddingTop();
-            int paddingRight = view.getPaddingRight();
-            int paddingBottom = view.getPaddingBottom();
-            view.setBackgroundResource(resource);
-            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        return view;
+        return Helpers.addBackgroundIndicator(context, view, android.R.attr.activatedBackgroundIndicator);
     }
 
     private View prepareView(View view, Context context, Cursor cursor) {

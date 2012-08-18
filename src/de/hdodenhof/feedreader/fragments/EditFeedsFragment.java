@@ -42,19 +42,14 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
     private static final String TAG = EditFeedsFragment.class.getSimpleName();
     private static final int LOADER = 10;
 
-    private ListView mFeedsListView;
     private SimpleCursorAdapter mFeedAdapter;
-
+    private ListView mFeedsListView;
     private ActionMode mActionMode;
     private boolean mActionViewVisible = false;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        if (savedInstanceState != null) {
-
-        }
 
         String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.URL };
         int[] uiBindTo = { R.id.list_item_editfeed_name, R.id.list_item_editfeed_url };
@@ -94,6 +89,8 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
             final int checkedCount = getCheckedItemCount();
 
             if (checkedCount > 0) {
+                MenuItem edit = mActionMode.getMenu().getItem(0);
+
                 if (mActionMode == null || mActionViewVisible == false) {
                     mActionMode = ((SherlockFragmentActivity) getActivity()).startActionMode(new FeedCallback());
                     mActionViewVisible = true;
@@ -102,7 +99,6 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
                 String feedsFound = getResources().getQuantityString(R.plurals.numberOfFeedsSelected, checkedCount, checkedCount);
                 mActionMode.setSubtitle(feedsFound);
 
-                MenuItem edit = mActionMode.getMenu().getItem(0);
                 if (checkedCount == 1) {
                     if (!edit.isVisible()) {
                         edit.setVisible(true);
@@ -144,7 +140,6 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
     }
 
     private class FeedCallback implements Callback {
-
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             MenuInflater inflater = mode.getMenuInflater();
@@ -157,20 +152,18 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-            // TODO Auto-generated method stub
             return false;
         }
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            long[] checkItems = getCheckedItemIds();
+            long[] checkFeedIDs = getCheckedItemIds();
             switch (item.getItemId()) {
             case R.id.item_delete:
-                // TODO Loading animation
                 ContentResolver contentResolver = getActivity().getContentResolver();
-                for (long checkedItem : checkItems) {
-                    contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(checkedItem) });
-                    contentResolver.delete(RSSContentProvider.URI_FEEDS, FeedDAO._ID + " = ?", new String[] { String.valueOf(checkedItem) });
+                for (long feedID : checkFeedIDs) {
+                    contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) });
+                    contentResolver.delete(RSSContentProvider.URI_FEEDS, FeedDAO._ID + " = ?", new String[] { String.valueOf(feedID) });
                 }
                 mode.finish();
                 return true;

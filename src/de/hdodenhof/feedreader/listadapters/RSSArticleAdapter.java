@@ -8,7 +8,6 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -47,16 +46,15 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     private static final int LAYOUT_MODE_COMPACT = R.layout.listitem_article;
     private static final int LAYOUT_MODE_EXTENDED = R.layout.listitem_article_extended;
-
     private static final int ALPHA_STATE_DIMMED = 128;
     private static final int ALPHA_STATE_FULL = 255;
 
-    private int mLayout;
-    private int mMode;
-    private boolean mIsModeExtendedPossible;
     private LruCache<String, Bitmap> mImageCache;
     private DiskLruImageCache mDiskImageCache;
     private Context mContext;
+    private boolean mIsModeExtendedPossible;
+    private int mMode;
+    private int mLayout;
 
     public RSSArticleAdapter(Context context, Cursor c, String[] from, int[] to, int flags, int currentMode, boolean isModeExtendedPossible) {
         super(context, (currentMode == MODE_COMPACT) ? LAYOUT_MODE_COMPACT : LAYOUT_MODE_EXTENDED, c, from, to, flags);
@@ -118,38 +116,42 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
             setInvisible(articleImage);
 
             if (imageURL != null && imageURL != "") {
-                try {
-                    URL url = new URL(imageURL);
-
-                    String key = getFileName(url);
-                    Bitmap image = mImageCache.get(key);
-                    if (image == null) {
-                        image = mDiskImageCache.getBitmap(key);
-                    }
-                    if (image == null) {
-                        if (cancelPotentialDownload(imageURL, articleImage)) {
-                            int imageDimension = (mIsModeExtendedPossible) ? mContext.getResources().getDimensionPixelSize(R.dimen.image_dimension_extended)
-                                    : mContext.getResources().getDimensionPixelSize(R.dimen.image_dimension_compact);
-
-                            ImageDownloaderTask task = new ImageDownloaderTask(articleImage, imageDimension);
-                            DownloadDrawable downloadDrawable = new DownloadDrawable(task);
-                            articleImage.setImageDrawable(downloadDrawable);
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageURL);
-                            } else {
-                                task.execute(imageURL);
-                            }
-                        }
-                    } else {
-                        cancelPotentialDownload(imageURL, articleImage);
-                        articleImage.setImageBitmap(image);
-                        setVisible(articleImage);
-                    }
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
+                prepareImage(imageURL, articleImage);
             }
+        }
+    }
+
+    private void prepareImage(String imageURL, final ImageView articleImage) {
+        try {
+            URL url = new URL(imageURL);
+
+            String key = getFileName(url);
+            Bitmap image = mImageCache.get(key);
+            if (image == null) {
+                image = mDiskImageCache.getBitmap(key);
+            }
+            if (image == null) {
+                if (cancelPotentialDownload(imageURL, articleImage)) {
+                    int imageDimension = (mIsModeExtendedPossible) ? mContext.getResources().getDimensionPixelSize(R.dimen.image_dimension_extended) : mContext
+                            .getResources().getDimensionPixelSize(R.dimen.image_dimension_compact);
+
+                    ImageDownloaderTask task = new ImageDownloaderTask(articleImage, imageDimension);
+                    DownloadDrawable downloadDrawable = new DownloadDrawable(task);
+                    articleImage.setImageDrawable(downloadDrawable);
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                        task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageURL);
+                    } else {
+                        task.execute(imageURL);
+                    }
+                }
+            } else {
+                cancelPotentialDownload(imageURL, articleImage);
+                articleImage.setImageBitmap(image);
+                setVisible(articleImage);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
     }
 
@@ -173,21 +175,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         final LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(mLayout, parent, false);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            TypedArray attributes = context.obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
-            int resource = attributes.getResourceId(0, 0);
-            attributes.recycle();
-
-            // setBackgroundResource resets padding
-            int paddingLeft = view.getPaddingLeft();
-            int paddingTop = view.getPaddingTop();
-            int paddingRight = view.getPaddingRight();
-            int paddingBottom = view.getPaddingBottom();
-            view.setBackgroundResource(resource);
-            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
-        }
-
-        return view;
+        return Helpers.addBackgroundIndicator(context, view, android.R.attr.activatedBackgroundIndicator);
     }
 
     public int getType() {
@@ -196,6 +184,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     public class ImageDownloaderTask extends AsyncTask<String, Void, Bitmap> {
         private final WeakReference<ImageView> mImageViewReference;
+
         private URL mURL;
         private int mImageDimension;
 

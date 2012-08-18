@@ -23,11 +23,12 @@ import com.jakewharton.DiskLruCache;
  */
 public class DiskLruImageCache {
 
+    private static final int APP_VERSION = 1;
+    private static final int VALUE_COUNT = 1;
+
     private DiskLruCache mDiskCache;
     private CompressFormat mCompressFormat = CompressFormat.JPEG;
     private int mCompressQuality = 70;
-    private static final int APP_VERSION = 1;
-    private static final int VALUE_COUNT = 1;
 
     public DiskLruImageCache(Context context, String uniqueName, int diskCacheSize) {
         try {

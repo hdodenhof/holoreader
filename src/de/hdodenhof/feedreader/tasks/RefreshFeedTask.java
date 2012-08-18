@@ -65,51 +65,40 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
     protected Integer doInBackground(Integer... params) {
         int mFeedID = params[0];
 
+        ContentResolver contentResolver = mContext.getContentResolver();
+        ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
+        ArrayList<String[]> existingArticles = new ArrayList<String[]>();
+        Date minimumDate;
+        Date newestArticleDate = new Date(0);
+        Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
+
+        boolean isArticle = false;
+        String title = null;
+        String summary = null;
+        String content = null;
+        String guid = null;
+        String pubdate = null;
+
+        String feedURL = queryURL(mFeedID);
+
+        // delete read articles after KEEP_READ_ARTICLES_DAYS
+        contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?",
+                new String[] { SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)), "1" });
+
+        // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
+        contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ?",
+                new String[] { SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
+
+        existingArticles = queryArticles(contentResolver, mFeedID);
+        newestArticleDate = SQLiteHelper.toDate(existingArticles.get(0)[1]);
+
+        if (newestArticleDate.equals(new Date(0))) {
+            minimumDate = articleNotOlderThan;
+        } else {
+            minimumDate = articleNotOlderThan.before(newestArticleDate) ? articleNotOlderThan : newestArticleDate;
+        }
+
         try {
-            ContentResolver contentResolver = mContext.getContentResolver();
-            ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
-            ArrayList<String> existingArticles = new ArrayList<String>();
-            Date newestArticleDate = new Date(0);
-
-            boolean isArticle = false;
-            String title = null;
-            String summary = null;
-            String content = null;
-            String guid = null;
-            String pubdate = null;
-
-            String feedURL = queryURL(mFeedID);
-
-            // delete read articles after KEEP_READ_ARTICLES_DAYS
-            contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?",
-                    new String[] { SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)), "1" });
-
-            // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
-            contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ?",
-                    new String[] { SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
-
-            Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
-                    ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(mFeedID) }, ArticleDAO.PUBDATE + " DESC");
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                do {
-                    existingArticles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO.GUID)));
-                    if (cursor.isFirst()) {
-                        newestArticleDate = SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE)));
-                    }
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-
-            Date minimumDate;
-            Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
-
-            if (newestArticleDate.equals(new Date(0))) {
-                minimumDate = articleNotOlderThan;
-            } else {
-                minimumDate = articleNotOlderThan.before(newestArticleDate) ? articleNotOlderThan : newestArticleDate;
-            }
-
             InputStream inputStream = new URL(feedURL).openConnection().getInputStream();
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
             parserFactory.setNamespaceAware(true);
@@ -168,6 +157,24 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             e.printStackTrace();
         }
         return mFeedID;
+    }
+
+    private ArrayList<String[]> queryArticles(ContentResolver contentResolver, int mFeedID) {
+        ArrayList<String[]> articles = new ArrayList<String[]>();
+
+        Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
+                ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(mFeedID) }, ArticleDAO.PUBDATE + " DESC");
+
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            do {
+                articles.add(new String[] { cursor.getString(cursor.getColumnIndex(ArticleDAO.GUID)),
+                        cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE)) });
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        return articles;
     }
 
     @Override

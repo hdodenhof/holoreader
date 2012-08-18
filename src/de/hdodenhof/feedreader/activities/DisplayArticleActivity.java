@@ -27,7 +27,7 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
     private static final String TAG = DisplayArticleActivity.class.getSimpleName();
 
     private int mFeedID;
-    private int mCurrentArticle;
+    private int mArticleID;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -57,9 +57,9 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mCurrentArticle != -1) {
+        if (mArticleID != -1) {
             MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
-            markReadRunnable.setArticle(mCurrentArticle);
+            markReadRunnable.setArticle(mArticleID);
             new Thread(markReadRunnable).start();
         }
     }
@@ -111,7 +111,7 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
             new Thread(markReadRunnable).start();
         }
 
-        mCurrentArticle = currentArticle;
+        mArticleID = currentArticle;
     }
 
 }

@@ -42,26 +42,26 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     private static final String TAG = DisplayFeedActivity.class.getSimpleName();
     private static final String PREFS_NAME = "Feedreader";
 
-    private boolean mTwoPane = false;
-    private boolean mUnreadOnly;
-    private int mCurrentArticle = -1;
-    private int mCurrentFeed = -1;
     private ArticleViewPager mArticlePagerFragment;
     private SharedPreferences mPreferences;
-    private Resources resources;
+    private Resources mResources;
+    private boolean mTwoPane = false;
+    private boolean mUnreadOnly = true;
+    private int mArticleID = -1;
+    private int mFeedID = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        resources = getResources();
-
         if (getIntent().hasExtra("feedid")) {
-            mCurrentFeed = getIntent().getIntExtra("feedid", -1);
+            mFeedID = getIntent().getIntExtra("feedid", -1);
         }
 
         mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+
+        mResources = getResources();
 
         setContentView(R.layout.activity_feed);
 
@@ -71,10 +71,10 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         }
 
         ActionBar actionBar = getSupportActionBar();
-        if (mCurrentFeed != -1) {
-            actionBar.setTitle(Helpers.queryFeedName(getContentResolver(), mCurrentFeed));
+        if (mFeedID != -1) {
+            actionBar.setTitle(Helpers.queryFeedName(getContentResolver(), mFeedID));
         } else {
-            actionBar.setTitle(resources.getText(R.string.AllFeeds));
+            actionBar.setTitle(mResources.getText(R.string.AllFeeds));
         }
         actionBar.setDisplayHomeAsUpEnabled(true);
     }
@@ -83,9 +83,9 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     protected void onPause() {
         super.onPause();
         // dual pane only
-        if (mCurrentArticle != -1) {
+        if (mArticleID != -1) {
             MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
-            markReadRunnable.setArticle(mCurrentArticle);
+            markReadRunnable.setArticle(mArticleID);
             new Thread(markReadRunnable).start();
         }
     }
@@ -118,12 +118,12 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
+        Intent homeActivityIntent = new Intent(this, HomeActivity.class);
+        homeActivityIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
         switch (item.getItemId()) {
         case android.R.id.home:
-            intent = new Intent(this, HomeActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
+            startActivity(homeActivityIntent);
             return true;
         case R.id.item_toggle:
             mUnreadOnly = !mUnreadOnly;
@@ -133,10 +133,10 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             editor.commit();
 
             if (mUnreadOnly) {
-                Toast.makeText(this, resources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_unchecked);
             } else {
-                Toast.makeText(this, resources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_checked);
             }
             ArticleListFragment articleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
@@ -144,16 +144,14 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             return true;
         case R.id.item_markread:
             if (!mTwoPane) {
-                if (mCurrentFeed == -1) {
+                if (mFeedID == -1) {
                     new Thread(new MarkReadRunnable((Context) this)).start();
                 } else {
                     MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
-                    markReadRunnable.setFeed(mCurrentFeed);
+                    markReadRunnable.setFeed(mFeedID);
                     new Thread(markReadRunnable).start();
                 }
-                intent = new Intent(this, HomeActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(intent);
+                startActivity(homeActivityIntent);
             }
             return true;
         default:
@@ -196,7 +194,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
 
                 Intent intent = new Intent(this, DisplayArticleActivity.class);
                 intent.putExtra("articleid", articleID);
-                intent.putExtra("feedid", mCurrentFeed);
+                intent.putExtra("feedid", mFeedID);
                 intent.putStringArrayListExtra("articles", articles);
                 startActivity(intent);
             }
@@ -218,6 +216,6 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             markReadRunnable.setArticle(oldArticle);
             new Thread(markReadRunnable).start();
         }
-        mCurrentArticle = currentArticle;
+        mArticleID = currentArticle;
     }
 }

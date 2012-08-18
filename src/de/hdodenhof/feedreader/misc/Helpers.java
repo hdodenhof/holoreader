@@ -7,11 +7,14 @@ import java.util.Date;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.text.format.DateFormat;
+import android.view.View;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
@@ -84,5 +87,29 @@ public class Helpers {
         } else {
             return DateFormat.format("MMM dd, kk:mm", date).toString();
         }
+    }
+
+    /**
+     * 
+     * @param context
+     * @param view
+     * @param resid
+     * @return
+     */
+    public static View addBackgroundIndicator(Context context, View view, int resid) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            TypedArray attributes = context.obtainStyledAttributes(new int[] { resid });
+            int resource = attributes.getResourceId(0, 0);
+            attributes.recycle();
+
+            // setBackgroundResource resets padding
+            int paddingLeft = view.getPaddingLeft();
+            int paddingTop = view.getPaddingTop();
+            int paddingRight = view.getPaddingRight();
+            int paddingBottom = view.getPaddingBottom();
+            view.setBackgroundResource(resource);
+            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+        }
+        return view;
     }
 }

@@ -175,7 +175,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
         long mRefreshed = mPreferences.getLong("refreshed", (new Date(0)).getTime());
         if (mRefreshed < (new Date()).getTime() - 3600000) {
-            refreshFeeds();
+            refreshFeeds(false);
         }
     }
 
@@ -220,7 +220,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * @param item
      *            MenuItem that holds the refresh animation
      */
-    private void refreshFeeds() {
+    private void refreshFeeds(boolean forced) {
         boolean mIsConnected = Helpers.isConnected(this);
 
         if (mIsConnected) {
@@ -232,7 +232,9 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 refreshFeed(mFeedID);
             }
         } else {
-            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+            if (forced) {
+                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+            }
         }
     }
 
@@ -397,7 +399,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
         case R.id.item_refresh:
-            refreshFeeds();
+            refreshFeeds(true);
             return true;
         case R.id.item_add:
             showAddDialog();

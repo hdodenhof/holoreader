@@ -41,10 +41,6 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-
-        }
-
         setContentView(R.layout.activity_article);
 
         if (!getIntent().hasExtra("articleid")) {

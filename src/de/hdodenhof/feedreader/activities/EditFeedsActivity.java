@@ -15,10 +15,6 @@ public class EditFeedsActivity extends SherlockFragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-
-        }
-
         setContentView(R.layout.activity_editfeeds);
 
         ActionBar mActionBar = getSupportActionBar();

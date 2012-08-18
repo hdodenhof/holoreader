@@ -59,10 +59,6 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-
-        }
-
         mResources = getResources();
 
         if (getIntent().hasExtra("feedid")) {

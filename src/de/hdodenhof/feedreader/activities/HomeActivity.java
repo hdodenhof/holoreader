@@ -138,10 +138,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (savedInstanceState != null) {
-
-        }
-
         setContentView(R.layout.activity_home);
 
         mResources = getResources();

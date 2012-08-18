@@ -70,6 +70,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private MenuItem mRefreshItem;
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
+    private int mSelectedFeed = -1;
 
     /**
      * Handles messages from AsyncTasks started within this activity
@@ -333,21 +334,19 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
         switch (adapter.getType()) {
         case RSSAdapter.TYPE_FEED:
-            int feedID;
-
             if (position == 0) {
-                feedID = -1;
+                mSelectedFeed = -1;
             } else {
                 cursor = ((RSSFeedAdapter) adapter).getCursor();
                 cursor.moveToPosition(position - 1);
-                feedID = cursor.getInt(cursor.getColumnIndex(FeedDAO._ID));
+                mSelectedFeed = cursor.getInt(cursor.getColumnIndex(FeedDAO._ID));
             }
 
             if (mTwoPane) {
-                mArticleListFragment.selectFeed(feedID);
+                mArticleListFragment.selectFeed(mSelectedFeed);
             } else {
                 Intent intent = new Intent(this, DisplayFeedActivity.class);
-                intent.putExtra("feedid", feedID);
+                intent.putExtra("feedid", mSelectedFeed);
                 startActivity(intent);
             }
 
@@ -368,6 +367,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
             Intent intent = new Intent(this, DisplayFeedActivity.class);
             intent.putExtra("articleid", articleID);
+            intent.putExtra("feedid", mSelectedFeed);
             intent.putStringArrayListExtra("articles", articles);
             startActivity(intent);
             break;
@@ -419,7 +419,14 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             }
             return true;
         case R.id.item_markread:
-            if (!mTwoPane) {
+            if (mTwoPane && mSelectedFeed != -1) {
+                MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+                markReadRunnable.setFeed(mSelectedFeed);
+                new Thread(markReadRunnable).start();
+                if (mUnreadOnly) {
+                    mArticleListFragment.selectFeed(-1);
+                }
+            } else {
                 new Thread(new MarkReadRunnable((Context) this)).start();
             }
             return true;

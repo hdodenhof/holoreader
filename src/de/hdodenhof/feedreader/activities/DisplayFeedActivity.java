@@ -143,16 +143,14 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             articleListFragment.setUnreadOnly(mUnreadOnly);
             return true;
         case R.id.item_markread:
-            if (!mTwoPane) {
-                if (mFeedID == -1) {
-                    new Thread(new MarkReadRunnable((Context) this)).start();
-                } else {
-                    MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
-                    markReadRunnable.setFeed(mFeedID);
-                    new Thread(markReadRunnable).start();
-                }
-                startActivity(homeActivityIntent);
+            if (mFeedID == -1) {
+                new Thread(new MarkReadRunnable((Context) this)).start();
+            } else {
+                MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+                markReadRunnable.setFeed(mFeedID);
+                new Thread(markReadRunnable).start();
             }
+            startActivity(homeActivityIntent);
             return true;
         default:
             return super.onOptionsItemSelected(item);

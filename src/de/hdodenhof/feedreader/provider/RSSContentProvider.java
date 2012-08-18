@@ -53,34 +53,34 @@ public class RSSContentProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 
-        SQLiteQueryBuilder mQueryBuilder = new SQLiteQueryBuilder();
+        SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
 
-        int mURIType = sURIMatcher.match(uri);
-        switch (mURIType) {
+        int uriType = sURIMatcher.match(uri);
+        switch (uriType) {
         case FEEDS:
-            mQueryBuilder.setTables(FeedDAO.VIEW);
+            queryBuilder.setTables(FeedDAO.VIEW);
             break;
         case FEED_ID:
-            mQueryBuilder.setTables(FeedDAO.VIEW);
-            mQueryBuilder.appendWhere(FeedDAO._ID + "=" + uri.getLastPathSegment());
+            queryBuilder.setTables(FeedDAO.VIEW);
+            queryBuilder.appendWhere(FeedDAO._ID + "=" + uri.getLastPathSegment());
             break;
         case ARTICLES:
-            mQueryBuilder.setTables(ArticleDAO.VIEW);
+            queryBuilder.setTables(ArticleDAO.VIEW);
             break;
         case ARTICLE_ID:
-            mQueryBuilder.setTables(ArticleDAO.VIEW);
-            mQueryBuilder.appendWhere(ArticleDAO._ID + "=" + uri.getLastPathSegment());
+            queryBuilder.setTables(ArticleDAO.VIEW);
+            queryBuilder.appendWhere(ArticleDAO._ID + "=" + uri.getLastPathSegment());
             break;
         default:
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
-        SQLiteDatabase mDatabase = mSQLiteHelper.getWritableDatabase();
-        Cursor mCursor = mQueryBuilder.query(mDatabase, projection, selection, selectionArgs, null, null, sortOrder);
+        SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
+        Cursor cursor = queryBuilder.query(database, projection, selection, selectionArgs, null, null, sortOrder);
 
-        mCursor.setNotificationUri(getContext().getContentResolver(), uri);
+        cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
-        return mCursor;
+        return cursor;
 
     }
 
@@ -91,70 +91,61 @@ public class RSSContentProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
-        int mURIType = sURIMatcher.match(uri);
-        SQLiteDatabase mDatabase = mSQLiteHelper.getWritableDatabase();
+        int uriType = sURIMatcher.match(uri);
+        SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
         long mID = 0;
-        Uri mURI;
+        Uri returnUri;
 
-        switch (mURIType) {
+        switch (uriType) {
         case FEEDS:
-            mID = mDatabase.insert(FeedDAO.TABLE, null, values);
-            mURI = Uri.parse(BASE_PATH_FEEDS + "/" + mID);
+            mID = database.insert(FeedDAO.TABLE, null, values);
+            returnUri = Uri.parse(BASE_PATH_FEEDS + "/" + mID);
             break;
         case ARTICLES:
-            mID = mDatabase.insert(ArticleDAO.TABLE, null, values);
-            mURI = Uri.parse(BASE_PATH_ARTICLES + "/" + mID);
+            mID = database.insert(ArticleDAO.TABLE, null, values);
+            returnUri = Uri.parse(BASE_PATH_ARTICLES + "/" + mID);
             break;
         default:
             throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
         getContext().getContentResolver().notifyChange(uri, null);
-        if (mURIType == ARTICLES) {
+        if (uriType == ARTICLES) {
             getContext().getContentResolver().notifyChange(URI_FEEDS, null);
         }
 
-        return mURI;
+        return returnUri;
     }
-
-    // @Override
-    // public int bulkInsert(Uri uri, ContentValues[] values) {
-    // int numValues = values.length;
-    // for (int i = 0; i < numValues; i++) {
-    // insert(uri, values[i]);
-    // }
-    // return numValues;
-    // }
 
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        int mURIType = sURIMatcher.match(uri);
-        SQLiteDatabase mDatabase = mSQLiteHelper.getWritableDatabase();
-        int mRowsDeleted = 0;
-        String mID;
+        int uriType = sURIMatcher.match(uri);
+        SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
+        int rowsDeleted = 0;
+        String id;
 
-        switch (mURIType) {
+        switch (uriType) {
         case FEEDS:
-            mRowsDeleted = mDatabase.delete(FeedDAO.TABLE, selection, selectionArgs);
+            rowsDeleted = database.delete(FeedDAO.TABLE, selection, selectionArgs);
             break;
         case FEED_ID:
-            mID = uri.getLastPathSegment();
+            id = uri.getLastPathSegment();
             if (TextUtils.isEmpty(selection)) {
-                mRowsDeleted = mDatabase.delete(FeedDAO.TABLE, FeedDAO._ID + "=" + mID, null);
+                rowsDeleted = database.delete(FeedDAO.TABLE, FeedDAO._ID + "=" + id, null);
             } else {
-                mRowsDeleted = mDatabase.delete(FeedDAO.TABLE, FeedDAO._ID + "=" + mID + " and " + selection, selectionArgs);
+                rowsDeleted = database.delete(FeedDAO.TABLE, FeedDAO._ID + "=" + id + " and " + selection, selectionArgs);
             }
             break;
         case ARTICLES:
-            mRowsDeleted = mDatabase.delete(ArticleDAO.TABLE, selection, selectionArgs);
+            rowsDeleted = database.delete(ArticleDAO.TABLE, selection, selectionArgs);
             getContext().getContentResolver().notifyChange(URI_FEEDS, null);
             break;
         case ARTICLE_ID:
-            mID = uri.getLastPathSegment();
+            id = uri.getLastPathSegment();
             if (TextUtils.isEmpty(selection)) {
-                mRowsDeleted = mDatabase.delete(ArticleDAO.TABLE, ArticleDAO._ID + "=" + mID, null);
+                rowsDeleted = database.delete(ArticleDAO.TABLE, ArticleDAO._ID + "=" + id, null);
             } else {
-                mRowsDeleted = mDatabase.delete(ArticleDAO.TABLE, ArticleDAO._ID + "=" + mID + " and " + selection, selectionArgs);
+                rowsDeleted = database.delete(ArticleDAO.TABLE, ArticleDAO._ID + "=" + id + " and " + selection, selectionArgs);
             }
             getContext().getContentResolver().notifyChange(URI_ARTICLES, null);
             getContext().getContentResolver().notifyChange(URI_FEEDS, null);
@@ -164,41 +155,41 @@ public class RSSContentProvider extends ContentProvider {
         }
 
         getContext().getContentResolver().notifyChange(uri, null);
-        return mRowsDeleted;
+        return rowsDeleted;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        int mURIype = sURIMatcher.match(uri);
-        SQLiteDatabase mDatabase = mSQLiteHelper.getWritableDatabase();
-        int mRowsUpdated = 0;
-        String mID;
+        int uriype = sURIMatcher.match(uri);
+        SQLiteDatabase database = mSQLiteHelper.getWritableDatabase();
+        int rowsUpdated = 0;
+        String id;
 
-        switch (mURIype) {
+        switch (uriype) {
         case FEEDS:
-            mRowsUpdated = mDatabase.update(FeedDAO.TABLE, values, selection, selectionArgs);
+            rowsUpdated = database.update(FeedDAO.TABLE, values, selection, selectionArgs);
             break;
         case FEED_ID:
-            mID = uri.getLastPathSegment();
+            id = uri.getLastPathSegment();
             if (TextUtils.isEmpty(selection)) {
-                mRowsUpdated = mDatabase.update(FeedDAO.TABLE, values, FeedDAO._ID + "=" + mID, null);
+                rowsUpdated = database.update(FeedDAO.TABLE, values, FeedDAO._ID + "=" + id, null);
             } else {
-                mRowsUpdated = mDatabase.update(FeedDAO.TABLE, values, FeedDAO._ID + "=" + mID + " and " + selection, selectionArgs);
+                rowsUpdated = database.update(FeedDAO.TABLE, values, FeedDAO._ID + "=" + id + " and " + selection, selectionArgs);
             }
             getContext().getContentResolver().notifyChange(URI_FEEDS, null);
             break;
         case ARTICLES:
-            mRowsUpdated = mDatabase.update(ArticleDAO.TABLE, values, selection, selectionArgs);
+            rowsUpdated = database.update(ArticleDAO.TABLE, values, selection, selectionArgs);
             if (values.containsKey(ArticleDAO.READ)) {
                 getContext().getContentResolver().notifyChange(URI_FEEDS, null);
             }
             break;
         case ARTICLE_ID:
-            mID = uri.getLastPathSegment();
+            id = uri.getLastPathSegment();
             if (TextUtils.isEmpty(selection)) {
-                mRowsUpdated = mDatabase.update(ArticleDAO.TABLE, values, ArticleDAO._ID + "=" + mID, null);
+                rowsUpdated = database.update(ArticleDAO.TABLE, values, ArticleDAO._ID + "=" + id, null);
             } else {
-                mRowsUpdated = mDatabase.update(ArticleDAO.TABLE, values, ArticleDAO._ID + "=" + mID + " and " + selection, selectionArgs);
+                rowsUpdated = database.update(ArticleDAO.TABLE, values, ArticleDAO._ID + "=" + id + " and " + selection, selectionArgs);
             }
             getContext().getContentResolver().notifyChange(URI_ARTICLES, null);
             if (values.containsKey(ArticleDAO.READ)) {
@@ -210,7 +201,7 @@ public class RSSContentProvider extends ContentProvider {
         }
 
         getContext().getContentResolver().notifyChange(uri, null);
-        return mRowsUpdated;
+        return rowsUpdated;
     }
 
 }

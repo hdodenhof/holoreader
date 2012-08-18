@@ -48,8 +48,8 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
         }
 
-        SharedPreferences mPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+        SharedPreferences preferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUnreadOnly = preferences.getBoolean("unreadonly", true);
 
         String[] uiBindFrom = { FeedDAO.NAME, FeedDAO.UPDATED, FeedDAO.UNREAD };
         int[] uiBindTo = { R.id.list_item_feed_name, R.id.list_item_feed_updated, R.id.list_item_feed_unread };
@@ -60,27 +60,29 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
         mFeedsListView = getListView();
 
-        View mHeaderView = getActivity().getLayoutInflater().inflate(R.layout.listitem_feed, null);
-        TextView mUpdatedView = (TextView) mHeaderView.findViewById(R.id.list_item_feed_updated);
-        TextView mTitleView = (TextView) mHeaderView.findViewById(R.id.list_item_feed_name);
-        mUpdatedView.setVisibility(View.GONE);
-        mTitleView.setText(getResources().getString(R.string.AllFeeds));
+        View headerView = getActivity().getLayoutInflater().inflate(R.layout.listitem_feed, null);
+
+        TextView updatedView = (TextView) headerView.findViewById(R.id.list_item_feed_updated);
+        updatedView.setVisibility(View.GONE);
+
+        TextView titleView = (TextView) headerView.findViewById(R.id.list_item_feed_name);
+        titleView.setText(getResources().getString(R.string.AllFeeds));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            TypedArray mAttributes = getActivity().obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
-            int mResource = mAttributes.getResourceId(0, 0);
-            mAttributes.recycle();
+            TypedArray attributes = getActivity().obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
+            int resource = attributes.getResourceId(0, 0);
+            attributes.recycle();
 
             // setBackgroundResource resets padding
-            int mLeftPadding = mHeaderView.getPaddingLeft();
-            int mTopPadding = mHeaderView.getPaddingTop();
-            int mRightPadding = mHeaderView.getPaddingRight();
-            int mBottomPadding = mHeaderView.getPaddingBottom();
-            mHeaderView.setBackgroundResource(mResource);
-            mHeaderView.setPadding(mLeftPadding, mTopPadding, mRightPadding, mBottomPadding);
+            int paddingLeft = headerView.getPaddingLeft();
+            int paddingTop = headerView.getPaddingTop();
+            int paddingRight = headerView.getPaddingRight();
+            int paddingBottom = headerView.getPaddingBottom();
+            headerView.setBackgroundResource(resource);
+            headerView.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
         }
 
-        mFeedsListView.addHeaderView(mHeaderView);
+        mFeedsListView.addHeaderView(headerView);
 
         this.setEmptyText(getResources().getString(R.string.LoadingFeeds));
         this.setListAdapter(mFeedAdapter);
@@ -101,14 +103,14 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] mProjection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
-        String mSelection = null;
+        String[] projection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
+        String selection = null;
         if (mUnreadOnly) {
-            mSelection = FeedDAO.UNREAD + " > 0";
+            selection = FeedDAO.UNREAD + " > 0";
         }
         // for some reason using SelectionArgs in this query won't work
-        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, mSelection, null, FeedDAO.UPDATED + " DESC");
-        return mCursorLoader;
+        CursorLoader cursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, projection, selection, null, FeedDAO.UPDATED + " DESC");
+        return cursorLoader;
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {

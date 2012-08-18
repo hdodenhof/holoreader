@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
@@ -27,11 +26,10 @@ import de.hdodenhof.feedreader.listadapters.RSSAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.misc.ArticleViewPager;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
+import de.hdodenhof.feedreader.misc.Helpers;
 import de.hdodenhof.feedreader.misc.MarkReadRunnable;
 import de.hdodenhof.feedreader.misc.OnArticleChangedListener;
-import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
-import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
 /**
  * 
@@ -50,16 +48,13 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     private int mCurrentFeed = -1;
     private ArticleViewPager mArticlePagerFragment;
     private SharedPreferences mPreferences;
-    private Resources mResources;
+    private Resources resources;
 
-    /**
-     * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mResources = getResources();
+        resources = getResources();
 
         if (getIntent().hasExtra("feedid")) {
             mCurrentFeed = getIntent().getIntExtra("feedid", -1);
@@ -75,53 +70,30 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             mArticlePagerFragment = new ArticleViewPager(this);
         }
 
-        ActionBar mActionBar = getSupportActionBar();
+        ActionBar actionBar = getSupportActionBar();
         if (mCurrentFeed != -1) {
-            mActionBar.setTitle(queryFeedName(mCurrentFeed));
+            actionBar.setTitle(Helpers.queryFeedName(getContentResolver(), mCurrentFeed));
         } else {
-            mActionBar.setTitle(mResources.getText(R.string.AllFeeds));
+            actionBar.setTitle(resources.getText(R.string.AllFeeds));
         }
-        mActionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-    /**
-     * @see android.support.v4.app.FragmentActivity#onPause()
-     */
     @Override
     protected void onPause() {
         super.onPause();
         // dual pane only
         if (mCurrentArticle != -1) {
-            MarkReadRunnable mMarkReadRunnable = new MarkReadRunnable((Context) this);
-            mMarkReadRunnable.setArticle(mCurrentArticle);
-            new Thread(mMarkReadRunnable).start();
-        }
-    }
-
-    /**
-     * 
-     * @param feedID
-     * @return
-     */
-    private String queryFeedName(int feedID) {
-        if (feedID != 0) {
-            Uri mBaseUri = Uri.withAppendedPath(RSSContentProvider.URI_FEEDS, String.valueOf(feedID));
-            String[] mProjection = { FeedDAO._ID, FeedDAO.NAME };
-
-            Cursor mCursor = getContentResolver().query(mBaseUri, mProjection, null, null, null);
-            mCursor.moveToFirst();
-            String mFeedName = mCursor.getString(mCursor.getColumnIndex(FeedDAO.NAME));
-            mCursor.close();
-
-            return mFeedName;
-        } else {
-            return "";
+            MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+            markReadRunnable.setArticle(mCurrentArticle);
+            new Thread(markReadRunnable).start();
         }
     }
 
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.support.v4.app.Fragment) )
      */
+    @Override
     public void onFragmentReady(Fragment fragment) {
         if (mTwoPane && fragment instanceof ArticleListFragment) {
             ((ArticleListFragment) fragment).setChoiceModeSingle();
@@ -131,6 +103,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#isDualPane()
      */
+    @Override
     public boolean isDualPane() {
         return mTwoPane;
     }
@@ -138,51 +111,49 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#isPrimaryFragment(android.support.v4.app.Fragment)
      */
+    @Override
     public boolean isPrimaryFragment(Fragment fragment) {
         return fragment instanceof ArticleListFragment;
     }
 
-    /**
-     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent mIntent;
+        Intent intent;
         switch (item.getItemId()) {
         case android.R.id.home:
-            mIntent = new Intent(this, HomeActivity.class);
-            mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(mIntent);
+            intent = new Intent(this, HomeActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
             return true;
         case R.id.item_toggle:
             mUnreadOnly = !mUnreadOnly;
 
-            SharedPreferences.Editor mEditor = mPreferences.edit();
-            mEditor.putBoolean("unreadonly", mUnreadOnly);
-            mEditor.commit();
+            SharedPreferences.Editor editor = mPreferences.edit();
+            editor.putBoolean("unreadonly", mUnreadOnly);
+            editor.commit();
 
             if (mUnreadOnly) {
-                Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, resources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_unchecked);
             } else {
-                Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, resources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_checked);
             }
-            ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
-            mArticleListFragment.setUnreadOnly(mUnreadOnly);
+            ArticleListFragment articleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
+            articleListFragment.setUnreadOnly(mUnreadOnly);
             return true;
         case R.id.item_markread:
             if (!mTwoPane) {
                 if (mCurrentFeed == -1) {
                     new Thread(new MarkReadRunnable((Context) this)).start();
                 } else {
-                    MarkReadRunnable mMarkReadRunnable = new MarkReadRunnable((Context) this);
-                    mMarkReadRunnable.setFeed(mCurrentFeed);
-                    new Thread(mMarkReadRunnable).start();
+                    MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+                    markReadRunnable.setFeed(mCurrentFeed);
+                    new Thread(markReadRunnable).start();
                 }
-                mIntent = new Intent(this, HomeActivity.class);
-                mIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                startActivity(mIntent);
+                intent = new Intent(this, HomeActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
             }
             return true;
         default:
@@ -190,13 +161,10 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         }
     }
 
-    /**
-     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
-     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater mMenuInflater = getSupportMenuInflater();
-        mMenuInflater.inflate(R.menu.feed, menu);
+        MenuInflater menuInflater = getSupportMenuInflater();
+        menuInflater.inflate(R.menu.feed, menu);
 
         if (mTwoPane) {
             menu.removeItem(R.id.item_toggle);
@@ -207,36 +175,30 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         return true;
     }
 
-    /**
-     * Updates all fragments or launches a new activity (depending on the activities current layout) whenever an article in the ArticleListFragment has been
-     * clicked
-     * 
-     * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
-     */
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        RSSAdapter mAdapter = (RSSAdapter) parent.getAdapter();
+        RSSAdapter adapter = (RSSAdapter) parent.getAdapter();
 
-        switch (mAdapter.getType()) {
+        switch (adapter.getType()) {
         case RSSAdapter.TYPE_ARTICLE:
             if (mTwoPane) {
                 mArticlePagerFragment.changePosition(position);
             } else {
-                Cursor mCursor = ((RSSArticleAdapter) mAdapter).getCursor();
-                mCursor.moveToPosition(position);
-                int mArticleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
+                Cursor cursor = ((RSSArticleAdapter) adapter).getCursor();
+                cursor.moveToPosition(position);
+                int articleID = cursor.getInt(cursor.getColumnIndex(ArticleDAO._ID));
 
-                ArrayList<String> mArticles = new ArrayList<String>();
+                ArrayList<String> articles = new ArrayList<String>();
 
-                mCursor.moveToFirst();
+                cursor.moveToFirst();
                 do {
-                    mArticles.add(mCursor.getString(mCursor.getColumnIndex(ArticleDAO._ID)));
-                } while (mCursor.moveToNext());
+                    articles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO._ID)));
+                } while (cursor.moveToNext());
 
-                Intent mIntent = new Intent(this, DisplayArticleActivity.class);
-                mIntent.putExtra("articleid", mArticleID);
-                mIntent.putExtra("feedid", mCurrentFeed);
-                mIntent.putStringArrayListExtra("articles", mArticles);
-                startActivity(mIntent);
+                Intent intent = new Intent(this, DisplayArticleActivity.class);
+                intent.putExtra("articleid", articleID);
+                intent.putExtra("feedid", mCurrentFeed);
+                intent.putStringArrayListExtra("articles", articles);
+                startActivity(intent);
             }
             break;
         default:
@@ -248,13 +210,13 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
      * @see de.hdodenhof.feedreader.misc.OnArticleChangedListener#onArticleChanged(int)
      */
     public void onArticleChanged(int oldArticle, int currentArticle, int position) {
-        ArticleListFragment mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
-        mArticleListFragment.changePosition(position);
+        ArticleListFragment articleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
+        articleListFragment.changePosition(position);
 
         if (oldArticle != -1) {
-            MarkReadRunnable mMarkReadRunnable = new MarkReadRunnable((Context) this);
-            mMarkReadRunnable.setArticle(oldArticle);
-            new Thread(mMarkReadRunnable).start();
+            MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+            markReadRunnable.setArticle(oldArticle);
+            new Thread(markReadRunnable).start();
         }
         mCurrentArticle = currentArticle;
     }

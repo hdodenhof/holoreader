@@ -69,7 +69,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private SharedPreferences mPreferences;
     private HashSet<Integer> mFeedsUpdating;
     private MenuItem mRefreshItem;
-    private Resources mResources;
+    private Resources resources;
 
     /**
      * Handles messages from AsyncTasks started within this activity
@@ -77,28 +77,28 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     Handler mAsyncHandler = new AsynHandler(this);
 
     private static class AsynHandler extends Handler {
-        private final WeakReference<HomeActivity> mTargetReference;
+        private final WeakReference<HomeActivity> targetReference;
 
         AsynHandler(HomeActivity target) {
-            mTargetReference = new WeakReference<HomeActivity>(target);
+            targetReference = new WeakReference<HomeActivity>(target);
         }
 
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            HomeActivity mTarget = mTargetReference.get();
+            HomeActivity target = targetReference.get();
 
             switch (msg.what) {
             case 1:
                 // added feed
-                mTarget.callbackFeedAdded(msg.arg1);
+                target.callbackFeedAdded(msg.arg1);
                 break;
             case 2:
                 // feed refresh
-                mTarget.callbackFeedRefresh(msg.arg1);
+                target.callbackFeedRefresh(msg.arg1);
                 break;
             case 9:
                 // something went wrong while adding a feed
-                mTarget.callbackError();
+                target.callbackError();
                 break;
             default:
                 break;
@@ -126,21 +126,21 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         }
     }
 
+    /**
+     * Error occoured where trying to add feed
+     */
     private void callbackError() {
         mSpinner.dismiss();
         Helpers.showDialog(this, "An error occured", "Something went wrong while adding the feed");
     }
 
-    /**
-     * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_home);
 
-        mResources = getResources();
+        resources = getResources();
 
         mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
         mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
@@ -163,9 +163,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         }
     }
 
-    /**
-     * @see android.support.v4.app.FragmentActivity#onResume()
-     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -190,6 +187,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#onFragmentReady(android.support.v4.app.Fragment)
      */
+    @Override
     public void onFragmentReady(Fragment fragment) {
         if (mTwoPane && fragment instanceof FeedListFragment) {
             ((FeedListFragment) fragment).setChoiceModeSingle();
@@ -199,6 +197,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#isDualPane()
      */
+    @Override
     public boolean isDualPane() {
         return mTwoPane;
     }
@@ -206,6 +205,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     /**
      * @see de.hdodenhof.feedreader.misc.FragmentCallback#isPrimaryFragment(android.support.v4.app.Fragment)
      */
+    @Override
     public boolean isPrimaryFragment(Fragment fragment) {
         return fragment instanceof FeedListFragment;
     }
@@ -217,9 +217,9 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      *            URL of the feed to fetch
      */
     private void addFeed(String feedUrl) {
-        mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PleaseWait), true);
-        AddFeedTask mAddFeedTask = new AddFeedTask(mAsyncHandler, this);
-        mAddFeedTask.execute(feedUrl);
+        mSpinner = ProgressDialog.show(this, "", resources.getString(R.string.PleaseWait), true);
+        AddFeedTask addFeedTask = new AddFeedTask(mAsyncHandler, this);
+        addFeedTask.execute(feedUrl);
     }
 
     /**
@@ -229,24 +229,25 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      *            MenuItem that holds the refresh animation
      */
     private void refreshFeeds(boolean forced) {
-        boolean mIsConnected = Helpers.isConnected(this);
+        boolean isConnected = Helpers.isConnected(this);
 
-        if (mIsConnected) {
-            SharedPreferences.Editor mEditor = mPreferences.edit();
-            mEditor.putLong("refreshed", (new Date()).getTime());
-            mEditor.commit();
+        if (isConnected) {
+            SharedPreferences.Editor editor = mPreferences.edit();
+            editor.putLong("refreshed", (new Date()).getTime());
+            editor.commit();
 
             for (Integer mFeedID : queryFeeds()) {
                 refreshFeed(mFeedID);
             }
         } else {
             if (forced) {
-                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+                Helpers.showDialog(this, resources.getString(R.string.NoConnectionTitle), resources.getString(R.string.NoConnectionText));
             }
         }
     }
 
     /**
+     * Refreshes a single feed
      * 
      * @param feedID
      */
@@ -269,114 +270,108 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     /**
      * Queries all feed ids
      * 
-     * @return All feed ids in a HashMap
+     * @return HashMap of all feed ids
      */
     private HashSet<Integer> queryFeeds() {
-        HashSet<Integer> mFeedsUpdating = new HashSet<Integer>();
+        HashSet<Integer> feedsUpdating = new HashSet<Integer>();
 
-        ContentResolver mContentResolver = getContentResolver();
-        Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL }, null, null, null);
+        ContentResolver contentResolver = getContentResolver();
+        Cursor cursor = contentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL }, null, null, null);
 
-        if (mCursor.getCount() > 0) {
-            mCursor.moveToFirst();
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
             do {
-                mFeedsUpdating.add(mCursor.getInt(mCursor.getColumnIndex(FeedDAO._ID)));
-            } while (mCursor.moveToNext());
+                feedsUpdating.add(cursor.getInt(cursor.getColumnIndex(FeedDAO._ID)));
+            } while (cursor.moveToNext());
         }
-        mCursor.close();
+        cursor.close();
 
-        return mFeedsUpdating;
+        return feedsUpdating;
     }
 
     /**
      * Shows a dialog to add a new feed URL
      */
     private void showAddDialog() {
-        boolean mIsConnected = Helpers.isConnected(this);
+        boolean isConnected = Helpers.isConnected(this);
 
-        if (mIsConnected) {
-            AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(this);
+        if (isConnected) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
 
-            mAlertDialog.setTitle(mResources.getString(R.string.AddFeedDialogTitle));
-            mAlertDialog.setMessage(mResources.getString(R.string.AddFeedDialogText));
+            alertDialog.setTitle(resources.getString(R.string.AddFeedDialogTitle));
+            alertDialog.setMessage(resources.getString(R.string.AddFeedDialogText));
 
             final EditText mInput = new EditText(this);
             mInput.setText("http://t3n.de/news/feed");
-            mAlertDialog.setView(mInput);
+            alertDialog.setView(mInput);
 
-            mAlertDialog.setPositiveButton(mResources.getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
+            alertDialog.setPositiveButton(resources.getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                     String value = mInput.getText().toString();
                     addFeed(value);
                 }
             });
 
-            mAlertDialog.setNegativeButton(mResources.getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
+            alertDialog.setNegativeButton(resources.getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int whichButton) {
                 }
             });
-            mAlertDialog.show();
+            alertDialog.show();
         } else {
-            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+            Helpers.showDialog(this, resources.getString(R.string.NoConnectionTitle), resources.getString(R.string.NoConnectionText));
         }
     }
 
-    /**
-     * Updates all fragments or launches a new activity (depending on the activities current layout) whenever a feed or article in one of the fragments has been
-     * clicked on
-     * 
-     * @see android.widget.AdapterView.OnItemClickListener#onItemClick(android.widget.AdapterView, android.view.View, int, long)
-     */
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        RSSAdapter mAdapter;
+        RSSAdapter adapter;
         if (parent.getAdapter() instanceof HeaderViewListAdapter) {
-            HeaderViewListAdapter mWrapperAdapter = (HeaderViewListAdapter) parent.getAdapter();
-            mAdapter = (RSSAdapter) mWrapperAdapter.getWrappedAdapter();
+            HeaderViewListAdapter wrapperAdapter = (HeaderViewListAdapter) parent.getAdapter();
+            adapter = (RSSAdapter) wrapperAdapter.getWrappedAdapter();
         } else {
-            mAdapter = (RSSAdapter) parent.getAdapter();
+            adapter = (RSSAdapter) parent.getAdapter();
         }
 
-        Cursor mCursor;
-        int mFeedID;
+        Cursor cursor;
+        int feedID;
 
-        switch (mAdapter.getType()) {
+        switch (adapter.getType()) {
         case RSSAdapter.TYPE_FEED:
             if (position == 0) {
-                mFeedID = -1;
+                feedID = -1;
             } else {
-                mCursor = ((RSSFeedAdapter) mAdapter).getCursor();
-                mCursor.moveToPosition(position - 1);
-                mFeedID = mCursor.getInt(mCursor.getColumnIndex(FeedDAO._ID));
+                cursor = ((RSSFeedAdapter) adapter).getCursor();
+                cursor.moveToPosition(position - 1);
+                feedID = cursor.getInt(cursor.getColumnIndex(FeedDAO._ID));
             }
 
             if (mTwoPane) {
-                mArticleListFragment.selectFeed(mFeedID);
+                mArticleListFragment.selectFeed(feedID);
             } else {
-                Intent mIntent = new Intent(this, DisplayFeedActivity.class);
-                mIntent.putExtra("feedid", mFeedID);
-                startActivity(mIntent);
+                Intent intent = new Intent(this, DisplayFeedActivity.class);
+                intent.putExtra("feedid", feedID);
+                startActivity(intent);
             }
 
             break;
 
         // DualPane layout only
         case RSSAdapter.TYPE_ARTICLE:
-            mCursor = ((RSSArticleAdapter) mAdapter).getCursor();
-            mCursor.moveToPosition(position);
+            cursor = ((RSSArticleAdapter) adapter).getCursor();
+            cursor.moveToPosition(position);
 
-            int mArticleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
+            int articleID = cursor.getInt(cursor.getColumnIndex(ArticleDAO._ID));
 
-            ArrayList<String> mArticles = new ArrayList<String>();
+            ArrayList<String> articles = new ArrayList<String>();
 
-            mCursor.moveToFirst();
+            cursor.moveToFirst();
             do {
-                mArticles.add(mCursor.getString(mCursor.getColumnIndex(ArticleDAO._ID)));
-            } while (mCursor.moveToNext());
+                articles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO._ID)));
+            } while (cursor.moveToNext());
 
-            Intent mIntent = new Intent(this, DisplayFeedActivity.class);
-            mIntent.putExtra("articleid", mArticleID);
-            mIntent.putStringArrayListExtra("articles", mArticles);
-            startActivity(mIntent);
+            Intent intent = new Intent(this, DisplayFeedActivity.class);
+            intent.putExtra("articleid", articleID);
+            intent.putStringArrayListExtra("articles", articles);
+            startActivity(intent);
             break;
 
         default:
@@ -384,13 +379,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         }
     }
 
-    /**
-     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
-     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater mMenuInflater = getSupportMenuInflater();
-        mMenuInflater.inflate(R.menu.main, menu);
+        MenuInflater menuInflater = getSupportMenuInflater();
+        menuInflater.inflate(R.menu.main, menu);
 
         if (!mUnreadOnly) {
             menu.getItem(2).setIcon(R.drawable.checkbox_checked);
@@ -400,9 +392,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         return true;
     }
 
-    /**
-     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
-     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -415,15 +404,15 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         case R.id.item_toggle:
             mUnreadOnly = !mUnreadOnly;
 
-            SharedPreferences.Editor mEditor = mPreferences.edit();
-            mEditor.putBoolean("unreadonly", mUnreadOnly);
-            mEditor.commit();
+            SharedPreferences.Editor editor = mPreferences.edit();
+            editor.putBoolean("unreadonly", mUnreadOnly);
+            editor.commit();
 
             if (mUnreadOnly) {
-                Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, resources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_unchecked);
             } else {
-                Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, resources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
                 item.setIcon(R.drawable.checkbox_checked);
             }
             mFeedListFragment.setUnreadOnly(mUnreadOnly);

@@ -45,6 +45,9 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
     private ListView mFeedsListView;
     private SimpleCursorAdapter mFeedAdapter;
 
+    private ActionMode mActionMode;
+    private boolean mActionViewVisible = false;
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -69,9 +72,9 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String[] mProjection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
-        CursorLoader mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, mProjection, null, null, FeedDAO.NAME + " ASC");
-        return mCursorLoader;
+        String[] projection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
+        CursorLoader cursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, projection, null, null, FeedDAO.NAME + " ASC");
+        return cursorLoader;
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
@@ -82,9 +85,6 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
     public void onLoaderReset(Loader<Cursor> loader) {
         mFeedAdapter.swapCursor(null);
     }
-
-    private ActionMode mActionMode;
-    private boolean mActionViewVisible = false;
 
     private class FeedOnItemClickListener implements OnItemClickListener {
 
@@ -99,17 +99,17 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
                     mActionViewVisible = true;
                 }
 
-                String mFeedsFound = getResources().getQuantityString(R.plurals.numberOfFeedsSelected, checkedCount, checkedCount);
-                mActionMode.setSubtitle(mFeedsFound);
+                String feedsFound = getResources().getQuantityString(R.plurals.numberOfFeedsSelected, checkedCount, checkedCount);
+                mActionMode.setSubtitle(feedsFound);
 
-                MenuItem mEdit = mActionMode.getMenu().getItem(0);
+                MenuItem edit = mActionMode.getMenu().getItem(0);
                 if (checkedCount == 1) {
-                    if (!mEdit.isVisible()) {
-                        mEdit.setVisible(true);
+                    if (!edit.isVisible()) {
+                        edit.setVisible(true);
                     }
                 } else {
-                    if (mEdit.isVisible()) {
-                        mEdit.setVisible(false);
+                    if (edit.isVisible()) {
+                        edit.setVisible(false);
                     }
                 }
             } else {
@@ -134,12 +134,12 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
             return mFeedsListView.getCheckedItemIds();
         } else {
-            SparseBooleanArray mCheckedPositions = mFeedsListView.getCheckedItemPositions();
-            long[] mIDs = new long[mCheckedPositions.size()];
-            for (int i = 0; i < mCheckedPositions.size(); i++) {
-                mIDs[i] = mFeedsListView.getItemIdAtPosition(mCheckedPositions.keyAt(i));
+            SparseBooleanArray checkedPositions = mFeedsListView.getCheckedItemPositions();
+            long[] ids = new long[checkedPositions.size()];
+            for (int i = 0; i < checkedPositions.size(); i++) {
+                ids[i] = mFeedsListView.getItemIdAtPosition(checkedPositions.keyAt(i));
             }
-            return mIDs;
+            return ids;
         }
     }
 
@@ -163,23 +163,23 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            long[] mCheckItems = getCheckedItemIds();
+            long[] checkItems = getCheckedItemIds();
             switch (item.getItemId()) {
             case R.id.item_delete:
                 // TODO Loading animation
-                ContentResolver mContentResolver = getActivity().getContentResolver();
-                for (long mItem : mCheckItems) {
-                    mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(mItem) });
-                    mContentResolver.delete(RSSContentProvider.URI_FEEDS, FeedDAO._ID + " = ?", new String[] { String.valueOf(mItem) });
+                ContentResolver contentResolver = getActivity().getContentResolver();
+                for (long checkedItem : checkItems) {
+                    contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(checkedItem) });
+                    contentResolver.delete(RSSContentProvider.URI_FEEDS, FeedDAO._ID + " = ?", new String[] { String.valueOf(checkedItem) });
                 }
                 mode.finish();
                 return true;
             case R.id.item_edit:
-                Cursor mFeed = (Cursor) mFeedsListView.getItemAtPosition(mFeedsListView.getCheckedItemPositions().keyAt(0));
-                FragmentManager mFragmentManager = getActivity().getSupportFragmentManager();
-                EditFeedDialog mEditFeedDialog = new EditFeedDialog(mFeed.getLong(mFeed.getColumnIndex(FeedDAO._ID)), mFeed.getString(mFeed
-                        .getColumnIndex(FeedDAO.NAME)), mFeed.getString(mFeed.getColumnIndex(FeedDAO.URL)));
-                mEditFeedDialog.show(mFragmentManager, "fragment_edit_feed_dialog");
+                Cursor feed = (Cursor) mFeedsListView.getItemAtPosition(mFeedsListView.getCheckedItemPositions().keyAt(0));
+                FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+                EditFeedDialog editFeedDialog = new EditFeedDialog(feed.getLong(feed.getColumnIndex(FeedDAO._ID)), feed.getString(feed
+                        .getColumnIndex(FeedDAO.NAME)), feed.getString(feed.getColumnIndex(FeedDAO.URL)));
+                editFeedDialog.show(fragmentManager, "fragment_edit_feed_dialog");
                 mode.finish();
                 return true;
             default:
@@ -189,9 +189,9 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            SparseBooleanArray mCheckedPositions = mFeedsListView.getCheckedItemPositions();
-            for (int i = 0; i < mCheckedPositions.size(); i++) {
-                mFeedsListView.setItemChecked(mCheckedPositions.keyAt(i), false);
+            SparseBooleanArray checkedPositions = mFeedsListView.getCheckedItemPositions();
+            for (int i = 0; i < checkedPositions.size(); i++) {
+                mFeedsListView.setItemChecked(checkedPositions.keyAt(i), false);
             }
             mActionViewVisible = false;
         }

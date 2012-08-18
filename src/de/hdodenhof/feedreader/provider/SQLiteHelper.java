@@ -63,12 +63,12 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(FEED_VIEW_CREATE);
         database.execSQL(ARTICLE_VIEW_CREATE);
 
-        for (String[] mData : mDummydata) {
-            ContentValues mContentValues = new ContentValues();
-            mContentValues.put(FeedDAO.NAME, mData[0]);
-            mContentValues.put(FeedDAO.URL, mData[1]);
+        for (String[] data : mDummydata) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(FeedDAO.NAME, data[0]);
+            contentValues.put(FeedDAO.URL, data[1]);
 
-            database.insert(FeedDAO.TABLE, null, mContentValues);
+            database.insert(FeedDAO.TABLE, null, contentValues);
         }
     }
 

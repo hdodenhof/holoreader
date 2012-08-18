@@ -44,27 +44,27 @@ public class EditFeedDialog extends DialogFragment implements DialogInterface.On
         ((TextView) mView.findViewById(R.id.txt_feedname)).setText(mFeedName);
         ((TextView) mView.findViewById(R.id.txt_feedurl)).setText(mFeedURL);
 
-        AlertDialog.Builder mDialogBuilder = new AlertDialog.Builder(getActivity());
-        mDialogBuilder.setTitle("Edit Feed");
-        mDialogBuilder.setView(mView);
-        mDialogBuilder.setCancelable(true);
-        mDialogBuilder.setPositiveButton(getResources().getString(R.string.PositiveButton), this);
-        mDialogBuilder.setNegativeButton(getResources().getString(R.string.NegativeButton), this);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        dialogBuilder.setTitle("Edit Feed");
+        dialogBuilder.setView(mView);
+        dialogBuilder.setCancelable(true);
+        dialogBuilder.setPositiveButton(getResources().getString(R.string.PositiveButton), this);
+        dialogBuilder.setNegativeButton(getResources().getString(R.string.NegativeButton), this);
 
-        return mDialogBuilder.create();
+        return dialogBuilder.create();
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
         switch (which) {
         case DialogInterface.BUTTON_POSITIVE:
-            ContentResolver mContentResolver = getActivity().getContentResolver();
-            ContentValues mContentValues = new ContentValues();
+            ContentResolver contentResolver = getActivity().getContentResolver();
+            ContentValues contentValues = new ContentValues();
 
-            mContentValues.put(FeedDAO.NAME, ((TextView) mView.findViewById(R.id.txt_feedname)).getText().toString());
-            mContentValues.put(FeedDAO.URL, ((TextView) mView.findViewById(R.id.txt_feedurl)).getText().toString());
+            contentValues.put(FeedDAO.NAME, ((TextView) mView.findViewById(R.id.txt_feedname)).getText().toString());
+            contentValues.put(FeedDAO.URL, ((TextView) mView.findViewById(R.id.txt_feedurl)).getText().toString());
 
-            mContentResolver.update(RSSContentProvider.URI_FEEDS, mContentValues, FeedDAO._ID + " = ?", new String[] { String.valueOf(mFeedID) });
+            contentResolver.update(RSSContentProvider.URI_FEEDS, contentValues, FeedDAO._ID + " = ?", new String[] { String.valueOf(mFeedID) });
             break;
         case DialogInterface.BUTTON_NEGATIVE:
             dialog.dismiss();

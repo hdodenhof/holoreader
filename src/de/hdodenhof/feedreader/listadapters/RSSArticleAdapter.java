@@ -3,9 +3,6 @@ package de.hdodenhof.feedreader.listadapters;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -22,7 +19,6 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.util.LruCache;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +28,7 @@ import android.widget.TextView;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.misc.DiskLruImageCache;
+import de.hdodenhof.feedreader.misc.Helpers;
 import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
@@ -68,86 +65,86 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         mMode = currentMode;
         mIsModeExtendedPossible = isModeExtendedPossible;
 
-        final int mMemoryClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
-        final int mCacheSize = 1024 * 1024 * mMemoryClass / 8;
+        final int memoryClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE)).getMemoryClass();
+        final int cacheSize = 1024 * 1024 * memoryClass / 8;
 
-        mImageCache = new LruCache<String, Bitmap>(mCacheSize) {
+        mImageCache = new LruCache<String, Bitmap>(cacheSize) {
             @Override
             protected int sizeOf(String key, Bitmap bitmap) {
                 return bitmap.getRowBytes() * bitmap.getHeight();
             }
         };
 
-        mDiskImageCache = new DiskLruImageCache(context, "images", mCacheSize * 2);
+        mDiskImageCache = new DiskLruImageCache(context, "images", cacheSize * 2);
     }
 
     @SuppressLint("NewApi")
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        String mTitle = cursor.getString(cursor.getColumnIndex(ArticleDAO.TITLE));
-        String mSummary = cursor.getString(cursor.getColumnIndex(ArticleDAO.SUMMARY));
-        String mPubdate = formatToYesterdayOrToday(SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE))));
-        String mImageURL = cursor.getString(cursor.getColumnIndex(ArticleDAO.IMAGE));
-        int mRead = cursor.getInt(cursor.getColumnIndex(ArticleDAO.READ));
+        String title = cursor.getString(cursor.getColumnIndex(ArticleDAO.TITLE));
+        String summary = cursor.getString(cursor.getColumnIndex(ArticleDAO.SUMMARY));
+        String pubdate = Helpers.formatToYesterdayOrToday(SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE))));
+        String imageURL = cursor.getString(cursor.getColumnIndex(ArticleDAO.IMAGE));
+        int read = cursor.getInt(cursor.getColumnIndex(ArticleDAO.READ));
 
-        final TextView mArticleTitle = (TextView) view.findViewById(R.id.list_item_entry_title);
-        final TextView mArticlePubdate = (TextView) view.findViewById(R.id.list_item_entry_date);
-        final ImageView mArticleImage = (ImageView) view.findViewById(R.id.list_item_entry_image);
-        final TextView mArticleSummary = (TextView) view.findViewById(R.id.list_item_entry_summary);
+        final TextView articleTitle = (TextView) view.findViewById(R.id.list_item_entry_title);
+        final TextView articlePubdate = (TextView) view.findViewById(R.id.list_item_entry_date);
+        final ImageView articleImage = (ImageView) view.findViewById(R.id.list_item_entry_image);
+        final TextView articleSummary = (TextView) view.findViewById(R.id.list_item_entry_summary);
 
-        if (mArticleTitle != null) {
-            mArticleTitle.setText(mTitle);
+        if (articleTitle != null) {
+            articleTitle.setText(title);
         }
-        if (mArticleSummary != null) {
-            mArticleSummary.setText(mSummary);
+        if (articleSummary != null) {
+            articleSummary.setText(summary);
         }
-        if (mArticlePubdate != null) {
-            mArticlePubdate.setText(mPubdate);
+        if (articlePubdate != null) {
+            articlePubdate.setText(pubdate);
         }
 
-        if (SQLiteHelper.toBoolean(mRead)) {
-            mArticleImage.setAlpha(ALPHA_STATE_DIMMED);
-            dim(mArticleTitle);
-            dim(mArticleSummary);
-            dim(mArticlePubdate);
+        if (SQLiteHelper.toBoolean(read)) {
+            articleImage.setAlpha(ALPHA_STATE_DIMMED);
+            dim(articleTitle);
+            dim(articleSummary);
+            dim(articlePubdate);
         } else {
-            mArticleImage.setAlpha(ALPHA_STATE_FULL);
-            lightup(mArticleTitle);
-            lightup(mArticleSummary);
-            lightup(mArticlePubdate);
+            articleImage.setAlpha(ALPHA_STATE_FULL);
+            lightup(articleTitle);
+            lightup(articleSummary);
+            lightup(articlePubdate);
         }
 
-        if (mArticleImage != null) {
-            setInvisible(mArticleImage);
+        if (articleImage != null) {
+            setInvisible(articleImage);
 
-            if (mImageURL != null && mImageURL != "") {
+            if (imageURL != null && imageURL != "") {
                 try {
-                    URL mURL = new URL(mImageURL);
+                    URL url = new URL(imageURL);
 
-                    String mKey = getFileName(mURL);
-                    Bitmap mImage = mImageCache.get(mKey);
-                    if (mImage == null) {
-                        mImage = mDiskImageCache.getBitmap(mKey);
+                    String key = getFileName(url);
+                    Bitmap image = mImageCache.get(key);
+                    if (image == null) {
+                        image = mDiskImageCache.getBitmap(key);
                     }
-                    if (mImage == null) {
-                        if (cancelPotentialDownload(mImageURL, mArticleImage)) {
-                            int mImageDimension = (mIsModeExtendedPossible) ? mContext.getResources().getDimensionPixelSize(R.dimen.image_dimension_extended)
+                    if (image == null) {
+                        if (cancelPotentialDownload(imageURL, articleImage)) {
+                            int imageDimension = (mIsModeExtendedPossible) ? mContext.getResources().getDimensionPixelSize(R.dimen.image_dimension_extended)
                                     : mContext.getResources().getDimensionPixelSize(R.dimen.image_dimension_compact);
 
-                            ImageDownloaderTask mTask = new ImageDownloaderTask(mArticleImage, mImageDimension);
-                            DownloadedDrawable mDownloadedDrawable = new DownloadedDrawable(mTask);
-                            mArticleImage.setImageDrawable(mDownloadedDrawable);
+                            ImageDownloaderTask task = new ImageDownloaderTask(articleImage, imageDimension);
+                            DownloadDrawable downloadDrawable = new DownloadDrawable(task);
+                            articleImage.setImageDrawable(downloadDrawable);
 
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                mTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, mImageURL);
+                                task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, imageURL);
                             } else {
-                                mTask.execute(mImageURL);
+                                task.execute(imageURL);
                             }
                         }
                     } else {
-                        cancelPotentialDownload(mImageURL, mArticleImage);
-                        mArticleImage.setImageBitmap(mImage);
-                        setVisible(mArticleImage);
+                        cancelPotentialDownload(imageURL, articleImage);
+                        articleImage.setImageBitmap(image);
+                        setVisible(articleImage);
                     }
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
@@ -157,13 +154,13 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     }
 
     private void dim(TextView view) {
-        ColorStateList mColors = view.getTextColors();
-        view.setTextColor(mColors.withAlpha(ALPHA_STATE_DIMMED));
+        ColorStateList colors = view.getTextColors();
+        view.setTextColor(colors.withAlpha(ALPHA_STATE_DIMMED));
     }
 
     private void lightup(TextView view) {
-        ColorStateList mColors = view.getTextColors();
-        view.setTextColor(mColors.withAlpha(ALPHA_STATE_FULL));
+        ColorStateList colors = view.getTextColors();
+        view.setTextColor(colors.withAlpha(ALPHA_STATE_FULL));
     }
 
     @Override
@@ -173,46 +170,28 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        final LayoutInflater mInflater = LayoutInflater.from(context);
-        View mView = mInflater.inflate(mLayout, parent, false);
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        View view = inflater.inflate(mLayout, parent, false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            TypedArray mAttributes = context.obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
-            int mResource = mAttributes.getResourceId(0, 0);
-            mAttributes.recycle();
+            TypedArray attributes = context.obtainStyledAttributes(new int[] { android.R.attr.activatedBackgroundIndicator });
+            int resource = attributes.getResourceId(0, 0);
+            attributes.recycle();
 
             // setBackgroundResource resets padding
-            int mLeftPadding = mView.getPaddingLeft();
-            int mTopPadding = mView.getPaddingTop();
-            int mRightPadding = mView.getPaddingRight();
-            int mBottomPadding = mView.getPaddingBottom();
-            mView.setBackgroundResource(mResource);
-            mView.setPadding(mLeftPadding, mTopPadding, mRightPadding, mBottomPadding);
+            int paddingLeft = view.getPaddingLeft();
+            int paddingTop = view.getPaddingTop();
+            int paddingRight = view.getPaddingRight();
+            int paddingBottom = view.getPaddingBottom();
+            view.setBackgroundResource(resource);
+            view.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
         }
 
-        return mView;
+        return view;
     }
 
     public int getType() {
         return RSSAdapter.TYPE_ARTICLE;
-    }
-
-    private String formatToYesterdayOrToday(Date date) {
-        Calendar mToday = Calendar.getInstance();
-        Calendar mYesterday = Calendar.getInstance();
-        mYesterday.add(Calendar.DATE, -1);
-        Calendar mCalendar = Calendar.getInstance();
-        mCalendar.setTime(date);
-
-        SimpleDateFormat mTimeFormatter = new SimpleDateFormat("kk:mm");
-
-        if (mCalendar.get(Calendar.YEAR) == mToday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mToday.get(Calendar.DAY_OF_YEAR)) {
-            return "Today, " + mTimeFormatter.format(date);
-        } else if (mCalendar.get(Calendar.YEAR) == mYesterday.get(Calendar.YEAR) && mCalendar.get(Calendar.DAY_OF_YEAR) == mYesterday.get(Calendar.DAY_OF_YEAR)) {
-            return "Yesterday, " + mTimeFormatter.format(date);
-        } else {
-            return DateFormat.format("MMM dd, kk:mm", date).toString();
-        }
     }
 
     public class ImageDownloaderTask extends AsyncTask<String, Void, Bitmap> {
@@ -229,9 +208,9 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         protected Bitmap doInBackground(String... params) {
             try {
                 mURL = new URL(params[0]);
-                Bitmap mBitmap = BitmapFactory.decodeStream(mURL.openConnection().getInputStream());
-                float originalWidth = mBitmap.getWidth();
-                float originalHeight = mBitmap.getHeight();
+                Bitmap bitmap = BitmapFactory.decodeStream(mURL.openConnection().getInputStream());
+                float originalWidth = bitmap.getWidth();
+                float originalHeight = bitmap.getHeight();
 
                 if (originalHeight < mImageDimension || originalWidth < mImageDimension) {
                     return null;
@@ -239,22 +218,22 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                     if (originalHeight > mImageDimension) {
                         int newHeight = mImageDimension;
                         int newWidth = (int) ((newHeight / originalHeight) * originalWidth);
-                        mBitmap = Bitmap.createScaledBitmap(mBitmap, newWidth, newHeight, true);
+                        bitmap = Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true);
                     }
 
                     if (!isCancelled()) {
-                        String mKey = getFileName(mURL);
+                        String key = getFileName(mURL);
                         synchronized (mDiskImageCache) {
-                            if (mDiskImageCache.getBitmap(mKey) == null) {
-                                mDiskImageCache.put(mKey, mBitmap);
+                            if (mDiskImageCache.getBitmap(key) == null) {
+                                mDiskImageCache.put(key, bitmap);
                             }
                         }
                         synchronized (mImageCache) {
-                            if (mImageCache.get(mKey) == null) {
-                                mImageCache.put(mKey, mBitmap);
+                            if (mImageCache.get(key) == null) {
+                                mImageCache.put(key, bitmap);
                             }
                         }
-                        return mBitmap;
+                        return bitmap;
                     } else {
                         return null;
                     }
@@ -269,11 +248,11 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             if (mImageViewReference != null && bitmap != null) {
-                ImageView mImageView = mImageViewReference.get();
-                ImageDownloaderTask mImageDownloaderTask = getImageDownloaderTask(mImageView);
-                if (this == mImageDownloaderTask) {
-                    mImageView.setImageBitmap(bitmap);
-                    setVisible(mImageView);
+                ImageView imageView = mImageViewReference.get();
+                ImageDownloaderTask imageDownloaderTask = getImageDownloaderTask(imageView);
+                if (this == imageDownloaderTask) {
+                    imageView.setImageBitmap(bitmap);
+                    setVisible(imageView);
                 }
             }
         }
@@ -282,30 +261,30 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     private void setVisible(View view) {
         view.setVisibility(View.VISIBLE);
         if (mMode == MODE_COMPACT) {
-            View mArticleSummary = ((View) view.getParent()).findViewById(R.id.list_item_entry_summary);
-            RelativeLayout.LayoutParams mLayoutParams = (RelativeLayout.LayoutParams) mArticleSummary.getLayoutParams();
-            mLayoutParams.addRule(RelativeLayout.BELOW, R.id.list_item_entry_image);
-            mArticleSummary.setLayoutParams(mLayoutParams);
+            View articleSummary = ((View) view.getParent()).findViewById(R.id.list_item_entry_summary);
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) articleSummary.getLayoutParams();
+            layoutParams.addRule(RelativeLayout.BELOW, R.id.list_item_entry_image);
+            articleSummary.setLayoutParams(layoutParams);
         }
     }
 
     private void setInvisible(View view) {
         if (mMode == MODE_COMPACT) {
-            View mArticleSummary = ((View) view.getParent()).findViewById(R.id.list_item_entry_summary);
-            RelativeLayout.LayoutParams mLayoutParams = (RelativeLayout.LayoutParams) mArticleSummary.getLayoutParams();
-            mLayoutParams.addRule(RelativeLayout.BELOW, R.id.list_item_entry_title);
-            mArticleSummary.setLayoutParams(mLayoutParams);
+            View articleSummary = ((View) view.getParent()).findViewById(R.id.list_item_entry_summary);
+            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) articleSummary.getLayoutParams();
+            layoutParams.addRule(RelativeLayout.BELOW, R.id.list_item_entry_title);
+            articleSummary.setLayoutParams(layoutParams);
         }
         view.setVisibility(View.GONE);
     }
 
     private static boolean cancelPotentialDownload(String url, ImageView imageView) {
-        ImageDownloaderTask mImageDownloaderTask = getImageDownloaderTask(imageView);
+        ImageDownloaderTask imageDownloaderTask = getImageDownloaderTask(imageView);
 
-        if (mImageDownloaderTask != null) {
-            URL mBitmapUrl = mImageDownloaderTask.mURL;
-            if ((mBitmapUrl == null) || (!mBitmapUrl.toString().equals(url))) {
-                mImageDownloaderTask.cancel(true);
+        if (imageDownloaderTask != null) {
+            URL bitmapUrl = imageDownloaderTask.mURL;
+            if ((bitmapUrl == null) || (!bitmapUrl.toString().equals(url))) {
+                imageDownloaderTask.cancel(true);
             } else {
                 return false;
             }
@@ -315,19 +294,19 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
 
     private static ImageDownloaderTask getImageDownloaderTask(ImageView imageView) {
         if (imageView != null) {
-            Drawable mDrawable = imageView.getDrawable();
-            if (mDrawable instanceof DownloadedDrawable) {
-                DownloadedDrawable mDownloadedDrawable = (DownloadedDrawable) mDrawable;
-                return mDownloadedDrawable.getImageDownloaderTask();
+            Drawable drawable = imageView.getDrawable();
+            if (drawable instanceof DownloadDrawable) {
+                DownloadDrawable downloadDrawable = (DownloadDrawable) drawable;
+                return downloadDrawable.getImageDownloaderTask();
             }
         }
         return null;
     }
 
-    private static class DownloadedDrawable extends ColorDrawable {
+    private static class DownloadDrawable extends ColorDrawable {
         private final WeakReference<ImageDownloaderTask> mImageDownloaderTaskReference;
 
-        public DownloadedDrawable(ImageDownloaderTask imageDownloaderTask) {
+        public DownloadDrawable(ImageDownloaderTask imageDownloaderTask) {
             super(Color.TRANSPARENT);
             mImageDownloaderTaskReference = new WeakReference<ImageDownloaderTask>(imageDownloaderTask);
         }
@@ -341,28 +320,28 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
      * From http://stackoverflow.com/a/1856542
      */
     private static String getFileName(URL extUrl) {
-        String mFilename = "";
-        String mPath = extUrl.getPath();
-        String[] mPathContents = mPath.split("[\\\\/]");
-        if (mPathContents != null) {
-            String mLastPart = mPathContents[mPathContents.length - 1];
-            String[] mLastPartContents = mLastPart.split("\\.");
-            if (mLastPartContents != null && mLastPartContents.length > 1) {
-                int mLastPartContentLength = mLastPartContents.length;
-                String mName = "";
-                for (int i = 0; i < mLastPartContentLength; i++) {
-                    if (i < (mLastPartContents.length - 1)) {
-                        mName += mLastPartContents[i];
-                        if (i < (mLastPartContentLength - 2)) {
-                            mName += ".";
+        String filename = "";
+        String path = extUrl.getPath();
+        String[] pathContents = path.split("[\\\\/]");
+        if (pathContents != null) {
+            String lastPart = pathContents[pathContents.length - 1];
+            String[] lastPartContents = lastPart.split("\\.");
+            if (lastPartContents != null && lastPartContents.length > 1) {
+                int lastPartContentLength = lastPartContents.length;
+                String name = "";
+                for (int i = 0; i < lastPartContentLength; i++) {
+                    if (i < (lastPartContents.length - 1)) {
+                        name += lastPartContents[i];
+                        if (i < (lastPartContentLength - 2)) {
+                            name += ".";
                         }
                     }
                 }
-                String mExtension = mLastPartContents[mLastPartContentLength - 1];
-                mFilename = mName + "." + mExtension;
+                String extension = lastPartContents[lastPartContentLength - 1];
+                filename = name + "." + extension;
             }
         }
-        return mFilename;
+        return filename;
     }
 
 }

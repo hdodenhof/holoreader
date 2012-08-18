@@ -1,11 +1,21 @@
 package de.hdodenhof.feedreader.misc;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Context;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
+import android.text.format.DateFormat;
 
 import de.hdodenhof.feedreader.R;
+import de.hdodenhof.feedreader.provider.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
 public class Helpers {
 
@@ -15,9 +25,9 @@ public class Helpers {
      * @return True if connection is available, false if not
      */
     public static boolean isConnected(Context context) {
-        ConnectivityManager mConnectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
-        return mNetworkInfo == null ? false : mNetworkInfo.isAvailable();
+        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        return networkInfo == null ? false : networkInfo.isAvailable();
     }
 
     /**
@@ -29,10 +39,50 @@ public class Helpers {
      *            Dialog message
      */
     public static void showDialog(Context context, String title, String message) {
-        AlertDialog.Builder mAlertDialog = new AlertDialog.Builder(context);
-        mAlertDialog.setTitle(title);
-        mAlertDialog.setMessage(message);
-        mAlertDialog.setPositiveButton(context.getResources().getString(R.string.PositiveButton), null);
-        mAlertDialog.show();
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+        alertDialog.setTitle(title);
+        alertDialog.setMessage(message);
+        alertDialog.setPositiveButton(context.getResources().getString(R.string.PositiveButton), null);
+        alertDialog.show();
+    }
+
+    /**
+     * Queries the name of the feed with the given ID
+     * 
+     * @param feedID
+     * @return Name of the feed with the given ID
+     */
+    public static String queryFeedName(ContentResolver contentResolver, int feedID) {
+        Uri baseUri = Uri.withAppendedPath(RSSContentProvider.URI_FEEDS, String.valueOf(feedID));
+        String[] projection = { FeedDAO._ID, FeedDAO.NAME };
+
+        Cursor cursor = contentResolver.query(baseUri, projection, null, null, null);
+        cursor.moveToFirst();
+        String feedName = cursor.getString(cursor.getColumnIndex(FeedDAO.NAME));
+        cursor.close();
+
+        return feedName;
+    }
+
+    /**
+     * @param date
+     * @return
+     */
+    public static String formatToYesterdayOrToday(Date date) {
+        Calendar today = Calendar.getInstance();
+        Calendar yesterday = Calendar.getInstance();
+        yesterday.add(Calendar.DATE, -1);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("kk:mm");
+
+        if (calendar.get(Calendar.YEAR) == today.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == today.get(Calendar.DAY_OF_YEAR)) {
+            return "Today, " + timeFormatter.format(date);
+        } else if (calendar.get(Calendar.YEAR) == yesterday.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR)) {
+            return "Yesterday, " + timeFormatter.format(date);
+        } else {
+            return DateFormat.format("MMM dd, kk:mm", date).toString();
+        }
     }
 }

@@ -15,37 +15,37 @@ public class MarkReadRunnable implements Runnable {
     int mFeedID = -1;
 
     public MarkReadRunnable(Context context) {
-        this.mContext = context;
+        mContext = context;
     }
 
     public void setArticle(int articleID) {
-        this.mArticleID = articleID;
-        this.mFeedID = -1;
+        mArticleID = articleID;
+        mFeedID = -1;
     }
 
     public void setFeed(int feedID) {
-        this.mFeedID = feedID;
-        this.mArticleID = -1;
+        mFeedID = feedID;
+        mArticleID = -1;
     }
 
     public void run() {
-        ContentResolver mContentResolver = mContext.getContentResolver();
-        ContentValues mContentValues = new ContentValues();
-        String mSelection = ArticleDAO.READ + " != ?";
-        String[] mSelectionArgs = new String[] { String.valueOf(SQLiteHelper.fromBoolean(true)) };
-        Uri mUri;
+        ContentResolver contentResolver = mContext.getContentResolver();
+        ContentValues contentValues = new ContentValues();
+        String selection = ArticleDAO.READ + " != ?";
+        String[] selectionArgs = new String[] { String.valueOf(SQLiteHelper.fromBoolean(true)) };
+        Uri uri;
 
         if (mArticleID != -1) {
-            mUri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, String.valueOf(mArticleID));
+            uri = Uri.withAppendedPath(RSSContentProvider.URI_ARTICLES, String.valueOf(mArticleID));
         } else {
-            mUri = RSSContentProvider.URI_ARTICLES;
+            uri = RSSContentProvider.URI_ARTICLES;
             if (mFeedID != -1) {
-                mSelection = mSelection + " AND " + ArticleDAO.FEEDID + " = ? ";
-                mSelectionArgs = new String[] { mSelectionArgs[0], String.valueOf(mFeedID) };
+                selection = selection + " AND " + ArticleDAO.FEEDID + " = ? ";
+                selectionArgs = new String[] { selectionArgs[0], String.valueOf(mFeedID) };
             }
         }
-        mContentValues.put(ArticleDAO.READ, SQLiteHelper.fromBoolean(true));
-        mContentResolver.update(mUri, mContentValues, mSelection, mSelectionArgs);
+        contentValues.put(ArticleDAO.READ, SQLiteHelper.fromBoolean(true));
+        contentResolver.update(uri, contentValues, selection, selectionArgs);
 
     }
 }

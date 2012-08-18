@@ -100,8 +100,8 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             mArticles = getActivity().getIntent().getStringArrayListExtra("articles");
         }
 
-        SharedPreferences mPreferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+        SharedPreferences preferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUnreadOnly = preferences.getBoolean("unreadonly", true);
 
         mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
         mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
@@ -124,12 +124,12 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String mSelection = null;
-        String mSelectionArgs[] = null;
+        String selection = null;
+        String selectionArgs[] = null;
 
-        String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE,
+        String[] projection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE,
                 ArticleDAO.PUBDATE, ArticleDAO.READ };
-        CursorLoader mCursorLoader = null;
+        CursorLoader cursorLoader = null;
 
         if (mTwoPane) {
             // DualPane
@@ -137,14 +137,14 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
                 // FeedListActivity
                 // articles in Intent
 
-                mSelection = ArticleDAO._ID + " IN (";
+                selection = ArticleDAO._ID + " IN (";
                 for (int i = 0; i < mArticles.size() - 1; i++) {
-                    mSelection = mSelection + "?, ";
+                    selection = selection + "?, ";
                 }
-                mSelection = mSelection + "?)";
-                mSelectionArgs = mArticles.toArray(new String[mArticles.size()]);
+                selection = selection + "?)";
+                selectionArgs = mArticles.toArray(new String[mArticles.size()]);
 
-                mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, ArticleDAO.PUBDATE
+                cursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, projection, selection, selectionArgs, ArticleDAO.PUBDATE
                         + " DESC");
 
             } else {
@@ -153,24 +153,24 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
                     // first call no feedID in Intent
 
                     if (mUnreadOnly) {
-                        mSelection = "read = 0";
+                        selection = "read = 0";
                     }
 
-                    mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs,
-                            ArticleDAO.PUBDATE + " DESC");
+                    cursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, projection, selection, selectionArgs, ArticleDAO.PUBDATE
+                            + " DESC");
 
                 } else {
                     // feedID in Intent
 
-                    mSelection = ArticleDAO.FEEDID + " = ?";
-                    mSelectionArgs = new String[] { String.valueOf(mSelectedFeed) };
+                    selection = ArticleDAO.FEEDID + " = ?";
+                    selectionArgs = new String[] { String.valueOf(mSelectedFeed) };
 
                     if (mUnreadOnly) {
-                        mSelection = mSelection + " AND read = 0";
+                        selection = selection + " AND read = 0";
                     }
 
-                    mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs,
-                            ArticleDAO.PUBDATE + " DESC");
+                    cursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, projection, selection, selectionArgs, ArticleDAO.PUBDATE
+                            + " DESC");
 
                 }
             }
@@ -179,44 +179,43 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             // feedID in Intent
 
             if (mSelectedFeed != -1) {
-                mSelection = ArticleDAO.FEEDID + " = ?";
-                mSelectionArgs = new String[] { String.valueOf(mSelectedFeed) };
+                selection = ArticleDAO.FEEDID + " = ?";
+                selectionArgs = new String[] { String.valueOf(mSelectedFeed) };
             }
 
             if (mUnreadOnly) {
-                if (mSelection == null) {
-                    mSelection = "read = 0";
+                if (selection == null) {
+                    selection = "read = 0";
                 } else {
-                    mSelection = mSelection + " AND read = 0";
+                    selection = selection + " AND read = 0";
                 }
             }
 
             mArticles = new ArrayList<String>();
 
-            ContentResolver mContentResolver = getActivity().getContentResolver();
-            Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID }, mSelection, mSelectionArgs, null);
+            ContentResolver contentResolver = getActivity().getContentResolver();
+            Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID }, selection, selectionArgs, null);
 
-            if (mCursor.getCount() > 0) {
-                mCursor.moveToFirst();
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
                 do {
-                    mArticles.add(mCursor.getString(mCursor.getColumnIndex(ArticleDAO._ID)));
-                } while (mCursor.moveToNext());
+                    mArticles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO._ID)));
+                } while (cursor.moveToNext());
             }
-            mCursor.close();
+            cursor.close();
 
-            mSelection = ArticleDAO._ID + " IN (";
+            selection = ArticleDAO._ID + " IN (";
             for (int i = 0; i < mArticles.size() - 1; i++) {
-                mSelection = mSelection + "?, ";
+                selection = selection + "?, ";
             }
-            mSelection = mSelection + "?)";
-            mSelectionArgs = mArticles.toArray(new String[mArticles.size()]);
+            selection = selection + "?)";
+            selectionArgs = mArticles.toArray(new String[mArticles.size()]);
 
-            mCursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, ArticleDAO.PUBDATE
-                    + " DESC");
+            cursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, projection, selection, selectionArgs, ArticleDAO.PUBDATE + " DESC");
 
         }
 
-        return mCursorLoader;
+        return cursorLoader;
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {

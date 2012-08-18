@@ -30,17 +30,17 @@ public class EditFeedAdapter extends SimpleCursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        String mName = cursor.getString(cursor.getColumnIndex(FeedDAO.NAME));
-        String mURL = cursor.getString(cursor.getColumnIndex(FeedDAO.URL));
+        String name = cursor.getString(cursor.getColumnIndex(FeedDAO.NAME));
+        String url = cursor.getString(cursor.getColumnIndex(FeedDAO.URL));
 
-        final TextView mTitleView = (TextView) view.findViewById(R.id.list_item_editfeed_name);
-        final TextView mSummaryView = (TextView) view.findViewById(R.id.list_item_editfeed_url);
+        final TextView titleView = (TextView) view.findViewById(R.id.list_item_editfeed_name);
+        final TextView summaryView = (TextView) view.findViewById(R.id.list_item_editfeed_url);
 
-        if (mTitleView != null) {
-            mTitleView.setText(mName);
+        if (titleView != null) {
+            titleView.setText(name);
         }
-        if (mSummaryView != null) {
-            mSummaryView.setText(mURL);
+        if (summaryView != null) {
+            summaryView.setText(url);
         }
     }
 
@@ -53,9 +53,9 @@ public class EditFeedAdapter extends SimpleCursorAdapter {
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
         final LayoutInflater inflater = LayoutInflater.from(context);
-        View mView = inflater.inflate(mLayout, parent, false);
+        View view = inflater.inflate(mLayout, parent, false);
 
-        return mView;
+        return view;
     }
 
     @Override

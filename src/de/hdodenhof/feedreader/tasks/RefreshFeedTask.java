@@ -49,120 +49,120 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
     private Context mContext;
 
     public RefreshFeedTask(Handler mainUIHandler, Context context) {
-        this.mMainUIHandler = mainUIHandler;
-        this.mContext = context;
+        mMainUIHandler = mainUIHandler;
+        mContext = context;
 
         for (int i = 0; i < DATE_FORMATS.length; i++) {
             mSimpleDateFormats[i] = new SimpleDateFormat(DATE_FORMATS[i], Locale.US);
             mSimpleDateFormats[i].setTimeZone(TimeZone.getTimeZone("GMT"));
         }
 
-        SharedPreferences mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mKeepReadArticlesDays = Integer.parseInt(mSharedPrefs.getString("pref_keep_read_articles_days", ""));
-        mKeepUnreadArticlesDays = Integer.parseInt(mSharedPrefs.getString("pref_keep_unread_articles_days", ""));
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        mKeepReadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_read_articles_days", ""));
+        mKeepUnreadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_unread_articles_days", ""));
     }
 
     protected Integer doInBackground(Integer... params) {
         int mFeedID = params[0];
 
         try {
-            ContentResolver mContentResolver = mContext.getContentResolver();
-            ArrayList<ContentValues> mContentValuesArrayList = new ArrayList<ContentValues>();
-            ArrayList<String> mExistingArticles = new ArrayList<String>();
-            Date mNewestArticleDate = new Date(0);
+            ContentResolver contentResolver = mContext.getContentResolver();
+            ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
+            ArrayList<String> existingArticles = new ArrayList<String>();
+            Date newestArticleDate = new Date(0);
 
-            boolean mIsArticle = false;
-            String mTitle = null;
-            String mSummary = null;
-            String mContent = null;
-            String mGUID = null;
-            String mPubdate = null;
+            boolean isArticle = false;
+            String title = null;
+            String summary = null;
+            String content = null;
+            String guid = null;
+            String pubdate = null;
 
-            String mFeedURL = queryURL(mFeedID);
+            String feedURL = queryURL(mFeedID);
 
             // delete read articles after KEEP_READ_ARTICLES_DAYS
-            mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?",
+            contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?",
                     new String[] { SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)), "1" });
 
             // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
-            mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ?",
+            contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ?",
                     new String[] { SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
 
-            Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
+            Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
                     ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(mFeedID) }, ArticleDAO.PUBDATE + " DESC");
-            if (mCursor.getCount() > 0) {
-                mCursor.moveToFirst();
+            if (cursor.getCount() > 0) {
+                cursor.moveToFirst();
                 do {
-                    mExistingArticles.add(mCursor.getString(mCursor.getColumnIndex(ArticleDAO.GUID)));
-                    if (mCursor.isFirst()) {
-                        mNewestArticleDate = SQLiteHelper.toDate(mCursor.getString(mCursor.getColumnIndex(ArticleDAO.PUBDATE)));
+                    existingArticles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO.GUID)));
+                    if (cursor.isFirst()) {
+                        newestArticleDate = SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE)));
                     }
-                } while (mCursor.moveToNext());
+                } while (cursor.moveToNext());
             }
-            mCursor.close();
+            cursor.close();
 
-            Date mMinimumDate;
-            Date mArticleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
+            Date minimumDate;
+            Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
 
-            if (mNewestArticleDate.equals(new Date(0))) {
-                mMinimumDate = mArticleNotOlderThan;
+            if (newestArticleDate.equals(new Date(0))) {
+                minimumDate = articleNotOlderThan;
             } else {
-                mMinimumDate = mArticleNotOlderThan.before(mNewestArticleDate) ? mArticleNotOlderThan : mNewestArticleDate;
+                minimumDate = articleNotOlderThan.before(newestArticleDate) ? articleNotOlderThan : newestArticleDate;
             }
 
-            InputStream mInputStream = new URL(mFeedURL).openConnection().getInputStream();
-            XmlPullParserFactory mParserFactory = XmlPullParserFactory.newInstance();
-            mParserFactory.setNamespaceAware(true);
-            XmlPullParser mPullParser = mParserFactory.newPullParser();
-            mPullParser.setInput(mInputStream, null);
+            InputStream inputStream = new URL(feedURL).openConnection().getInputStream();
+            XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
+            parserFactory.setNamespaceAware(true);
+            XmlPullParser pullParser = parserFactory.newPullParser();
+            pullParser.setInput(inputStream, null);
 
-            int mEventType = mPullParser.getEventType();
+            int mEventType = pullParser.getEventType();
             while (mEventType != XmlPullParser.END_DOCUMENT) {
                 if (mEventType == XmlPullParser.START_TAG) {
-                    String mCurrentTag = mPullParser.getName();
+                    String currentTag = pullParser.getName();
 
-                    if (mCurrentTag.equalsIgnoreCase("item") || mCurrentTag.equalsIgnoreCase("entry")) {
-                        mIsArticle = true;
-                    } else if (mCurrentTag.equalsIgnoreCase("title") && mIsArticle == true) {
-                        mTitle = mPullParser.nextText();
-                    } else if ((mCurrentTag.equalsIgnoreCase("description") || mCurrentTag.equalsIgnoreCase("summary")) && mIsArticle == true) {
-                        mSummary = Html.fromHtml(mPullParser.nextText()).toString();
-                    } else if ((mCurrentTag.equalsIgnoreCase("encoded") || mCurrentTag.equalsIgnoreCase("content")) && mIsArticle == true) {
-                        mContent = mPullParser.nextText();
-                    } else if ((mCurrentTag.equalsIgnoreCase("guid") || mCurrentTag.equalsIgnoreCase("id")) && mIsArticle == true) {
-                        mGUID = mPullParser.nextText();
-                    } else if (mCurrentTag.equalsIgnoreCase("pubdate") || mCurrentTag.equalsIgnoreCase("published") || mCurrentTag.equalsIgnoreCase("date")) {
-                        mPubdate = parsePubdate(mPullParser.nextText());
+                    if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
+                        isArticle = true;
+                    } else if (currentTag.equalsIgnoreCase("title") && isArticle == true) {
+                        title = pullParser.nextText();
+                    } else if ((currentTag.equalsIgnoreCase("description") || currentTag.equalsIgnoreCase("summary")) && isArticle == true) {
+                        summary = Html.fromHtml(pullParser.nextText()).toString();
+                    } else if ((currentTag.equalsIgnoreCase("encoded") || currentTag.equalsIgnoreCase("content")) && isArticle == true) {
+                        content = pullParser.nextText();
+                    } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
+                        guid = pullParser.nextText();
+                    } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")) {
+                        pubdate = parsePubdate(pullParser.nextText());
                     }
 
                 } else if (mEventType == XmlPullParser.END_TAG) {
-                    String mCurrentTag = mPullParser.getName();
+                    String currentTag = pullParser.getName();
 
-                    if (mCurrentTag.equalsIgnoreCase("item") || mCurrentTag.equalsIgnoreCase("entry")) {
-                        mIsArticle = false;
+                    if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
+                        isArticle = false;
 
-                        if (SQLiteHelper.toDate(mPubdate).before(mMinimumDate)) {
+                        if (SQLiteHelper.toDate(pubdate).before(minimumDate)) {
                             break;
                         }
 
-                        if (!mExistingArticles.contains(mGUID)) {
-                            mContentValuesArrayList.add(prepareArticle(mFeedID, mGUID, mPubdate, mTitle, mSummary, mContent));
+                        if (!existingArticles.contains(guid)) {
+                            contentValuesArrayList.add(prepareArticle(mFeedID, guid, pubdate, title, summary, content));
 
-                            mTitle = null;
-                            mSummary = null;
-                            mContent = null;
-                            mGUID = null;
-                            mPubdate = null;
+                            title = null;
+                            summary = null;
+                            content = null;
+                            guid = null;
+                            pubdate = null;
                         }
                     }
                 }
-                mEventType = mPullParser.next();
+                mEventType = pullParser.next();
             }
-            mInputStream.close();
+            inputStream.close();
 
-            ContentValues[] mContentValuesArray = new ContentValues[mContentValuesArrayList.size()];
-            mContentValuesArray = mContentValuesArrayList.toArray(mContentValuesArray);
-            mContentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, mContentValuesArray);
+            ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
+            contentValuesArray = contentValuesArrayList.toArray(contentValuesArray);
+            contentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, contentValuesArray);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -177,36 +177,36 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
     @Override
     protected void onPostExecute(Integer result) {
-        Message mMSG = Message.obtain();
-        mMSG.what = 2;
-        mMSG.arg1 = result;
-        mMainUIHandler.sendMessage(mMSG);
+        Message msg = Message.obtain();
+        msg.what = 2;
+        msg.arg1 = result;
+        mMainUIHandler.sendMessage(msg);
     }
 
     private Date pastDate(int interval) {
-        Calendar mCalendar = Calendar.getInstance();
-        mCalendar.add(Calendar.DATE, -interval);
-        return mCalendar.getTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -interval);
+        return calendar.getTime();
     }
 
     private String queryURL(int feedID) {
-        String mFeedURL = "";
-        ContentResolver mContentResolver = mContext.getContentResolver();
-        Cursor mCursor = mContentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.URL }, FeedDAO._ID + " = ?",
+        String feedURL = "";
+        ContentResolver contentResolver = mContext.getContentResolver();
+        Cursor cursor = contentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.URL }, FeedDAO._ID + " = ?",
                 new String[] { String.valueOf(feedID) }, null);
-        if (mCursor.getCount() > 0) {
-            mCursor.moveToFirst();
-            mFeedURL = mCursor.getString(mCursor.getColumnIndex(FeedDAO.URL));
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            feedURL = cursor.getString(cursor.getColumnIndex(FeedDAO.URL));
         }
-        mCursor.close();
-        return mFeedURL;
+        cursor.close();
+        return feedURL;
     }
 
     private String parsePubdate(String rawDate) throws XmlPullParserException {
-        String mParsedDate = "";
+        String parsedDate = "";
         for (int j = 0; j < DATE_FORMATS.length; j++) {
             try {
-                mParsedDate = SQLiteHelper.fromDate((mSimpleDateFormats[j].parse(rawDate)));
+                parsedDate = SQLiteHelper.fromDate((mSimpleDateFormats[j].parse(rawDate)));
                 break;
             } catch (ParseException mParserException) {
                 if (j == DATE_FORMATS.length - 1) {
@@ -214,25 +214,25 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                 }
             }
         }
-        return mParsedDate;
+        return parsedDate;
     }
 
     private ContentValues prepareArticle(int feedID, String guid, String pubdate, String title, String summary, String content) {
-        Document mDocument = Jsoup.parse(content);
+        Document document = Jsoup.parse(content);
 
-        Elements mIframes = mDocument.getElementsByTag("iframe");
-        TextNode mPlaceholder = new TextNode("(video removed)", null);
-        for (Element mIframe : mIframes) {
-            mIframe.replaceWith(mPlaceholder);
+        Elements iframes = document.getElementsByTag("iframe");
+        TextNode placeholder = new TextNode("(video removed)", null);
+        for (Element mIframe : iframes) {
+            mIframe.replaceWith(placeholder);
         }
-        content = mDocument.html();
+        content = document.html();
 
         if (summary == null) {
-            String mContentSummary = mDocument.text();
-            if (mContentSummary.length() > SUMMARY_MAXLENGTH) {
-                summary = mContentSummary.substring(0, SUMMARY_MAXLENGTH) + "[...]";
+            String contentSummary = document.text();
+            if (contentSummary.length() > SUMMARY_MAXLENGTH) {
+                summary = contentSummary.substring(0, SUMMARY_MAXLENGTH) + "[...]";
             } else {
-                summary = mContentSummary;
+                summary = contentSummary;
             }
         }
 
@@ -241,20 +241,20 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             summary = summary.substring(0, summary.length() - 1);
         }
 
-        Element mImage = mDocument.select("img").first();
-        String mImageURL = mImage.absUrl("src");
+        Element image = document.select("img").first();
+        String imageURL = image.absUrl("src");
 
-        ContentValues mContentValues = new ContentValues();
+        ContentValues contentValues = new ContentValues();
 
-        mContentValues.put(ArticleDAO.FEEDID, feedID);
-        mContentValues.put(ArticleDAO.GUID, guid);
-        mContentValues.put(ArticleDAO.PUBDATE, pubdate);
-        mContentValues.put(ArticleDAO.TITLE, title);
-        mContentValues.put(ArticleDAO.SUMMARY, summary);
-        mContentValues.put(ArticleDAO.CONTENT, content);
-        mContentValues.put(ArticleDAO.IMAGE, mImageURL);
-        mContentValues.put(ArticleDAO.READ, 0);
+        contentValues.put(ArticleDAO.FEEDID, feedID);
+        contentValues.put(ArticleDAO.GUID, guid);
+        contentValues.put(ArticleDAO.PUBDATE, pubdate);
+        contentValues.put(ArticleDAO.TITLE, title);
+        contentValues.put(ArticleDAO.SUMMARY, summary);
+        contentValues.put(ArticleDAO.CONTENT, content);
+        contentValues.put(ArticleDAO.IMAGE, imageURL);
+        contentValues.put(ArticleDAO.READ, 0);
 
-        return mContentValues;
+        return contentValues;
     }
 }

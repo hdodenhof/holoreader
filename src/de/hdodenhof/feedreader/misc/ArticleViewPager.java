@@ -72,22 +72,22 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     }
 
     public void onPageSelected(int position) {
-        int mNewArticleID = mPagerAdapter.getArticleID(position);
-        ((OnArticleChangedListener) mContext).onArticleChanged(mCurrentArticleID, mNewArticleID, position);
-        mCurrentArticleID = mNewArticleID;
+        int newArticleID = mPagerAdapter.getArticleID(position);
+        ((OnArticleChangedListener) mContext).onArticleChanged(mCurrentArticleID, newArticleID, position);
+        mCurrentArticleID = newArticleID;
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String mSelection = ArticleDAO._ID + " IN (";
+        String selection = ArticleDAO._ID + " IN (";
         for (int i = 0; i < mArticles.size() - 1; i++) {
-            mSelection = mSelection + "?, ";
+            selection = selection + "?, ";
         }
-        mSelection = mSelection + "?)";
-        String[] mSelectionArgs = mArticles.toArray(new String[mArticles.size()]);
+        selection = selection + "?)";
+        String[] selectionArgs = mArticles.toArray(new String[mArticles.size()]);
 
-        CursorLoader mCursorLoader = new CursorLoader(mContext, RSSContentProvider.URI_ARTICLES, mProjection, mSelection, mSelectionArgs, ArticleDAO.PUBDATE
+        CursorLoader cursorLoader = new CursorLoader(mContext, RSSContentProvider.URI_ARTICLES, mProjection, selection, selectionArgs, ArticleDAO.PUBDATE
                 + " DESC");
-        return mCursorLoader;
+        return cursorLoader;
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
@@ -112,22 +112,22 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     }
 
     private int queryPosition(Cursor cursor, int articleID) {
-        int mCursorPosition = cursor.getPosition();
-        int mPosition = 0;
-        int mIterator = 0;
+        int cursorPosition = cursor.getPosition();
+        int position = 0;
+        int iterator = 0;
 
         cursor.moveToFirst();
         do {
             if (articleID == cursor.getInt(cursor.getColumnIndex(ArticleDAO._ID))) {
-                mPosition = mIterator;
+                position = iterator;
                 break;
             }
-            mIterator++;
+            iterator++;
         } while (cursor.moveToNext());
 
-        cursor.moveToPosition(mCursorPosition);
+        cursor.moveToPosition(cursorPosition);
 
-        return mPosition;
+        return position;
     }
 
     private class ArticlePagerAdapter extends FragmentStatePagerAdapter {
@@ -137,8 +137,8 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
         public ArticlePagerAdapter(FragmentManager fm, String[] projection, Cursor cursor) {
             super(fm);
-            this.mProjection = projection;
-            this.mCursor = cursor;
+            mProjection = projection;
+            mCursor = cursor;
         }
 
         @Override
@@ -148,18 +148,18 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
             }
 
             mCursor.moveToPosition(position);
-            SherlockFragment mFragment;
+            SherlockFragment fragment;
             try {
-                mFragment = ArticleFragment.newInstance();
-            } catch (Exception mException) {
-                throw new RuntimeException(mException);
+                fragment = ArticleFragment.newInstance();
+            } catch (Exception exception) {
+                throw new RuntimeException(exception);
             }
             Bundle args = new Bundle();
             for (int i = 0; i < mProjection.length; ++i) {
                 args.putString(mProjection[i], mCursor.getString(i));
             }
-            mFragment.setArguments(args);
-            return mFragment;
+            fragment.setArguments(args);
+            return fragment;
         }
 
         @Override
@@ -181,13 +181,13 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         }
 
         public int getArticleID(int position) {
-            int mCursorPosition = mCursor.getPosition();
+            int cursorPosition = mCursor.getPosition();
 
             mCursor.moveToPosition(position);
-            int mArticleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
-            mCursor.moveToPosition(mCursorPosition);
+            int articleID = mCursor.getInt(mCursor.getColumnIndex(ArticleDAO._ID));
+            mCursor.moveToPosition(cursorPosition);
 
-            return mArticleID;
+            return articleID;
         }
 
     }

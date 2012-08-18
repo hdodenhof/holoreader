@@ -39,8 +39,7 @@ public class ArticleFragment extends SherlockFragment {
     private Date mPubdate;
 
     public static ArticleFragment newInstance() {
-        ArticleFragment mArticleFragmentInstance = new ArticleFragment();
-        return mArticleFragmentInstance;
+        return new ArticleFragment();
     }
 
     @Override
@@ -56,60 +55,60 @@ public class ArticleFragment extends SherlockFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View mArticleView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
+        final View articleView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
 
         if (mTitle != null && mContent != null && mPubdate != null) {
-            int mViewWidth;
+            int viewWidth;
 
             Display display = getActivity().getWindowManager().getDefaultDisplay();
             DisplayMetrics displayMetrics = new DisplayMetrics();
             display.getMetrics(displayMetrics);
 
             if (((FragmentCallback) getActivity()).isDualPane()) {
-                float mFactor = ((float) getResources().getInteger(R.integer.dualpane_feedactivity_article_weight)) / 100;
-                mViewWidth = (int) Math.round(displayMetrics.widthPixels * mFactor);
+                float factor = ((float) getResources().getInteger(R.integer.dualpane_feedactivity_article_weight)) / 100;
+                viewWidth = (int) Math.round(displayMetrics.widthPixels * factor);
             } else {
-                mViewWidth = displayMetrics.widthPixels;
+                viewWidth = displayMetrics.widthPixels;
             }
 
             // content margin is 8dp left and 8dp right
-            int mContentWidth = Math.round(mViewWidth / displayMetrics.density) - 16;
+            int contentWidth = Math.round(viewWidth / displayMetrics.density) - 16;
 
-            StringBuilder mStyleStringBuilder = new StringBuilder();
-            mStyleStringBuilder.append("<style type=\"text/css\">");
-            mStyleStringBuilder.append("body { padding: 0; margin: 0; }");
-            mStyleStringBuilder.append("img { max-width: " + String.valueOf(mContentWidth) + "; height: auto; }");
-            mStyleStringBuilder.append("figure { margin: 0 !important; }");
-            mStyleStringBuilder.append("</style>");
+            StringBuilder styleStringBuilder = new StringBuilder();
+            styleStringBuilder.append("<style type=\"text/css\">");
+            styleStringBuilder.append("body { padding: 0; margin: 0; }");
+            styleStringBuilder.append("img { max-width: " + String.valueOf(contentWidth) + "; height: auto; }");
+            styleStringBuilder.append("figure { margin: 0 !important; }");
+            styleStringBuilder.append("</style>");
 
             Document doc = Jsoup.parse(mContent);
-            doc.head().append(mStyleStringBuilder.toString());
+            doc.head().append(styleStringBuilder.toString());
 
-            TextView mTitleView = (TextView) mArticleView.findViewById(R.id.article_header);
-            mTitleView.setText(mTitle);
+            TextView titleView = (TextView) articleView.findViewById(R.id.article_header);
+            titleView.setText(mTitle);
 
-            TextView mPubdateView = (TextView) mArticleView.findViewById(R.id.article_pubdate);
-            CharSequence mFormattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", mPubdate);
-            mPubdateView.setText(mFormattedPubdate);
+            TextView pubdateView = (TextView) articleView.findViewById(R.id.article_pubdate);
+            CharSequence formattedPubdate = DateFormat.format("E, dd MMM yyyy - kk:mm", mPubdate);
+            pubdateView.setText(formattedPubdate);
 
-            TextView mFeednameView = (TextView) mArticleView.findViewById(R.id.article_feedname);
-            mFeednameView.setText(mFeedname);
+            TextView feednameView = (TextView) articleView.findViewById(R.id.article_feedname);
+            feednameView.setText(mFeedname);
 
-            WebView mContentView = (WebView) mArticleView.findViewById(R.id.article_text);
+            WebView contentView = (WebView) articleView.findViewById(R.id.article_text);
 
-            mContentView.setWebViewClient(new WebViewClient() {
+            contentView.setWebViewClient(new WebViewClient() {
                 @Override
                 public void onPageFinished(WebView view, String url) {
-                    mArticleView.postDelayed(new Runnable() {
+                    articleView.postDelayed(new Runnable() {
                         public void run() {
-                            mArticleView.findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
+                            articleView.findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
                         }
                     }, 500);
                 }
             });
-            mContentView.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);
+            contentView.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);
         }
-        return mArticleView;
+        return articleView;
 
     }
 }

@@ -2,6 +2,7 @@ package de.hdodenhof.feedreader.activities;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 
 import android.annotation.SuppressLint;
@@ -171,6 +172,11 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (mTwoPane) {
             mArticleListFragment.setUnreadOnly(mUnreadOnly);
         }
+
+        long mRefreshed = mPreferences.getLong("refreshed", (new Date(0)).getTime());
+        if (mRefreshed < (new Date()).getTime() - 3600000) {
+            refreshFeeds();
+        }
     }
 
     /**
@@ -218,6 +224,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         boolean mIsConnected = Helpers.isConnected(this);
 
         if (mIsConnected) {
+            SharedPreferences.Editor mEditor = mPreferences.edit();
+            mEditor.putLong("refreshed", (new Date()).getTime());
+            mEditor.commit();
+
             for (Integer mFeedID : queryFeeds()) {
                 refreshFeed(mFeedID);
             }

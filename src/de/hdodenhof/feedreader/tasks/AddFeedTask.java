@@ -51,7 +51,7 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
 
             while (mEventType != XmlPullParser.END_DOCUMENT) {
                 if (mEventType == XmlPullParser.START_TAG) {
-                    if (mPullParser.getName().equalsIgnoreCase("rss")) {
+                    if (mPullParser.getName().equalsIgnoreCase("rss") || mPullParser.getName().equalsIgnoreCase("feed")) {
                         mIsFeed = true;
                     }
                     if (mPullParser.getName().equalsIgnoreCase("title")) {

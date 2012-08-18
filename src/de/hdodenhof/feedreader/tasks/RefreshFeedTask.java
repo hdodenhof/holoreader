@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.text.Html;
+import android.util.Log;
 
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper;
@@ -37,13 +38,16 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
 public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
+    @SuppressWarnings("unused")
+    private static final String TAG = AddFeedTask.class.getSimpleName();
+
     private static final int SUMMARY_MAXLENGTH = 250;
     private static final String DATE_FORMATS[] = { "EEE, dd MMM yyyy HH:mm:ss Z", "EEE, dd MMM yyyy HH:mm:ss z", "yyyy-MM-dd'T'HH:mm:ssz",
             "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
     private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
 
-    private int mKeepReadArticlesDays = 3;
-    private int mKeepUnreadArticlesDays = 7;
+    private int mKeepReadArticlesDays;
+    private int mKeepUnreadArticlesDays;
 
     private Handler mMainUIHandler;
     private Context mContext;
@@ -58,8 +62,8 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         }
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
-        mKeepReadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_read_articles_days", ""));
-        mKeepUnreadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_unread_articles_days", ""));
+        mKeepReadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_read_articles_days", "3"));
+        mKeepUnreadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_unread_articles_days", "7"));
     }
 
     protected Integer doInBackground(Integer... params) {
@@ -67,7 +71,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
         ContentResolver contentResolver = mContext.getContentResolver();
         ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
-        ArrayList<String[]> existingArticles = new ArrayList<String[]>();
+        ArrayList<String> existingArticles = new ArrayList<String>();
         Date minimumDate;
         Date newestArticleDate = new Date(0);
         Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
@@ -79,26 +83,34 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         String guid = null;
         String pubdate = null;
 
-        String feedURL = queryURL(mFeedID);
-
-        // delete read articles after KEEP_READ_ARTICLES_DAYS
-        contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " = ?",
-                new String[] { SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)), "1" });
-
-        // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
-        contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.PUBDATE + " < ?",
-                new String[] { SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
-
-        existingArticles = queryArticles(contentResolver, mFeedID);
-        newestArticleDate = SQLiteHelper.toDate(existingArticles.get(0)[1]);
-
-        if (newestArticleDate.equals(new Date(0))) {
-            minimumDate = articleNotOlderThan;
-        } else {
-            minimumDate = articleNotOlderThan.before(newestArticleDate) ? articleNotOlderThan : newestArticleDate;
-        }
-
         try {
+
+            String feedURL = queryURL(mFeedID);
+            Log.v(TAG, "id_" + mFeedID + ": " + feedURL);
+
+            // delete read articles after KEEP_READ_ARTICLES_DAYS
+            int deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ? AND "
+                    + ArticleDAO.READ + " = ?", new String[] { String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)), "1" });
+            Log.v(TAG, "id_" + mFeedID + ": Deleted " + deleted + " read articles");
+
+            // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
+            deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?", new String[] {
+                    String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
+            Log.v(TAG, "id_" + mFeedID + ": Deleted " + deleted + " old unread articles");
+
+            existingArticles = queryArticles(contentResolver, mFeedID);
+            newestArticleDate = queryNewestArticleDate(contentResolver, mFeedID);
+
+            Log.v(TAG, "id_" + mFeedID + ": existing articles: " + existingArticles.size());
+            Log.v(TAG, "id_" + mFeedID + ": newestArticleDate: " + newestArticleDate);
+            Log.v(TAG, "id_" + mFeedID + ": articleNotOlderThan: " + articleNotOlderThan);
+            if (newestArticleDate.equals(new Date(0))) {
+                minimumDate = articleNotOlderThan;
+            } else {
+                minimumDate = articleNotOlderThan.before(newestArticleDate) ? newestArticleDate : articleNotOlderThan;
+            }
+            Log.v(TAG, "id_" + mFeedID + ": minimumDate: " + minimumDate);
+
             InputStream inputStream = new URL(feedURL).openConnection().getInputStream();
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
             parserFactory.setNamespaceAware(true);
@@ -130,11 +142,17 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                     if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
                         isArticle = false;
 
+                        Log.v(TAG, "id_" + mFeedID + ": working on " + guid);
+
                         if (SQLiteHelper.toDate(pubdate).before(minimumDate)) {
+                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
                             break;
+                        } else {
+                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") >=  minimumDate (" + minimumDate + ")");
                         }
 
                         if (!existingArticles.contains(guid)) {
+                            Log.v(TAG, "id_" + mFeedID + ": adding " + guid);
                             contentValuesArrayList.add(prepareArticle(mFeedID, guid, pubdate, title, summary, content));
 
                             title = null;
@@ -159,22 +177,35 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         return mFeedID;
     }
 
-    private ArrayList<String[]> queryArticles(ContentResolver contentResolver, int mFeedID) {
-        ArrayList<String[]> articles = new ArrayList<String[]>();
+    private ArrayList<String> queryArticles(ContentResolver contentResolver, int feedID) {
+        ArrayList<String> articles = new ArrayList<String>();
 
         Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
-                ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(mFeedID) }, ArticleDAO.PUBDATE + " DESC");
+                ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) }, ArticleDAO.PUBDATE + " DESC");
 
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             do {
-                articles.add(new String[] { cursor.getString(cursor.getColumnIndex(ArticleDAO.GUID)),
-                        cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE)) });
+                articles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO.GUID)));
             } while (cursor.moveToNext());
         }
         cursor.close();
 
         return articles;
+    }
+
+    private Date queryNewestArticleDate(ContentResolver contentResolver, int feedID) {
+        Date maxDate = new Date(0);
+        Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.PUBDATE }, ArticleDAO.FEEDID + " = ?",
+                new String[] { String.valueOf(feedID) }, ArticleDAO.PUBDATE + " DESC");
+
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            maxDate = SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE)));
+        }
+        cursor.close();
+
+        return maxDate;
     }
 
     @Override

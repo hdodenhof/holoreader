@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -40,12 +41,14 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
         boolean mIsFeed = false;
 
         try {
-            InputStream mInputStream = new URL(mURL).openConnection().getInputStream();
+            URLConnection connection = new URL(mURL).openConnection();
+            connection.setRequestProperty("User-agent", "Feedreader/0.8");
+            InputStream inputStream = connection.getInputStream();
 
             XmlPullParserFactory mParserFactory = XmlPullParserFactory.newInstance();
             mParserFactory.setNamespaceAware(true);
             XmlPullParser mPullParser = mParserFactory.newPullParser();
-            mPullParser.setInput(mInputStream, null);
+            mPullParser.setInput(inputStream, null);
 
             int mEventType = mPullParser.getEventType();
 
@@ -61,7 +64,7 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
                 }
                 mEventType = mPullParser.next();
             }
-            mInputStream.close();
+            inputStream.close();
 
             if (mIsFeed) {
                 ContentResolver mContentResolver = mContext.getContentResolver();

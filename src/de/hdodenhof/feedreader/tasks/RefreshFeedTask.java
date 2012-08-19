@@ -2,6 +2,7 @@ package de.hdodenhof.feedreader.tasks;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -111,7 +112,10 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             }
             Log.v(TAG, "id_" + mFeedID + ": minimumDate: " + minimumDate);
 
-            InputStream inputStream = new URL(feedURL).openConnection().getInputStream();
+            URLConnection connection = new URL(feedURL).openConnection();
+            connection.setRequestProperty("User-agent", "Feedreader/0.8");
+            InputStream inputStream = connection.getInputStream();
+
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
             parserFactory.setNamespaceAware(true);
             XmlPullParser pullParser = parserFactory.newPullParser();

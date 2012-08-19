@@ -6,6 +6,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -84,6 +86,16 @@ public class ArticleFragment extends SherlockFragment {
                         articleView.findViewById(R.id.progressbar).setVisibility(View.INVISIBLE);
                     }
                 }, 500);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                if (url != null && url.startsWith("http://")) {
+                    view.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                    return true;
+                } else {
+                    return false;
+                }
             }
         });
         contentView.loadDataWithBaseURL(null, doc.html(), "text/html", "utf-8", null);

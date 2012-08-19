@@ -134,10 +134,10 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
 
             if (mUnreadOnly) {
                 Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
-                item.setIcon(R.drawable.checkbox_unchecked);
+                item.setIcon(R.drawable.ab_btn_checkbox_unchecked);
             } else {
                 Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
-                item.setIcon(R.drawable.checkbox_checked);
+                item.setIcon(R.drawable.ab_btn_checkbox_checked);
             }
             ArticleListFragment articleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
             articleListFragment.setUnreadOnly(mUnreadOnly);
@@ -165,7 +165,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
         if (mTwoPane) {
             menu.removeItem(R.id.item_toggle);
         } else if (!mUnreadOnly) {
-            menu.getItem(0).setIcon(R.drawable.checkbox_checked);
+            menu.getItem(0).setIcon(R.drawable.ab_btn_checkbox_checked);
         }
 
         return true;

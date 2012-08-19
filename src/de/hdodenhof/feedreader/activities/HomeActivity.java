@@ -7,6 +7,7 @@ import java.util.HashSet;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -22,6 +23,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
@@ -295,27 +297,9 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         boolean isConnected = Helpers.isConnected(this);
 
         if (isConnected) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-
-            alertDialog.setTitle(mResources.getString(R.string.AddFeedDialogTitle));
-            alertDialog.setMessage(mResources.getString(R.string.AddFeedDialogText));
-
-            final EditText input = new EditText(this);
-            input.setText("http://t3n.de/news/feed");
-            alertDialog.setView(input);
-
-            alertDialog.setPositiveButton(mResources.getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    String value = input.getText().toString();
-                    addFeed(value);
-                }
-            });
-
-            alertDialog.setNegativeButton(mResources.getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-            });
-            alertDialog.show();
+            DialogFragment newFragment = new DialogAddFragment();
+            newFragment.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
+            newFragment.show(getSupportFragmentManager(), "dialog");
         } else {
             Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
         }
@@ -383,7 +367,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         menuInflater.inflate(R.menu.main, menu);
 
         if (!mUnreadOnly) {
-            menu.getItem(2).setIcon(R.drawable.checkbox_checked);
+            menu.getItem(2).setIcon(R.drawable.ab_btn_checkbox_checked);
         }
         mRefreshItem = menu.getItem(0);
 
@@ -408,10 +392,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
             if (mUnreadOnly) {
                 Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
-                item.setIcon(R.drawable.checkbox_unchecked);
+                item.setIcon(R.drawable.ab_btn_checkbox_unchecked);
             } else {
                 Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
-                item.setIcon(R.drawable.checkbox_checked);
+                item.setIcon(R.drawable.ab_btn_checkbox_checked);
             }
             mFeedListFragment.setUnreadOnly(mUnreadOnly);
             if (mTwoPane) {
@@ -438,6 +422,33 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             return true;
         default:
             return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private class DialogAddFragment extends DialogFragment {
+
+        private View mRootView;
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+
+            alertDialog.setPositiveButton(mResources.getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                    String value = ((EditText) mRootView.findViewById(R.id.enterUrl)).getText().toString();
+                    addFeed(value);
+                }
+            });
+
+            alertDialog.setNegativeButton(mResources.getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int whichButton) {
+                }
+            });
+
+            mRootView = getActivity().getLayoutInflater().inflate(R.layout.fragment_dialog_add, null);
+            alertDialog.setView(mRootView);
+
+            return alertDialog.create();
         }
     }
 

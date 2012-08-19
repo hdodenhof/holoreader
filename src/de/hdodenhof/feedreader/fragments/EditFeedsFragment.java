@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -172,6 +173,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
                 EditFeedDialog editFeedDialog = new EditFeedDialog(feed.getLong(feed.getColumnIndex(FeedDAO._ID)), feed.getString(feed
                         .getColumnIndex(FeedDAO.NAME)), feed.getString(feed.getColumnIndex(FeedDAO.URL)));
+                editFeedDialog.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
                 editFeedDialog.show(fragmentManager, "fragment_edit_feed_dialog");
                 mode.finish();
                 return true;

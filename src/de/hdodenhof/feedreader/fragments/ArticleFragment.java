@@ -5,6 +5,8 @@ import java.util.Date;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import android.annotation.SuppressLint;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
@@ -53,9 +55,14 @@ public class ArticleFragment extends SherlockFragment {
         mPubdate = SQLiteHelper.toDate(args.getString(ArticleDAO.PUBDATE));
     }
 
+    @SuppressLint("NewApi")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View articleView = inflater.inflate(R.layout.fragment_singlearticle, container, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            articleView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        }
 
         TextView titleView = (TextView) articleView.findViewById(R.id.article_header);
         TextView pubdateView = (TextView) articleView.findViewById(R.id.article_pubdate);

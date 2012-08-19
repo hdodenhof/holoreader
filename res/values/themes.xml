@@ -1,9 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="Default" parent="Theme.Sherlock.ForceOverflow"></style>
+    <style name="Default" parent="Theme.Sherlock.ForceOverflow">
+        <item name="actionBarItemBackground">@drawable/selectable_background</item>
+        <item name="popupMenuStyle">@style/CustomPopupMenu</item>
+        <item name="dropDownListViewStyle">@style/CustomDropDownListView</item>
+        <item name="actionBarStyle">@style/CustomActionBar</item>
+        <item name="actionModeBackground">@drawable/cab_background_top_holo_dark</item>
+        <item name="actionModeSplitBackground">@drawable/cab_background_bottom_holo_dark</item>
+        <item name="android:actionBarItemBackground">@drawable/selectable_background</item>
+        <item name="android:popupMenuStyle">@style/CustomPopupMenu</item>
+        <item name="android:dropDownListViewStyle">@style/CustomDropDownListView</item>
+        <item name="android:actionBarStyle">@style/CustomActionBar</item>
+        <item name="android:panelBackground">@drawable/menu_hardkey_panel</item>
+        <item name="android:actionModeBackground">@drawable/cab_background_top_holo_dark</item>
+        <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_holo_dark</item>
+        <item name="android:listViewStyle">@style/CustomListView</item>
+        <item name="android:listChoiceIndicatorMultiple">@drawable/btn_check_holo_dark</item>
+        <item name="android:editTextBackground">@drawable/edit_text_holo_dark</item>
+        <item name="customActivatedBackgroundIndicator">@drawable/activated_background_holo</item>
+    </style>
+
+    <style name="CustomListView" parent="@android:style/Widget.Holo.ListView">
+        <item name="android:listSelector">@drawable/list_selector_holo_dark</item>
+    </style>
 
     <style name="CustomActionButton" parent="Widget.Sherlock.ActionButton"></style>
+
+    <style name="CustomActionBar" parent="@style/Widget.Sherlock.ActionBar">
+        <item name="background">@drawable/ab_transparent</item>
+        <item name="progressBarStyle">@style/CustomProgressBar</item>
+        <item name="android:background">@drawable/ab_transparent</item>
+        <item name="android:progressBarStyle">@style/CustomProgressBar</item>
+    </style>
+
+    <style name="CustomPopupMenu" parent="@style/Widget.Sherlock.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel</item>
+    </style>
+
+    <style name="CustomDropDownListView" parent="@style/Widget.Sherlock.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background</item>
+    </style>
+
+    <style name="CustomProgressBar" parent="@style/Widget.Sherlock.ProgressBar.Horizontal">
+        <item name="android:progressDrawable">@drawable/progress_horizontal</item>
+    </style>
 
     <!-- Copied and merged from AOSP -->
     <style name="CustomIndeterminateProgress">

@@ -46,7 +46,7 @@ public class RSSFeedAdapter extends SimpleCursorAdapter implements RSSAdapter {
         final LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(mLayout, parent, false);
 
-        return Helpers.addBackgroundIndicator(context, view, android.R.attr.activatedBackgroundIndicator);
+        return Helpers.addBackgroundIndicator(context, view, R.attr.customActivatedBackgroundIndicator);
     }
 
     private View prepareView(View view, Context context, Cursor cursor) {

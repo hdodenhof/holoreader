@@ -18,7 +18,6 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 public class EditFeedDialog extends DialogFragment implements DialogInterface.OnClickListener {
     private long mFeedID;
     private String mFeedName;
-    private String mFeedURL;
     private View mView;
 
     public EditFeedDialog() {
@@ -28,7 +27,6 @@ public class EditFeedDialog extends DialogFragment implements DialogInterface.On
         super();
         mFeedID = id;
         mFeedName = name;
-        mFeedURL = url;
     }
 
     @Override
@@ -39,13 +37,12 @@ public class EditFeedDialog extends DialogFragment implements DialogInterface.On
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         LayoutInflater mLayoutInflater = LayoutInflater.from(getActivity());
-        mView = mLayoutInflater.inflate(R.layout.fragment_edit_feed_dialog, null);
+        mView = mLayoutInflater.inflate(R.layout.fragment_dialog_edit, null);
 
         ((TextView) mView.findViewById(R.id.txt_feedname)).setText(mFeedName);
-        ((TextView) mView.findViewById(R.id.txt_feedurl)).setText(mFeedURL);
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
-        dialogBuilder.setTitle("Edit Feed");
+
         dialogBuilder.setView(mView);
         dialogBuilder.setCancelable(true);
         dialogBuilder.setPositiveButton(getResources().getString(R.string.PositiveButton), this);
@@ -62,7 +59,6 @@ public class EditFeedDialog extends DialogFragment implements DialogInterface.On
             ContentValues contentValues = new ContentValues();
 
             contentValues.put(FeedDAO.NAME, ((TextView) mView.findViewById(R.id.txt_feedname)).getText().toString());
-            contentValues.put(FeedDAO.URL, ((TextView) mView.findViewById(R.id.txt_feedurl)).getText().toString());
 
             contentResolver.update(RSSContentProvider.URI_FEEDS, contentValues, FeedDAO._ID + " = ?", new String[] { String.valueOf(mFeedID) });
             break;

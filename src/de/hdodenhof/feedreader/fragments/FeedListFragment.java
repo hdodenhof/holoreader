@@ -1,8 +1,10 @@
 package de.hdodenhof.feedreader.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
@@ -39,6 +41,7 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
     private ListView mFeedsListView;
     private boolean mUnreadOnly = true;
 
+    @SuppressLint("NewApi")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -55,6 +58,9 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
         mFeedsListView = getListView();
         mFeedsListView.addHeaderView(getHeaderView());
         mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            mFeedsListView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        }
 
         this.setEmptyText(getResources().getString(R.string.LoadingFeeds));
         this.setListAdapter(mFeedAdapter);
@@ -70,7 +76,7 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
         titleView.setText(getResources().getString(R.string.AllFeeds));
         updatedView.setVisibility(View.GONE);
-        return Helpers.addBackgroundIndicator(getActivity(), headerView, android.R.attr.activatedBackgroundIndicator);
+        return Helpers.addBackgroundIndicator(getActivity(), headerView, R.attr.customActivatedBackgroundIndicator);
     }
 
     public void setChoiceModeSingle() {

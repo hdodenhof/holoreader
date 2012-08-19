@@ -76,7 +76,6 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         mDiskImageCache = new DiskLruImageCache(context, "images", cacheSize * 2);
     }
 
-    @SuppressLint("NewApi")
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         String title = cursor.getString(cursor.getColumnIndex(ArticleDAO.TITLE));
@@ -121,6 +120,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         }
     }
 
+    @SuppressLint("NewApi")
     private void prepareImage(String imageURL, final ImageView articleImage) {
         try {
             URL url = new URL(imageURL);
@@ -175,7 +175,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         final LayoutInflater inflater = LayoutInflater.from(context);
         View view = inflater.inflate(mLayout, parent, false);
 
-        return Helpers.addBackgroundIndicator(context, view, android.R.attr.activatedBackgroundIndicator);
+        return Helpers.addBackgroundIndicator(context, view, R.attr.customActivatedBackgroundIndicator);
     }
 
     public int getType() {

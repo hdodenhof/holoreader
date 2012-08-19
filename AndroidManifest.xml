@@ -14,7 +14,7 @@
 
     <application
         android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/launcher"
         android:label="@string/AppName"
         android:theme="@style/Default" >
         <activity

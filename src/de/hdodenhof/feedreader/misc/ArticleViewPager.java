@@ -2,7 +2,9 @@ package de.hdodenhof.feedreader.misc;
 
 import java.util.ArrayList;
 
+import android.annotation.SuppressLint;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -11,6 +13,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -49,9 +52,10 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         }
     }
 
+    @SuppressLint("NewApi")
     public ArticleViewPager(SherlockFragmentActivity context) {
-        this.mContext = context;
-        this.mCurrentState = STATE_LOADING;
+        mContext = context;
+        mCurrentState = STATE_LOADING;
 
         mArticles = mContext.getIntent().getStringArrayListExtra("articles");
         mPreselectedArticleID = mContext.getIntent().getIntExtra("articleid", 0);
@@ -63,6 +67,10 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         mPager = (ViewPager) mContext.findViewById(R.id.viewpager_article);
         mPager.setAdapter(mPagerAdapter);
         mPager.setOnPageChangeListener(this);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
+            mPager.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        }
     }
 
     public void onPageScrollStateChanged(int state) {

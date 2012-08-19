@@ -3,12 +3,12 @@
 
 	<item
         android:id="@+id/item_edit"
-        android:icon="@drawable/edit"
+        android:icon="@drawable/ab_btn_edit"
         android:title="@string/EditFeedsMenuEdit"/>
     
     <item
         android:id="@+id/item_delete"
-        android:icon="@drawable/discard"
+        android:icon="@drawable/ab_btn_discard"
         android:title="@string/EditFeedsMenuDelete"/>
 
 </menu>

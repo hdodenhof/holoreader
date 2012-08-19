@@ -11,7 +11,7 @@
     <string name="PositiveButton">OK</string>
     <string name="NegativeButton">Cancel</string>
     <string name="AddFeedDialogTitle">@string/MenuAdd</string>
-    <string name="AddFeedDialogText">Input feed URL</string>
+    <string name="AddFeedDialogText">Feed URL</string>
     <string name="ToastUnreadArticles">Show unread items only</string>
     <string name="ToastAllArticles">Show all items</string>
 
@@ -48,6 +48,7 @@
     <string name="EditFeedsMenuEdit">Edit selected feed</string>
     
     <!-- Feed edit dialog -->
+    <string name="EditFeedDialogTitle">Edit feed</string>
     <string name="EditFeedDialogName">Feed name</string>
     <string name="EditFeedDialogURL">Feed URL</string>
 

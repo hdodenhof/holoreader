@@ -99,6 +99,10 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 // feed refresh
                 target.callbackFeedRefresh(msg.arg1);
                 break;
+            case 8:
+                // feed does not contain content section
+                target.callbackNoContent();
+                break;
             case 9:
                 // something went wrong while adding a feed
                 target.callbackError();
@@ -115,6 +119,14 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private void callbackFeedAdded(int feedID) {
         mSpinner.dismiss();
         refreshFeed(feedID);
+    }
+
+    /**
+     * Show error message when feed has no content
+     */
+    private void callbackNoContent() {
+        mSpinner.dismiss();
+        Helpers.showDialog(this, "An error occured", "The supplied feed is not compatible");
     }
 
     /**

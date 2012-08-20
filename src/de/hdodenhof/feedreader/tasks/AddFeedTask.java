@@ -36,45 +36,61 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
 
     protected Integer doInBackground(String... params) {
 
-        String mURL = params[0];
-        String mName = "";
-        boolean mIsFeed = false;
+        String url = params[0];
+        String name = "";
+        boolean isFeed = false;
+        boolean isArticle = false;
+        boolean hasContent = false;
+        boolean foundName = false;
 
         try {
-            URLConnection connection = new URL(mURL).openConnection();
+            URLConnection connection = new URL(url).openConnection();
             connection.setRequestProperty("User-agent", "Feedreader/0.8");
             InputStream inputStream = connection.getInputStream();
 
-            XmlPullParserFactory mParserFactory = XmlPullParserFactory.newInstance();
-            mParserFactory.setNamespaceAware(true);
-            XmlPullParser mPullParser = mParserFactory.newPullParser();
-            mPullParser.setInput(inputStream, null);
+            XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
+            parserFactory.setNamespaceAware(true);
+            XmlPullParser pullParser = parserFactory.newPullParser();
+            pullParser.setInput(inputStream, null);
 
-            int mEventType = mPullParser.getEventType();
+            int eventType = pullParser.getEventType();
 
-            while (mEventType != XmlPullParser.END_DOCUMENT) {
-                if (mEventType == XmlPullParser.START_TAG) {
-                    if (mPullParser.getName().equalsIgnoreCase("rss") || mPullParser.getName().equalsIgnoreCase("feed")) {
-                        mIsFeed = true;
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                if (eventType == XmlPullParser.START_TAG) {
+                    if (pullParser.getName().equalsIgnoreCase("rss") || pullParser.getName().equalsIgnoreCase("feed")) {
+                        isFeed = true;
                     }
-                    if (mPullParser.getName().equalsIgnoreCase("title")) {
-                        mName = mPullParser.nextText();
+                    if (pullParser.getName().equalsIgnoreCase("title") && isFeed && foundName == false) {
+                        name = pullParser.nextText();
+                        foundName = true;
+                    }
+                    if ((pullParser.getName().equalsIgnoreCase("item") || pullParser.getName().equalsIgnoreCase("entry")) && isFeed) {
+                        isArticle = true;
+                    } else if ((pullParser.getName().equalsIgnoreCase("encoded") || pullParser.getName().equalsIgnoreCase("content")) && isArticle == true) {
+                        hasContent = true;
+                        break;
+                    }
+
+                } else if (eventType == XmlPullParser.END_TAG) {
+                    if ((pullParser.getName().equalsIgnoreCase("item") || pullParser.getName().equalsIgnoreCase("entry")) && isFeed) {
                         break;
                     }
                 }
-                mEventType = mPullParser.next();
+                eventType = pullParser.next();
             }
             inputStream.close();
 
-            if (mIsFeed) {
-                ContentResolver mContentResolver = mContext.getContentResolver();
-                ContentValues mContentValues = new ContentValues();
+            if (isFeed && hasContent) {
+                ContentResolver contentResolver = mContext.getContentResolver();
+                ContentValues contentValues = new ContentValues();
 
-                mContentValues.put(FeedDAO.NAME, mName);
-                mContentValues.put(FeedDAO.URL, mURL);
+                contentValues.put(FeedDAO.NAME, name);
+                contentValues.put(FeedDAO.URL, url);
 
-                Uri mNewFeed = mContentResolver.insert(RSSContentProvider.URI_FEEDS, mContentValues);
-                return Integer.parseInt(mNewFeed.getLastPathSegment());
+                Uri newFeed = contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
+                return Integer.parseInt(newFeed.getLastPathSegment());
+            } else if (isFeed) {
+                return -1;
             } else {
                 return null;
             }
@@ -98,13 +114,15 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
 
     @Override
     protected void onPostExecute(Integer result) {
-        Message mMSG = Message.obtain();
-        if (result != null) {
-            mMSG.what = 1;
-            mMSG.arg1 = result;
+        Message msg = Message.obtain();
+        if (result != null && result != -1) {
+            msg.what = 1;
+            msg.arg1 = result;
+        } else if (result == -1) {
+            msg.what = 8;
         } else {
-            mMSG.what = 9;
+            msg.what = 9;
         }
-        mMainUIHandler.sendMessage(mMSG);
+        mMainUIHandler.sendMessage(msg);
     }
 }

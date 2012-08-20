@@ -121,9 +121,9 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             XmlPullParser pullParser = parserFactory.newPullParser();
             pullParser.setInput(inputStream, null);
 
-            int mEventType = pullParser.getEventType();
-            while (mEventType != XmlPullParser.END_DOCUMENT) {
-                if (mEventType == XmlPullParser.START_TAG) {
+            int eventType = pullParser.getEventType();
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                if (eventType == XmlPullParser.START_TAG) {
                     String currentTag = pullParser.getName();
 
                     if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
@@ -140,7 +140,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         pubdate = parsePubdate(pullParser.nextText());
                     }
 
-                } else if (mEventType == XmlPullParser.END_TAG) {
+                } else if (eventType == XmlPullParser.END_TAG) {
                     String currentTag = pullParser.getName();
 
                     if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
@@ -167,7 +167,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         }
                     }
                 }
-                mEventType = pullParser.next();
+                eventType = pullParser.next();
             }
             inputStream.close();
 

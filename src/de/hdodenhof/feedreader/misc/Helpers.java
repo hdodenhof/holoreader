@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -16,7 +15,9 @@ import android.os.Build;
 import android.text.format.DateFormat;
 import android.view.View;
 
-import de.hdodenhof.feedreader.R;
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
+import de.hdodenhof.feedreader.fragments.DynamicDialogFragment;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
@@ -42,11 +43,10 @@ public class Helpers {
      *            Dialog message
      */
     public static void showDialog(Context context, String title, String message) {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
-        alertDialog.setTitle(title);
-        alertDialog.setMessage(message);
-        alertDialog.setPositiveButton(context.getResources().getString(R.string.PositiveButton), null);
-        alertDialog.show();
+        DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(context);
+        dialogFragment.setTitle(title);
+        dialogFragment.setMessage(message);
+        dialogFragment.show(((SherlockFragmentActivity) context).getSupportFragmentManager(), "dialog");
     }
 
     /**

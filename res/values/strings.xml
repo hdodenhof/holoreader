@@ -8,8 +8,9 @@
     <string name="PleaseWait">Please wait…</string>
     <string name="NoConnectionTitle">No connection</string>
     <string name="NoConnectionText">You are not connected to the internet, please retry later.</string>
-    <string name="PositiveButton">OK</string>
+    <string name="PositiveButton">Save</string>
     <string name="NegativeButton">Cancel</string>
+    <string name="NeutralButton">OK</string>
     <string name="AddFeedDialogTitle">@string/MenuAdd</string>
     <string name="AddFeedDialogText">Feed URL</string>
     <string name="ToastUnreadArticles">Show unread items only</string>

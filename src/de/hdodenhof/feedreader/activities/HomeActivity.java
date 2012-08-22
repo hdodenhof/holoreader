@@ -6,12 +6,9 @@ import java.util.Date;
 import java.util.HashSet;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -25,10 +22,10 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.EditText;
 import android.widget.HeaderViewListAdapter;
 import android.widget.Toast;
 
@@ -39,6 +36,7 @@ import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleListFragment;
+import de.hdodenhof.feedreader.fragments.DynamicDialogFragment;
 import de.hdodenhof.feedreader.fragments.FeedListFragment;
 import de.hdodenhof.feedreader.listadapters.RSSAdapter;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
@@ -309,9 +307,19 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         boolean isConnected = Helpers.isConnected(this);
 
         if (isConnected) {
-            DialogFragment newFragment = new DialogAddFragment();
-            newFragment.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
-            newFragment.show(getSupportFragmentManager(), "dialog");
+            DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(this);
+
+            dialogFragment.setTitle(mResources.getString(R.string.AddFeedDialogTitle));
+            dialogFragment.setLayout(R.layout.fragment_dialog_add);
+            dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
+                @Override
+                public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
+                    addFeed(map.get(R.id.enterUrl));
+                    df.dismiss();
+                }
+            });
+
+            dialogFragment.show(getSupportFragmentManager(), "dialog");
         } else {
             Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
         }
@@ -436,32 +444,4 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             return super.onOptionsItemSelected(item);
         }
     }
-
-    private class DialogAddFragment extends DialogFragment {
-
-        private View mRootView;
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-
-            alertDialog.setPositiveButton(mResources.getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                    String value = ((EditText) mRootView.findViewById(R.id.enterUrl)).getText().toString();
-                    addFeed(value);
-                }
-            });
-
-            alertDialog.setNegativeButton(mResources.getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int whichButton) {
-                }
-            });
-
-            mRootView = getActivity().getLayoutInflater().inflate(R.layout.fragment_dialog_add, null);
-            alertDialog.setView(mRootView);
-
-            return alertDialog.create();
-        }
-    }
-
 }

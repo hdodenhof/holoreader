@@ -17,15 +17,15 @@
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_holo_dark</item>
         <item name="android:listViewStyle">@style/CustomListView</item>
         <item name="android:listChoiceIndicatorMultiple">@drawable/btn_check_holo_dark</item>
-        <item name="android:editTextBackground">@drawable/edit_text_holo_dark</item>
-        <item name="customActivatedBackgroundIndicator">@drawable/activated_background_holo</item>
+        <item name="android:editTextBackground">@drawable/edit_text_holo_dark</item><!-- remove -->
+        <item name="customActivatedBackgroundIndicator">@drawable/activated_background_holo</item><!-- remove -->
     </style>
 
     <style name="CustomListView" parent="@android:style/Widget.Holo.ListView">
         <item name="android:listSelector">@drawable/list_selector_holo_dark</item>
     </style>
 
-    <style name="CustomActionButton" parent="Widget.Sherlock.ActionButton"></style>
+    <style name="CustomActionButton" parent="Widget.Sherlock.ActionButton"></style><!-- remove?? -->
 
     <style name="CustomActionBar" parent="@style/Widget.Sherlock.ActionBar">
         <item name="background">@drawable/ab_transparent</item>

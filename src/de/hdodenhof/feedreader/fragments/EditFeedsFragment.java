@@ -2,6 +2,7 @@ package de.hdodenhof.feedreader.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.AdapterView;
@@ -140,6 +142,10 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
         }
     }
 
+    protected void updateFeedName(long id, String name) {
+
+    }
+
     private class FeedCallback implements Callback {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -171,10 +177,27 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
             case R.id.item_edit:
                 Cursor feed = (Cursor) mFeedsListView.getItemAtPosition(mFeedsListView.getCheckedItemPositions().keyAt(0));
                 FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-                EditFeedDialog editFeedDialog = new EditFeedDialog(feed.getLong(feed.getColumnIndex(FeedDAO._ID)), feed.getString(feed
-                        .getColumnIndex(FeedDAO.NAME)), feed.getString(feed.getColumnIndex(FeedDAO.URL)));
-                editFeedDialog.setStyle(DialogFragment.STYLE_NO_TITLE, 0);
-                editFeedDialog.show(fragmentManager, "fragment_edit_feed_dialog");
+
+                SparseArray<String> initialValues = new SparseArray<String>();
+                initialValues.put(R.id.txt_feedname, feed.getString(feed.getColumnIndex(FeedDAO.NAME)));
+
+                DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(getActivity());
+                dialogFragment.setLayout(R.layout.fragment_dialog_edit);
+                dialogFragment.setTitle(getResources().getString(R.string.EditFeedDialogTitle));
+                dialogFragment.setInitialValues(initialValues);
+                dialogFragment.setTag(feed.getString(feed.getColumnIndex(FeedDAO._ID)));
+                dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
+                    @Override
+                    public void onClick(DialogFragment df, String tag, SparseArray<String> fieldMap) {
+                        ContentResolver contentResolver = getActivity().getContentResolver();
+                        ContentValues contentValues = new ContentValues();
+
+                        contentValues.put(FeedDAO.NAME, fieldMap.get(R.id.txt_feedname));
+                        contentResolver.update(RSSContentProvider.URI_FEEDS, contentValues, FeedDAO._ID + " = ?", new String[] { tag });
+                        df.dismiss();
+                    }
+                });
+                dialogFragment.show(fragmentManager, "dialog");
                 mode.finish();
                 return true;
             default:

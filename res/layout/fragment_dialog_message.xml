@@ -12,16 +12,6 @@
         android:paddingLeft="16dp"
         android:paddingRight="16dp"
         android:paddingTop="8dp"
-        android:text="@string/AddFeedDialogText"
         android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/enterUrl"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:inputType="textUri" >
-    </EditText>
 
 </LinearLayout>

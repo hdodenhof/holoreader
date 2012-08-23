@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.compk/res/android">
+
+    <style name="CustomEditText" parent="@android:style/Widget.EditText"></style>
+
+</resources>

@@ -17,6 +17,7 @@
 
     <EditText
         android:id="@+id/txt_feedname"
+        style="@style/CustomEditText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"

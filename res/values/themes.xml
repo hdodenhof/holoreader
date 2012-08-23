@@ -16,7 +16,6 @@
         <item name="android:actionModeBackground">@drawable/cab_background_top_holo_dark</item>
         <item name="android:actionModeSplitBackground">@drawable/cab_background_bottom_holo_dark</item>
         <item name="android:listViewStyle">@style/CustomListView</item>
-        <item name="android:listChoiceIndicatorMultiple">@drawable/btn_check_holo_dark</item> <!-- remove -->
         <item name="customActivatedBackgroundIndicator">@drawable/activated_background_holo</item><!-- remove -->
     </style>
 

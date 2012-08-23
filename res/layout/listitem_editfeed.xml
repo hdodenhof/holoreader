@@ -9,6 +9,7 @@
 
     <CheckBox
         android:id="@+id/list_item_editfeed_checkbox"
+        style="@style/CustomCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="8dp"

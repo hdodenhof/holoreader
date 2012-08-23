@@ -3,4 +3,6 @@
 
     <style name="CustomEditText" parent="@android:style/Widget.EditText"></style>
 
+    <style name="CustomCheckBox" parent="@android:style/Widget.CompoundButton.CheckBox"></style>
+
 </resources>

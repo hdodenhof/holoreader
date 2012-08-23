@@ -3,4 +3,8 @@
     <style name="CustomEditText" parent="@android:style/Widget.EditText">
         <item name="android:background">@drawable/edit_text_holo_dark</item>
     </style>
+    
+    <style name="CustomCheckBox" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/btn_check_holo_dark</item>
+    </style>
 </resources>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="horizontal" >
@@ -16,10 +17,23 @@
         android:layout_height="fill_parent"
         android:background="?android:attr/listDivider" />
 
-    <android.support.v4.view.ViewPager
-        android:id="@+android:id/viewpager_article"
+    <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="fill_parent"
-        android:layout_weight="@integer/dualpane_feedactivity_article_weight" />
+        android:layout_weight="@integer/dualpane_feedactivity_article_weight" >
+
+        <android.support.v4.view.ViewPager
+            android:id="@+android:id/viewpager_article"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+
+        <com.viewpagerindicator.UnderlinePageIndicator
+            android:id="@+id/titles"
+            android:layout_width="fill_parent"
+            android:layout_height="2dp"
+            android:layout_alignParentBottom="true"
+            android:background="#00FFFFFF"
+            app:selectedColor="#FFCC0000" />
+    </RelativeLayout>
 
 </LinearLayout>

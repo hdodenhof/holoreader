@@ -17,6 +17,7 @@ import android.view.View;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.viewpagerindicator.UnderlinePageIndicator;
 
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleFragment;
@@ -66,7 +67,10 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
         mPager = (ViewPager) mContext.findViewById(R.id.viewpager_article);
         mPager.setAdapter(mPagerAdapter);
-        mPager.setOnPageChangeListener(this);
+
+        UnderlinePageIndicator pageIndicator = (UnderlinePageIndicator) mContext.findViewById(R.id.titles);
+        pageIndicator.setViewPager(mPager);
+        pageIndicator.setOnPageChangeListener(this);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
             mPager.setOverScrollMode(View.OVER_SCROLL_NEVER);

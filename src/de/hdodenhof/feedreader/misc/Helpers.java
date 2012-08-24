@@ -3,6 +3,7 @@ package de.hdodenhof.feedreader.misc;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -112,4 +113,31 @@ public class Helpers {
         }
         return view;
     }
+
+    /**
+     * based on AOSP
+     */
+    public static final Pattern PATTERN_WEB = Pattern.compile(new StringBuilder()
+            .append("((?:(http|Http):")
+            .append("\\/\\/(?:(?:[a-zA-Z0-9\\$\\-\\_\\.\\+\\!\\*\\'\\(\\)")
+            .append("\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2})){1,64}(?:\\:(?:[a-zA-Z0-9\\$\\-\\_")
+            .append("\\.\\+\\!\\*\\'\\(\\)\\,\\;\\?\\&\\=]|(?:\\%[a-fA-F0-9]{2})){1,25})?\\@)?)?")
+            .append("((?:(?:[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}\\.)+")
+            // named host
+            .append("(?:")
+            // plus top level domain
+            .append("(?:aero|arpa|asia|a[cdefgilmnoqrstuwxz])").append("|(?:biz|b[abdefghijmnorstvwyz])").append("|(?:cat|com|coop|c[acdfghiklmnoruvxyz])")
+            .append("|d[ejkmoz]").append("|(?:edu|e[cegrstu])").append("|f[ijkmor]").append("|(?:gov|g[abdefghilmnpqrstuwy])").append("|h[kmnrtu]")
+            .append("|(?:info|int|i[delmnoqrst])").append("|(?:jobs|j[emop])").append("|k[eghimnrwyz]").append("|l[abcikrstuvy]")
+            .append("|(?:mil|mobi|museum|m[acdghklmnopqrstuvwxyz])").append("|(?:name|net|n[acefgilopruz])").append("|(?:org|om)")
+            .append("|(?:pro|p[aefghklmnrstwy])").append("|qa").append("|r[eouw]").append("|s[abcdeghijklmnortuvyz]")
+            .append("|(?:tel|travel|t[cdfghjklmnoprtvwz])").append("|u[agkmsyz]").append("|v[aceginu]").append("|w[fs]").append("|y[etu]")
+            .append("|z[amw]))")
+            .append("|(?:(?:25[0-5]|2[0-4]")
+            // or ip address
+            .append("[0-9]|[0-1][0-9]{2}|[1-9][0-9]|[1-9])\\.(?:25[0-5]|2[0-4][0-9]")
+            .append("|[0-1][0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(?:25[0-5]|2[0-4][0-9]|[0-1]")
+            .append("[0-9]{2}|[1-9][0-9]|[1-9]|0)\\.(?:25[0-5]|2[0-4][0-9]|[0-1][0-9]{2}").append("|[1-9][0-9]|[0-9])))").append("(?:\\:\\d{1,5})?)") // plus
+            .append("(\\/(?:(?:[a-zA-Z0-9\\;\\/\\?\\:\\@\\&\\=\\#\\~") // plus option query params
+            .append("\\-\\.\\+\\!\\*\\'\\(\\)\\,\\_])|(?:\\%[a-fA-F0-9]{2}))*)?").append("(?:\\b|$)").toString());
 }

@@ -1,9 +1,13 @@
 package de.hdodenhof.feedreader.activities;
 
 import java.lang.ref.WeakReference;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -13,7 +17,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -169,8 +172,14 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         Intent intent = getIntent();
         String action = intent.getAction();
         if (action == Intent.ACTION_VIEW) {
-            Uri data = intent.getData();
-            addFeed(data.toString());
+            String url = intent.getData().toString();
+            URL parsedUrl = parseUrl(url);
+
+            if (parsedUrl != null) {
+                addFeed(parsedUrl);
+            } else {
+                Helpers.showDialog(HomeActivity.this, "Error adding feed", "Invalid URL");
+            }
         }
     }
 
@@ -227,7 +236,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * @param feedUrl
      *            URL of the feed to fetch
      */
-    private void addFeed(String feedUrl) {
+    private void addFeed(URL feedUrl) {
         mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PleaseWait), true);
         AddFeedTask addFeedTask = new AddFeedTask(mAsyncHandler, this);
         addFeedTask.execute(feedUrl);
@@ -314,8 +323,14 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
                 @Override
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
-                    addFeed(map.get(R.id.enterUrl));
-                    df.dismiss();
+                    URL parsedUrl = parseUrl(map.get(R.id.enterUrl));
+
+                    if (parsedUrl != null) {
+                        addFeed(parsedUrl);
+                        df.dismiss();
+                    } else {
+                        Helpers.showDialog(HomeActivity.this, "Error adding feed", "Invalid URL");
+                    }
                 }
             });
 
@@ -323,6 +338,32 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         } else {
             Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
         }
+    }
+
+    /**
+     * 
+     * @param url
+     * @return
+     */
+    private URL parseUrl(String url) {
+        URL parsedUrl = null;
+
+        if (!url.substring(0, 7).equalsIgnoreCase("http://")) {
+            url = "http://" + url;
+        }
+
+        Pattern pattern = Helpers.PATTERN_WEB;
+        Matcher matcher = pattern.matcher(url);
+
+        try {
+            if (matcher.matches()) {
+                parsedUrl = new URL(url);
+            }
+        } catch (MalformedURLException e) {
+            return null;
+        }
+
+        return parsedUrl;
     }
 
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

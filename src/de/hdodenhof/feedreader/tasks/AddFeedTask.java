@@ -2,7 +2,6 @@ package de.hdodenhof.feedreader.tasks;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -21,7 +20,7 @@ import android.util.Log;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
-public class AddFeedTask extends AsyncTask<String, Void, Integer> {
+public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
 
     @SuppressWarnings("unused")
     private static final String TAG = AddFeedTask.class.getSimpleName();
@@ -34,9 +33,9 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
         mContext = context;
     }
 
-    protected Integer doInBackground(String... params) {
+    protected Integer doInBackground(URL... params) {
 
-        String url = params[0];
+        URL url = params[0];
         String name = "";
         boolean isFeed = false;
         boolean isArticle = false;
@@ -44,7 +43,7 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
         boolean foundName = false;
 
         try {
-            URLConnection connection = new URL(url).openConnection();
+            URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent", "Feedreader/0.8");
             InputStream inputStream = connection.getInputStream();
 
@@ -85,7 +84,7 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
                 ContentValues contentValues = new ContentValues();
 
                 contentValues.put(FeedDAO.NAME, name);
-                contentValues.put(FeedDAO.URL, url);
+                contentValues.put(FeedDAO.URL, url.toString());
 
                 Uri newFeed = contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
                 return Integer.parseInt(newFeed.getLastPathSegment());
@@ -95,8 +94,6 @@ public class AddFeedTask extends AsyncTask<String, Void, Integer> {
                 return null;
             }
 
-        } catch (MalformedURLException e) {
-            Log.e(TAG, "Malformed URL");
         } catch (IOException e) {
             Log.e(TAG, "IOException");
         } catch (Exception e) {

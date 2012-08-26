@@ -3,6 +3,7 @@
 
     <!-- General -->
     <string name="AppName">Feedreader</string>
+    <string name="AppVersionName">0.8</string>
     <string name="Today">Today</string>
     <string name="Yesterday">Yesterday</string>
     <string name="PleaseWait">Please wait…</string>

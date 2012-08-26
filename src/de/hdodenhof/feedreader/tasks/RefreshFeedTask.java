@@ -33,6 +33,7 @@ import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
 
+import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
@@ -119,7 +120,8 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             Log.v(TAG, "id_" + mFeedID + ": minimumDate: " + minimumDate);
 
             URLConnection connection = new URL(feedURL).openConnection();
-            connection.setRequestProperty("User-agent", "Feedreader/0.8");
+            connection.setRequestProperty("User-agent",
+                    mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName));
             InputStream inputStream = connection.getInputStream();
 
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();

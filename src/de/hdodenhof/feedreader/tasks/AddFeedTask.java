@@ -17,6 +17,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 
+import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
@@ -51,7 +52,8 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
 
         try {
             URLConnection connection = url.openConnection();
-            connection.setRequestProperty("User-agent", "Feedreader/0.8");
+            connection.setRequestProperty("User-agent",
+                    mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName));
             String contentType = connection.getContentType();
             if (!contentType.contains("xml")) {
                 returnCondition = ERROR_NOFEED;

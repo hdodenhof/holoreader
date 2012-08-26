@@ -1,5 +1,6 @@
 package de.hdodenhof.feedreader.tasks;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -42,6 +43,10 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
     @SuppressWarnings("unused")
     private static final String TAG = AddFeedTask.class.getSimpleName();
 
+    public static final int SUCCESS = 0;
+    public static final int ERROR_IOEXCEPTION = 1;
+    public static final int ERROR_XMLPULLPARSEREXCEPTION = 2;
+
     private static final int SUMMARY_MAXLENGTH = 250;
     private static final String DATE_FORMATS[] = { "EEE, dd MMM yyyy HH:mm:ss Z", "EEE, dd MMM yyyy HH:mm:ss z", "yyyy-MM-dd'T'HH:mm:ssz",
             "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
@@ -52,6 +57,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
     private Handler mMainUIHandler;
     private Context mContext;
+    private int returnCondition = SUCCESS;
 
     public RefreshFeedTask(Handler mainUIHandler, Context context) {
         mMainUIHandler = mainUIHandler;
@@ -175,10 +181,26 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             contentValuesArray = contentValuesArrayList.toArray(contentValuesArray);
             contentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, contentValuesArray);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException e) {
+            returnCondition = ERROR_IOEXCEPTION;
+        } catch (XmlPullParserException e) {
+            returnCondition = ERROR_XMLPULLPARSEREXCEPTION;
         }
         return mFeedID;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
+
+    @Override
+    protected void onPostExecute(Integer result) {
+        Message msg = Message.obtain();
+        msg.what = 2;
+        msg.arg1 = result;
+        msg.arg2 = returnCondition;
+        mMainUIHandler.sendMessage(msg);
     }
 
     private ArrayList<String> queryArticles(ContentResolver contentResolver, int feedID) {
@@ -210,19 +232,6 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         cursor.close();
 
         return maxDate;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
-
-    @Override
-    protected void onPostExecute(Integer result) {
-        Message msg = Message.obtain();
-        msg.what = 2;
-        msg.arg1 = result;
-        mMainUIHandler.sendMessage(msg);
     }
 
     private Date pastDate(int interval) {

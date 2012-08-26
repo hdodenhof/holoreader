@@ -93,20 +93,22 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
             switch (msg.what) {
             case 1:
-                // added feed
+                // return from adding a feed
                 target.callbackFeedAdded(msg.arg1);
                 break;
             case 2:
-                // feed refresh
-                target.callbackFeedRefresh(msg.arg1);
+                // TODO
+                // return from refreshing a feed
+                target.callbackFeedRefreshed(msg.arg1);
                 break;
             case 8:
-                // feed does not contain content section
-                target.callbackNoContent();
+                // return from adding a feed with error condition
+                target.callbackFeedAddedError(msg.arg1);
                 break;
             case 9:
-                // something went wrong while adding a feed
-                target.callbackError();
+                // TODO
+                // return from refreshing a feed with error condition
+                target.callbackFeedRefreshedError(msg.arg1, msg.arg2);
                 break;
             default:
                 break;
@@ -115,7 +117,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     };
 
     /**
-     * Update feed list and dismiss spinner after new feed has been added
+     * 
      */
     private void callbackFeedAdded(int feedID) {
         mSpinner.dismiss();
@@ -123,18 +125,31 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     }
 
     /**
-     * Show error message when feed has no content
+     * 
      */
-    private void callbackNoContent() {
+    private void callbackFeedAddedError(int returnCondition) {
         mSpinner.dismiss();
-        Helpers.showDialog(this, "An error occured", "The supplied feed is not compatible");
+        switch (returnCondition) {
+        case AddFeedTask.ERROR_NOFEED:
+            Helpers.showDialog(this, "An error occured", "No feed found at supplied URL");
+            break;
+        case AddFeedTask.ERROR_NOCONTENT:
+            Helpers.showDialog(this, "An error occured", "The supplied feed is not compatible");
+            break;
+        case AddFeedTask.ERROR_IOEXCEPTION:
+        case AddFeedTask.ERROR_XMLPULLPARSEREXCEPTION:
+            Helpers.showDialog(this, "An error occured", "Something went wrong while adding the feed");
+            break;
+        default:
+            break;
+        }
     }
 
     /**
-     * Update list of running tasks and dismiss spinner when all tasks are done
+     * 
      */
     @SuppressLint("NewApi")
-    private void callbackFeedRefresh(int feedID) {
+    private void callbackFeedRefreshed(int feedID) {
         mFeedsUpdating.remove(feedID);
         if (mFeedsUpdating.size() == 0) {
             mRefreshItem.getActionView().clearAnimation();
@@ -143,11 +158,18 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     }
 
     /**
-     * Show error message when adding feed went wrong
+     * 
      */
-    private void callbackError() {
-        mSpinner.dismiss();
-        Helpers.showDialog(this, "An error occured", "Something went wrong while adding the feed");
+    private void callbackFeedRefreshedError(int feedID, int returnCondition) {
+        mFeedsUpdating.remove(feedID);
+        switch (returnCondition) {
+        case AddFeedTask.ERROR_IOEXCEPTION:
+        case AddFeedTask.ERROR_XMLPULLPARSEREXCEPTION:
+            Toast.makeText(this, "Error while updating a feed", Toast.LENGTH_SHORT).show();
+            break;
+        default:
+            break;
+        }
     }
 
     @Override

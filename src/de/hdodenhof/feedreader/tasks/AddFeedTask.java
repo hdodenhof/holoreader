@@ -6,6 +6,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import android.content.ContentResolver;
@@ -15,7 +16,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
@@ -25,8 +25,15 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
     @SuppressWarnings("unused")
     private static final String TAG = AddFeedTask.class.getSimpleName();
 
+    public static final int SUCCESS = 0;
+    public static final int ERROR_IOEXCEPTION = 1;
+    public static final int ERROR_XMLPULLPARSEREXCEPTION = 2;
+    public static final int ERROR_NOCONTENT = 3;
+    public static final int ERROR_NOFEED = 4;
+
     private Handler mMainUIHandler;
     private Context mContext;
+    private int returnCondition = SUCCESS;
 
     public AddFeedTask(Handler mainUIHandler, Context context) {
         mMainUIHandler = mainUIHandler;
@@ -45,6 +52,11 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
         try {
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent", "Feedreader/0.8");
+            String contentType = connection.getContentType();
+            if (!contentType.contains("xml")) {
+                returnCondition = ERROR_NOFEED;
+                return null;
+            }
             InputStream inputStream = connection.getInputStream();
 
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
@@ -89,19 +101,17 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
                 Uri newFeed = contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
                 return Integer.parseInt(newFeed.getLastPathSegment());
             } else if (isFeed) {
-                return -1;
+                returnCondition = ERROR_NOCONTENT;
             } else {
-                return null;
+                returnCondition = ERROR_NOFEED;
             }
 
         } catch (IOException e) {
-            Log.e(TAG, "IOException");
-        } catch (Exception e) {
-            e.printStackTrace();
+            returnCondition = ERROR_IOEXCEPTION;
+        } catch (XmlPullParserException e) {
+            returnCondition = ERROR_XMLPULLPARSEREXCEPTION;
         }
-
         return null;
-
     }
 
     @Override
@@ -112,13 +122,12 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
     @Override
     protected void onPostExecute(Integer result) {
         Message msg = Message.obtain();
-        if (result != null && result != -1) {
+        if (returnCondition == SUCCESS) {
             msg.what = 1;
             msg.arg1 = result;
-        } else if (result == -1) {
-            msg.what = 8;
         } else {
-            msg.what = 9;
+            msg.what = 8;
+            msg.arg1 = returnCondition;
         }
         mMainUIHandler.sendMessage(msg);
     }

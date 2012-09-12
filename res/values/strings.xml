@@ -24,6 +24,7 @@
     <string name="MenuEditFeeds">Edit Feeds</string>
     <string name="MenuToogleUnread">Toogle unread items</string>
     <string name="MenuMarkRead">Mark all as read</string>
+    <string name="MenuWeb">Open link</string>
     
     <!-- Article -->
     <!-- Using unicode to keep whitespaces, it's " - " -->

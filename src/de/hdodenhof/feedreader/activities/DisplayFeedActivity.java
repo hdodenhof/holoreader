@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.View;
@@ -42,9 +43,11 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     private static final String TAG = DisplayFeedActivity.class.getSimpleName();
     private static final String PREFS_NAME = "Feedreader";
 
-    private ArticleViewPager mArticlePagerFragment;
+    private ArticleViewPager mViewPager;
     private SharedPreferences mPreferences;
     private Resources mResources;
+    private MenuItem mWebLink;
+    private boolean mWebLinkHide = false;
     private boolean mTwoPane = false;
     private boolean mUnreadOnly = true;
     private int mArticleID = -1;
@@ -67,7 +70,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
 
         if (findViewById(R.id.viewpager_article) != null) {
             mTwoPane = true;
-            mArticlePagerFragment = new ArticleViewPager(this);
+            mViewPager = new ArticleViewPager(this);
         }
 
         ActionBar actionBar = getSupportActionBar();
@@ -152,6 +155,12 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             }
             startActivity(homeActivityIntent);
             return true;
+        case R.id.item_web:
+            String url = mViewPager.getCurrentLink();
+            Intent webintent = new Intent(Intent.ACTION_VIEW);
+            webintent.setData(Uri.parse(url));
+            startActivity(webintent);
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -161,23 +170,31 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getSupportMenuInflater();
         menuInflater.inflate(R.menu.feed, menu);
+        mWebLink = menu.getItem(0);
 
         if (mTwoPane) {
             menu.removeItem(R.id.item_toggle);
-        } else if (!mUnreadOnly) {
-            menu.getItem(0).setIcon(R.drawable.ab_btn_checkbox_checked);
+            if (mWebLinkHide) {
+                mWebLink.setVisible(false);
+            }
+        } else {
+            if (!mUnreadOnly) {
+                menu.getItem(1).setIcon(R.drawable.ab_btn_checkbox_checked);
+            }
+            menu.removeItem(R.id.item_web);
         }
 
         return true;
     }
 
+    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         RSSAdapter adapter = (RSSAdapter) parent.getAdapter();
 
         switch (adapter.getType()) {
         case RSSAdapter.TYPE_ARTICLE:
             if (mTwoPane) {
-                mArticlePagerFragment.changePosition(position);
+                mViewPager.changePosition(position);
             } else {
                 Cursor cursor = ((RSSArticleAdapter) adapter).getCursor();
                 cursor.moveToPosition(position);
@@ -216,6 +233,19 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             markReadRunnable.setArticle(oldArticle);
             new Thread(markReadRunnable).start();
         }
+
+        if (mViewPager.getCurrentLink() == null) {
+            if (mWebLink != null) {
+                mWebLink.setVisible(false);
+            } else {
+                mWebLinkHide = true;
+            }
+        } else {
+            if (mWebLink != null) {
+                mWebLink.setVisible(true);
+            }
+        }
+
         mArticleID = currentArticle;
     }
 }

@@ -90,6 +90,8 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         String content = null;
         String guid = null;
         String pubdate = null;
+        String link = null;
+        boolean linkForced = false;
 
         try {
 
@@ -146,6 +148,13 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         guid = pullParser.nextText();
                     } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")) {
                         pubdate = parsePubdate(pullParser.nextText());
+                    } else if (currentTag.equalsIgnoreCase("link")) {
+                        if (!linkForced) {
+                            link = pullParser.nextText();
+                        }
+                    } else if (currentTag.equalsIgnoreCase("origLink")) {
+                        link = pullParser.nextText();
+                        linkForced = true;
                     }
 
                 } else if (eventType == XmlPullParser.END_TAG) {
@@ -165,13 +174,14 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
                         if (!existingArticles.contains(guid)) {
                             Log.v(TAG, "id_" + mFeedID + ": adding " + guid);
-                            contentValuesArrayList.add(prepareArticle(mFeedID, guid, pubdate, title, summary, content));
+                            contentValuesArrayList.add(prepareArticle(mFeedID, guid, link, pubdate, title, summary, content));
 
                             title = null;
                             summary = null;
                             content = null;
                             guid = null;
                             pubdate = null;
+                            link = null;
                         }
                     }
                 }
@@ -270,7 +280,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         return parsedDate;
     }
 
-    private ContentValues prepareArticle(int feedID, String guid, String pubdate, String title, String summary, String content) {
+    private ContentValues prepareArticle(int feedID, String guid, String link, String pubdate, String title, String summary, String content) {
         Document document = Jsoup.parse(content);
 
         Elements iframes = document.getElementsByTag("iframe");
@@ -300,6 +310,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
         contentValues.put(ArticleDAO.FEEDID, feedID);
         contentValues.put(ArticleDAO.GUID, guid);
+        contentValues.put(ArticleDAO.LINK, link);
         contentValues.put(ArticleDAO.PUBDATE, pubdate);
         contentValues.put(ArticleDAO.TITLE, title);
         contentValues.put(ArticleDAO.SUMMARY, summary);

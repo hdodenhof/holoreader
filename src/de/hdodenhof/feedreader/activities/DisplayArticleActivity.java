@@ -2,11 +2,14 @@ package de.hdodenhof.feedreader.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.feedreader.R;
@@ -26,6 +29,9 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayArticleActivity.class.getSimpleName();
 
+    ArticleViewPager mViewPager;
+    private MenuItem mWebLink;
+    private boolean mWebLinkHide = false;
     private int mFeedID;
     private int mArticleID;
 
@@ -43,7 +49,7 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
             mFeedID = getIntent().getIntExtra("feedid", -1);
         }
 
-        new ArticleViewPager(this);
+        mViewPager = new ArticleViewPager(this);
 
         ActionBar actionBar = getSupportActionBar();
         if (mFeedID != -1) {
@@ -96,9 +102,27 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
             intent.putExtra("feedid", mFeedID);
             startActivity(intent);
             return true;
+        case R.id.item_web:
+            String url = mViewPager.getCurrentLink();
+            Intent webintent = new Intent(Intent.ACTION_VIEW);
+            webintent.setData(Uri.parse(url));
+            startActivity(webintent);
+            return true;
         default:
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getSupportMenuInflater();
+        menuInflater.inflate(R.menu.article, menu);
+        mWebLink = menu.getItem(0);
+        if (mWebLinkHide) {
+            mWebLink.setVisible(false);
+        }
+
+        return true;
     }
 
     /**
@@ -109,6 +133,18 @@ public class DisplayArticleActivity extends SherlockFragmentActivity implements 
             MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
             markReadRunnable.setArticle(oldArticle);
             new Thread(markReadRunnable).start();
+        }
+
+        if (mViewPager.getCurrentLink() == null) {
+            if (mWebLink != null) {
+                mWebLink.setVisible(false);
+            } else {
+                mWebLinkHide = true;
+            }
+        } else {
+            if (mWebLink != null) {
+                mWebLink.setVisible(true);
+            }
         }
 
         mArticleID = currentArticle;

@@ -42,9 +42,11 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     private ArticlePagerAdapter mPagerAdapter;
     private ViewPager mPager;
     private ArrayList<String> mArticles = new ArrayList<String>();
-    private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.CONTENT };
+    private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.LINK,
+            ArticleDAO.CONTENT };
     private int mPreselectedArticleID = -1;
     private int mCurrentArticleID = -1;
+    private int mCurrentPosition = -1;
     private int mCurrentState;
 
     public void changePosition(int position) {
@@ -77,16 +79,24 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         }
     }
 
+    @Override
     public void onPageScrollStateChanged(int state) {
     }
 
+    @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
     }
 
+    @Override
     public void onPageSelected(int position) {
         int newArticleID = mPagerAdapter.getArticleID(position);
-        ((OnArticleChangedListener) mContext).onArticleChanged(mCurrentArticleID, newArticleID, position);
         mCurrentArticleID = newArticleID;
+        mCurrentPosition = position;
+        ((OnArticleChangedListener) mContext).onArticleChanged(mCurrentArticleID, newArticleID, position);
+    }
+
+    public String getCurrentLink() {
+        return mPagerAdapter.getArticleLink(mCurrentPosition);
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -200,6 +210,16 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
             mCursor.moveToPosition(cursorPosition);
 
             return articleID;
+        }
+
+        public String getArticleLink(int position) {
+            int cursorPosition = mCursor.getPosition();
+
+            mCursor.moveToPosition(position);
+            String articleLink = mCursor.getString(mCursor.getColumnIndex(ArticleDAO.LINK));
+            mCursor.moveToPosition(cursorPosition);
+
+            return articleLink.equals("") ? null : articleLink;
         }
 
     }

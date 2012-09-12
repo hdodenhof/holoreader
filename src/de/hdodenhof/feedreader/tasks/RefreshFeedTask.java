@@ -295,7 +295,6 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         }
 
         Element image = document.select("img").first();
-        String imageURL = image.absUrl("src");
 
         ContentValues contentValues = new ContentValues();
 
@@ -305,7 +304,11 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         contentValues.put(ArticleDAO.TITLE, title);
         contentValues.put(ArticleDAO.SUMMARY, summary);
         contentValues.put(ArticleDAO.CONTENT, content);
-        contentValues.put(ArticleDAO.IMAGE, imageURL);
+
+        if (image != null) {
+            contentValues.put(ArticleDAO.IMAGE, image.absUrl("src"));
+        }
+
         contentValues.put(ArticleDAO.READ, 0);
 
         return contentValues;

@@ -19,8 +19,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     @SuppressWarnings("unused")
     private static final String TAG = SQLiteHelper.class.getSimpleName();
 
-    private static final String DATABASE_NAME = "feedreader";
-    private static final int DATABASE_VERSION = 13;
+    private static final String DATABASE_NAME = "feedreader.db";
+    private static final int DATABASE_VERSION = 14;
 
     private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
             + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT);";

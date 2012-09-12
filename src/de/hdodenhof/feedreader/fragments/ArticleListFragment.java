@@ -152,16 +152,22 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
                 if (mFeedID == -1) {
                     // first call no feedID in Intent
                     if (mUnreadOnly) {
-                        selection = "read = 0";
+                        selection = ArticleDAO.READ + " = 0";
                     }
                 } else {
                     // feedID passed in Intent
                     selection = ArticleDAO.FEEDID + " = ?";
                     selectionArgs = new String[] { String.valueOf(mFeedID) };
                     if (mUnreadOnly) {
-                        selection = selection + " AND read = 0";
+                        selection = selection + " AND " + ArticleDAO.READ + " = 0";
                     }
                 }
+            }
+
+            if (selection == null) {
+                selection = ArticleDAO.ISDELETED + " = 0";
+            } else {
+                selection = selection + " AND " + ArticleDAO.ISDELETED + " = 0";
             }
         } else {
             // SinglePane, feedID passed in Intent
@@ -171,11 +177,18 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             }
             if (mUnreadOnly) {
                 if (selection == null) {
-                    selection = "read = 0";
+                    selection = ArticleDAO.READ + " = 0";
                 } else {
-                    selection = selection + " AND read = 0";
+                    selection = selection + " AND " + ArticleDAO.READ + " = 0";
                 }
             }
+
+            if (selection == null) {
+                selection = ArticleDAO.ISDELETED + " = 0";
+            } else {
+                selection = selection + " AND " + ArticleDAO.ISDELETED + " = 0";
+            }
+
             mArticles = new ArrayList<String>();
 
             ContentResolver contentResolver = getActivity().getContentResolver();

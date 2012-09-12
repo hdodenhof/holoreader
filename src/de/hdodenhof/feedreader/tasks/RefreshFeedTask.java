@@ -99,13 +99,14 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             String feedURL = queryURL(mFeedID);
             Log.v(TAG, "id_" + mFeedID + ": " + feedURL);
 
-            // delete read articles after KEEP_READ_ARTICLES_DAYS
-            int deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ? AND "
+            // mark read articles after KEEP_READ_ARTICLES_DAYS as deleted
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(ArticleDAO.ISDELETED, 1);
+            contentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ? AND "
                     + ArticleDAO.READ + " = ?", new String[] { String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)), "1" });
-            Log.v(TAG, "id_" + mFeedID + ": Deleted " + deleted + " read articles");
 
             // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
-            deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?", new String[] {
+            int deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?", new String[] {
                     String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
             Log.v(TAG, "id_" + mFeedID + ": Deleted " + deleted + " old unread articles");
 
@@ -172,11 +173,13 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                             pubdate = updated;
                         }
 
+                        Log.v(TAG, "id_" + mFeedID + ": pubdate " + pubdate + ", parsed: " + SQLiteHelper.toDate(pubdate));
+
                         if (SQLiteHelper.toDate(pubdate).before(minimumDate)) {
-                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
+                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + SQLiteHelper.toDate(pubdate) + ") <  minimumDate (" + minimumDate + "), breaking");
                             break;
                         } else {
-                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") >=  minimumDate (" + minimumDate + ")");
+                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + SQLiteHelper.toDate(pubdate) + ") >=  minimumDate (" + minimumDate + ")");
                         }
 
                         if (!existingArticles.contains(guid)) {
@@ -333,6 +336,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         }
 
         contentValues.put(ArticleDAO.READ, 0);
+        contentValues.put(ArticleDAO.ISDELETED, 0);
 
         return contentValues;
     }

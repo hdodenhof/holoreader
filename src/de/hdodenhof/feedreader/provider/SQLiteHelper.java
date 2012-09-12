@@ -47,10 +47,34 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + ArticleDAO.TABLE + " LEFT JOIN " + FeedDAO.TABLE + " ON " + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "."
             + FeedDAO._ID + "";
 
-    private static final String mDummydata[][] = { { "t3n News", "http://t3n.de/news/feed" },
-            { "Gründerszene.de - Infos für Gründer, Unternehmer, StartUps | Gründerszene", "http://www.gruenderszene.de/feed/" },
-            { "netzpolitik.org", "http://netzpolitik.org/feed" }, { "Android Developers Blog", "http://android-developers.blogspot.com/atom.xml" },
-            { "mobiFlip.de", "http://feeds.feedburner.com/mobiFlip" } };
+    /* @formatter:off */
+    private static final String mDummydata[][] = {
+        { "Android Developers Blog", "http://android-developers.blogspot.com/atom.xml" },
+        { "Android Police - Android News, Apps, Games, Phones, Tablets", "http://feeds.feedburner.com/AndroidPolice" },
+        { "Android UI Patterns", "http://feeds.feedburner.com/AndroidUiDesignPatterns" },
+        { "AndroidDevBlog", "http://android.cyrilmottier.com/?feed=rss2" },
+        { "BuildMobile » Android", "http://buildmobile.com/category/android/feed/" },
+        { "Clients From Hell", "http://clientsfromhell.net/rss" },
+        { "Engadget German", "http://de.engadget.com/rss.xml" },
+        { "Facebook Blog", "http://blog.facebook.com/atom.php" },
+        { "geek-week.de", "http://www.geek-week.de/feed/" },
+        { "Gmail Blog", "http://gmailblog.blogspot.com/atom.xml" },
+        { "Google Mobile Blog", "http://googlemobile.blogspot.com/atom.xml" },
+        { "Gründerszene", "http://www.gruenderszene.de/feed" },
+        { "Holo Everywhere", "http://feeds.feedburner.com/HoloEverywhere" },
+        { "In web we trust", "http://feeds.feedburner.com/in_web_we_trust" },
+        { "mobiFlip.de", "http://feeds.feedburner.com/mobiflip" },
+        { "mobile zeitgeist", "http://feeds.feedburner.com/MobileZeitgeist" },
+        { "netzpolitik.org", "http://netzpolitik.org/feed/" },
+        { "Official Android Blog", "http://feeds.feedburner.com/OfficialAndroidBlog" },
+        { "Pushing Pixels", "http://www.pushing-pixels.org/feed" },
+        { "Smashing Magazine Feed", "http://rss1.smashingmagazine.com/feed/" },
+        { "t3n News", "http://feeds.feedburner.com/aktuell/feeds/rss" },
+        { "Techi.com", "http://feeds.feedburner.com/techirss" },
+        { "The CommonsBlog", "http://commonsware.com/blog/feed.atom" },
+        { "The Oatmeal - Comics, Quizzes, & Stories", "http://theoatmeal.com/feed/rss" },
+        { "The Official Google Blog", "http://googleblog.blogspot.com/atom.xml" } };
+    /* @formatter:on */
 
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

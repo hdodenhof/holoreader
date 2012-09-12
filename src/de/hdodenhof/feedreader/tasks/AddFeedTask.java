@@ -79,7 +79,8 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
                     }
                     if ((pullParser.getName().equalsIgnoreCase("item") || pullParser.getName().equalsIgnoreCase("entry")) && isFeed) {
                         isArticle = true;
-                    } else if ((pullParser.getName().equalsIgnoreCase("encoded") || pullParser.getName().equalsIgnoreCase("content")) && isArticle == true) {
+                    } else if ((pullParser.getName().equalsIgnoreCase("encoded") || pullParser.getName().equalsIgnoreCase("content") || pullParser.getName()
+                            .equalsIgnoreCase("description")) && isArticle == true) {
                         hasContent = true;
                         break;
                     }

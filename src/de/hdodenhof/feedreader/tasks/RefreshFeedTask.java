@@ -42,7 +42,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
     @SuppressWarnings("unused")
-    private static final String TAG = AddFeedTask.class.getSimpleName();
+    private static final String TAG = RefreshFeedTask.class.getSimpleName();
 
     public static final int SUCCESS = 0;
     public static final int ERROR_IOEXCEPTION = 1;
@@ -85,13 +85,14 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
 
         boolean isArticle = false;
+        boolean linkForced = false;
         String title = null;
         String summary = null;
         String content = null;
         String guid = null;
         String pubdate = null;
+        String updated = null;
         String link = null;
-        boolean linkForced = false;
 
         try {
 
@@ -140,14 +141,17 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         isArticle = true;
                     } else if (currentTag.equalsIgnoreCase("title") && isArticle == true) {
                         title = pullParser.nextText();
-                    } else if ((currentTag.equalsIgnoreCase("description") || currentTag.equalsIgnoreCase("summary")) && isArticle == true) {
+                    } else if (currentTag.equalsIgnoreCase("summary") && isArticle == true) {
                         summary = Html.fromHtml(pullParser.nextText()).toString();
-                    } else if ((currentTag.equalsIgnoreCase("encoded") || currentTag.equalsIgnoreCase("content")) && isArticle == true) {
+                    } else if ((currentTag.equalsIgnoreCase("encoded") || currentTag.equalsIgnoreCase("content") || currentTag.equalsIgnoreCase("description"))
+                            && isArticle == true) {
                         content = pullParser.nextText();
                     } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
                         guid = pullParser.nextText();
                     } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")) {
                         pubdate = parsePubdate(pullParser.nextText());
+                    } else if (currentTag.equalsIgnoreCase("updated")) {
+                        updated = parsePubdate(pullParser.nextText());
                     } else if (currentTag.equalsIgnoreCase("link")) {
                         if (!linkForced) {
                             link = pullParser.nextText();
@@ -164,6 +168,9 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         isArticle = false;
 
                         Log.v(TAG, "id_" + mFeedID + ": working on " + guid);
+                        if (pubdate == null) {
+                            pubdate = updated;
+                        }
 
                         if (SQLiteHelper.toDate(pubdate).before(minimumDate)) {
                             Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
@@ -181,12 +188,14 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                             content = null;
                             guid = null;
                             pubdate = null;
+                            updated = null;
                             link = null;
                         }
                     }
                 }
                 eventType = pullParser.next();
             }
+
             inputStream.close();
 
             ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
@@ -197,6 +206,9 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             returnCondition = ERROR_IOEXCEPTION;
         } catch (XmlPullParserException e) {
             returnCondition = ERROR_XMLPULLPARSEREXCEPTION;
+        } catch (RuntimeException e) {
+            Log.v(TAG, "id_" + mFeedID + ": EXCEPTION");
+            e.printStackTrace();
         }
         return mFeedID;
     }

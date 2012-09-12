@@ -90,8 +90,8 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         String summary = null;
         String content = null;
         String guid = null;
-        String pubdate = null;
-        String updated = null;
+        Date pubdate = null;
+        Date updated = null;
         String link = null;
 
         try {
@@ -102,8 +102,10 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             // mark read articles after KEEP_READ_ARTICLES_DAYS as deleted
             ContentValues contentValues = new ContentValues();
             contentValues.put(ArticleDAO.ISDELETED, 1);
-            contentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ? AND "
-                    + ArticleDAO.READ + " = ?", new String[] { String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)), "1" });
+            int dbupdated = contentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE
+                    + " < ? AND " + ArticleDAO.READ + " = ?", new String[] { String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)),
+                    "1" });
+            Log.v(TAG, "id_" + mFeedID + ": Marked " + dbupdated + " old articles as deleted");
 
             // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
             int deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?", new String[] {
@@ -172,14 +174,15 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         if (pubdate == null) {
                             pubdate = updated;
                         }
+                        if (guid == null) {
+                            guid = link;
+                        }
 
-                        Log.v(TAG, "id_" + mFeedID + ": pubdate " + pubdate + ", parsed: " + SQLiteHelper.toDate(pubdate));
-
-                        if (SQLiteHelper.toDate(pubdate).before(minimumDate)) {
-                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + SQLiteHelper.toDate(pubdate) + ") <  minimumDate (" + minimumDate + "), breaking");
+                        if (pubdate.before(minimumDate)) {
+                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
                             break;
                         } else {
-                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + SQLiteHelper.toDate(pubdate) + ") >=  minimumDate (" + minimumDate + ")");
+                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") >=  minimumDate (" + minimumDate + ")");
                         }
 
                         if (!existingArticles.contains(guid)) {
@@ -280,11 +283,11 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         return feedURL;
     }
 
-    private String parsePubdate(String rawDate) throws XmlPullParserException {
-        String parsedDate = "";
+    private Date parsePubdate(String rawDate) throws XmlPullParserException {
+        Date parsedDate = null;
         for (int j = 0; j < DATE_FORMATS.length; j++) {
             try {
-                parsedDate = SQLiteHelper.fromDate((mSimpleDateFormats[j].parse(rawDate)));
+                parsedDate = mSimpleDateFormats[j].parse(rawDate);
                 break;
             } catch (ParseException mParserException) {
                 if (j == DATE_FORMATS.length - 1) {
@@ -295,7 +298,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         return parsedDate;
     }
 
-    private ContentValues prepareArticle(int feedID, String guid, String link, String pubdate, String title, String summary, String content) {
+    private ContentValues prepareArticle(int feedID, String guid, String link, Date pubdate, String title, String summary, String content) {
         Document document = Jsoup.parse(content);
 
         Elements iframes = document.getElementsByTag("iframe");
@@ -326,7 +329,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         contentValues.put(ArticleDAO.FEEDID, feedID);
         contentValues.put(ArticleDAO.GUID, guid);
         contentValues.put(ArticleDAO.LINK, link);
-        contentValues.put(ArticleDAO.PUBDATE, pubdate);
+        contentValues.put(ArticleDAO.PUBDATE, SQLiteHelper.fromDate(pubdate));
         contentValues.put(ArticleDAO.TITLE, title);
         contentValues.put(ArticleDAO.SUMMARY, summary);
         contentValues.put(ArticleDAO.CONTENT, content);

@@ -30,7 +30,6 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.text.Html;
 import android.util.Log;
 
 import de.hdodenhof.feedreader.R;
@@ -85,7 +84,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
 
         boolean isArticle = false;
-        boolean linkForced = false;
+        boolean linkOverride = false;
         String title = null;
         String summary = null;
         String content = null;
@@ -139,29 +138,35 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if (eventType == XmlPullParser.START_TAG) {
                     String currentTag = pullParser.getName();
+                    String currentNamespace = pullParser.getNamespace();
+                    String currentPrefix = pullParser.getPrefix();
 
                     if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
                         isArticle = true;
                     } else if (currentTag.equalsIgnoreCase("title") && isArticle == true) {
                         title = pullParser.nextText();
-                    } else if (currentTag.equalsIgnoreCase("summary") && isArticle == true) {
-                        summary = Html.fromHtml(pullParser.nextText()).toString();
-                    } else if ((currentTag.equalsIgnoreCase("encoded") || currentTag.equalsIgnoreCase("content") || currentTag.equalsIgnoreCase("description"))
-                            && isArticle == true) {
+                    } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && isArticle == true
+                            && currentNamespace.equalsIgnoreCase("")) {
+                        summary = pullParser.nextText();
+                        Log.v(TAG, "summary: " + summary);
+                    } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
+                            .equalsIgnoreCase("content") && currentNamespace.equalsIgnoreCase(""))) && isArticle == true) {
                         content = pullParser.nextText();
+                        Log.v(TAG, "content: " + content);
                     } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
                         guid = pullParser.nextText();
-                    } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")) {
+                    } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")
+                            && isArticle == true) {
                         pubdate = parsePubdate(pullParser.nextText());
-                    } else if (currentTag.equalsIgnoreCase("updated")) {
+                    } else if (currentTag.equalsIgnoreCase("updated") && isArticle == true) {
                         updated = parsePubdate(pullParser.nextText());
-                    } else if (currentTag.equalsIgnoreCase("link")) {
-                        if (!linkForced) {
+                    } else if (currentTag.equalsIgnoreCase("link") && isArticle == true) {
+                        if (!linkOverride) {
                             link = pullParser.nextText();
                         }
-                    } else if (currentTag.equalsIgnoreCase("origLink")) {
+                    } else if (currentTag.equalsIgnoreCase("origLink") && isArticle == true) {
                         link = pullParser.nextText();
-                        linkForced = true;
+                        linkOverride = true;
                     }
 
                 } else if (eventType == XmlPullParser.END_TAG) {
@@ -299,30 +304,51 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
     }
 
     private ContentValues prepareArticle(int feedID, String guid, String link, Date pubdate, String title, String summary, String content) {
-        Document document = Jsoup.parse(content);
+        boolean missingContent = false;
+        boolean missingSummary = false;
 
-        Elements iframes = document.getElementsByTag("iframe");
+        if (content == null) {
+            missingContent = true;
+        }
+        if (summary == null) {
+            missingSummary = true;
+        }
+
+        if (missingContent && missingSummary) {
+            return new ContentValues();
+        }
+
+        if (missingContent) {
+            content = summary;
+        } else if (missingSummary) {
+            summary = content;
+        }
+
+        Document parsedContent = Jsoup.parse(content);
+        Elements iframes = parsedContent.getElementsByTag("iframe");
         TextNode placeholder = new TextNode("(video removed)", null);
         for (Element mIframe : iframes) {
             mIframe.replaceWith(placeholder);
         }
-        content = document.html();
+        content = parsedContent.html();
 
-        if (summary == null) {
-            String contentSummary = document.text();
-            if (contentSummary.length() > SUMMARY_MAXLENGTH) {
-                summary = contentSummary.substring(0, SUMMARY_MAXLENGTH) + "[...]";
-            } else {
-                summary = contentSummary;
-            }
+        Document parsedSummary = Jsoup.parse(summary);
+        Elements pics = parsedSummary.getElementsByTag("img");
+        for (Element pic : pics) {
+            pic.remove();
+        }
+        summary = parsedSummary.text();
+
+        if (summary.length() > SUMMARY_MAXLENGTH) {
+            summary = summary.substring(0, SUMMARY_MAXLENGTH) + "...";
         }
 
-        // remove appended line breaks from summary
-        while (summary.charAt(summary.length() - 1) == '\n' || summary.charAt(summary.length() - 1) == '\r') {
-            summary = summary.substring(0, summary.length() - 1);
-        }
+        Element image = parsedContent.select("img").first();
 
-        Element image = document.select("img").first();
+        // // remove appended line breaks from summary
+        // while (summary.charAt(summary.length() - 1) == '\n' || summary.charAt(summary.length() - 1) == '\r') {
+        // summary = summary.substring(0, summary.length() - 1);
+        // }
 
         ContentValues contentValues = new ContentValues();
 

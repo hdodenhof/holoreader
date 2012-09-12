@@ -206,6 +206,18 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     }
 
     @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt("selectedFeed", mSelectedFeed);
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mSelectedFeed = savedInstanceState.getInt("selectedFeed");
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);

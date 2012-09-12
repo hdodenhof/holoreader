@@ -90,10 +90,8 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
         mCurrentState = STATE_LOADING;
 
         if (savedInstanceState != null) {
-
-        }
-
-        if (getActivity().getIntent().hasExtra("feedid")) {
+            mFeedID = savedInstanceState.getInt("selectedFeed");
+        } else if (getActivity().getIntent().hasExtra("feedid")) {
             mFeedID = getActivity().getIntent().getIntExtra("feedid", mFeedID);
         }
 
@@ -125,6 +123,12 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
         }
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        savedInstanceState.putInt("selectedFeed", mFeedID);
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {

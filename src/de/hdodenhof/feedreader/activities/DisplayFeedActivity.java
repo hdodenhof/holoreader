@@ -207,7 +207,9 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
      */
     public void onArticleChanged(int oldArticle, int currentArticle, int position) {
         ArticleListFragment articleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
-        articleListFragment.changePosition(position);
+        if (articleListFragment != null) {
+            articleListFragment.changePosition(position);
+        }
 
         if (oldArticle != -1) {
             MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);

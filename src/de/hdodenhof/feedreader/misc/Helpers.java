@@ -86,7 +86,7 @@ public class Helpers {
         } else if (calendar.get(Calendar.YEAR) == yesterday.get(Calendar.YEAR) && calendar.get(Calendar.DAY_OF_YEAR) == yesterday.get(Calendar.DAY_OF_YEAR)) {
             return "Yesterday, " + timeFormatter.format(date);
         } else {
-            return DateFormat.format("MMM dd, HH:mm", date).toString();
+            return DateFormat.format("MMM dd, hh:mm", date).toString();
         }
     }
 

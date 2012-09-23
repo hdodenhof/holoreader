@@ -199,15 +199,15 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                             } else {
                                 Log.e(TAG, "id_" + mFeedID + ": " + guid + " cannot be added");
                             }
-
-                            title = null;
-                            summary = null;
-                            content = null;
-                            guid = null;
-                            pubdate = null;
-                            updated = null;
-                            link = null;
                         }
+
+                        title = null;
+                        summary = null;
+                        content = null;
+                        guid = null;
+                        pubdate = null;
+                        updated = null;
+                        link = null;
                     }
                 }
                 eventType = pullParser.next();

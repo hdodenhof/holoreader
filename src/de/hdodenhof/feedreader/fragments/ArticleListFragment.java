@@ -47,6 +47,7 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
     private boolean mTwoPane = false;
     private boolean mThisIsPrimaryFragment = false;
     private boolean mScrollTop = false;
+    private boolean mIsLargeDevice = false;
     private int mChangeToPosition = -1;
     private int mFeedID = -1;
     private int mCurrentState;
@@ -61,7 +62,7 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
     public void changePosition(int position) {
         if (mCurrentState == STATE_LOADED) {
             if (mArticlesListView.getCheckedItemPosition() != position) {
-                int mPosition = (position - 1 < 0) ? 0 : position - 1;
+                int mPosition = (position - 1 < 0) ? 0 : (mIsLargeDevice ? position : position - 1);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
                     mArticlesListView.smoothScrollToPositionFromTop(mPosition, 0, 500);
                     mArticlesListView.setItemChecked(position, true);
@@ -101,13 +102,14 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
 
         mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
         mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
+        mIsLargeDevice = getResources().getString(R.string.LayoutSize).equals("large");
 
         String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.IMAGE, ArticleDAO.READ };
         int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_image, R.layout.listitem_article };
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
-        boolean isLargeDeviceInPortrait = (getResources().getString(R.string.LayoutSize).equals("large") && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
+        boolean isLargeDeviceInPortrait = (mIsLargeDevice && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
         mArticleAdapter = new RSSArticleAdapter(getActivity(), null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (mTwoPane
                 && !mThisIsPrimaryFragment && !isLargeDeviceInPortrait) ? RSSArticleAdapter.MODE_EXTENDED : RSSArticleAdapter.MODE_COMPACT, mTwoPane ? true
                 : false);

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Dualpane layout options; have to add up to 100 for each activity -->
+    <integer name="dualpane_homeactivity_feeds_weight">25</integer>
+    <integer name="dualpane_homeactivity_articles_weight">75</integer>
+    <integer name="dualpane_feedactivity_articles_weight">30</integer>
+    <integer name="dualpane_feedactivity_article_weight">70</integer>
+
+</resources>

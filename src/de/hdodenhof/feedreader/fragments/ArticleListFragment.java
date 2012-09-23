@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -110,8 +111,10 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
-        mArticleAdapter = new RSSArticleAdapter(getActivity(), null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER,
-                (mTwoPane && !mThisIsPrimaryFragment) ? RSSArticleAdapter.MODE_EXTENDED : RSSArticleAdapter.MODE_COMPACT, mTwoPane ? true : false);
+        boolean isLargeDeviceInPortrait = (getResources().getString(R.string.LayoutSize).equals("large") && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
+        mArticleAdapter = new RSSArticleAdapter(getActivity(), null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (mTwoPane
+                && !mThisIsPrimaryFragment && !isLargeDeviceInPortrait) ? RSSArticleAdapter.MODE_EXTENDED : RSSArticleAdapter.MODE_COMPACT, mTwoPane ? true
+                : false);
 
         this.setEmptyText(getResources().getString(R.string.LoadingArticles));
         this.setListAdapter(mArticleAdapter);

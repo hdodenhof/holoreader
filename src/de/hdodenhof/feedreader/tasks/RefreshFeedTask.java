@@ -138,21 +138,22 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if (eventType == XmlPullParser.START_TAG) {
                     String currentTag = pullParser.getName();
-                    String currentNamespace = pullParser.getNamespace();
                     String currentPrefix = pullParser.getPrefix();
+
+                    if (currentPrefix == null) {
+                        currentPrefix = "";
+                    }
 
                     if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
                         isArticle = true;
                     } else if (currentTag.equalsIgnoreCase("title") && isArticle == true) {
                         title = pullParser.nextText();
                     } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && isArticle == true
-                            && currentNamespace.equalsIgnoreCase("")) {
+                            && currentPrefix.equalsIgnoreCase("")) {
                         summary = pullParser.nextText();
-                        Log.v(TAG, "summary: " + summary);
                     } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
-                            .equalsIgnoreCase("content") && currentNamespace.equalsIgnoreCase(""))) && isArticle == true) {
+                            .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
                         content = pullParser.nextText();
-                        Log.v(TAG, "content: " + content);
                     } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
                         guid = pullParser.nextText();
                     } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")
@@ -191,8 +192,13 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         }
 
                         if (!existingArticles.contains(guid)) {
-                            Log.v(TAG, "id_" + mFeedID + ": adding " + guid);
-                            contentValuesArrayList.add(prepareArticle(mFeedID, guid, link, pubdate, title, summary, content));
+                            ContentValues newArticle = prepareArticle(mFeedID, guid, link, pubdate, title, summary, content);
+                            if (newArticle != null) {
+                                Log.v(TAG, "id_" + mFeedID + ": adding " + guid);
+                                contentValuesArrayList.add(newArticle);
+                            } else {
+                                Log.e(TAG, "id_" + mFeedID + ": " + guid + " cannot be added");
+                            }
 
                             title = null;
                             summary = null;
@@ -315,7 +321,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         }
 
         if (missingContent && missingSummary) {
-            return new ContentValues();
+            return null;
         }
 
         if (missingContent) {
@@ -344,11 +350,6 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         }
 
         Element image = parsedContent.select("img").first();
-
-        // // remove appended line breaks from summary
-        // while (summary.charAt(summary.length() - 1) == '\n' || summary.charAt(summary.length() - 1) == '\r') {
-        // summary = summary.substring(0, summary.length() - 1);
-        // }
 
         ContentValues contentValues = new ContentValues();
 

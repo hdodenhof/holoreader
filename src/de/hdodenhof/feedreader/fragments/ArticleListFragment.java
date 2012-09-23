@@ -180,9 +180,9 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             }
             if (mUnreadOnly) {
                 if (selection == null) {
-                    selection = ArticleDAO.READ + " = 0";
+                    selection = ArticleDAO.READ + " IS NULL";
                 } else {
-                    selection = selection + " AND " + ArticleDAO.READ + " = 0";
+                    selection = selection + " AND " + ArticleDAO.READ + " IS NULL";
                 }
             }
 

@@ -82,7 +82,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         String summary = cursor.getString(cursor.getColumnIndex(ArticleDAO.SUMMARY));
         String pubdate = Helpers.formatToYesterdayOrToday(SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE))));
         String imageURL = cursor.getString(cursor.getColumnIndex(ArticleDAO.IMAGE));
-        int read = cursor.getInt(cursor.getColumnIndex(ArticleDAO.READ));
+        String read = cursor.getString(cursor.getColumnIndex(ArticleDAO.READ));
 
         final TextView articleTitle = (TextView) view.findViewById(R.id.list_item_entry_title);
         final TextView articlePubdate = (TextView) view.findViewById(R.id.list_item_entry_date);
@@ -99,7 +99,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
             articlePubdate.setText(pubdate);
         }
 
-        if (SQLiteHelper.toBoolean(read)) {
+        if (read != null) {
             articleImage.setAlpha(ALPHA_STATE_DIMMED);
             dim(articleTitle);
             dim(articleSummary);

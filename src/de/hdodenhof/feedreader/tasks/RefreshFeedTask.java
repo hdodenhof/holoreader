@@ -102,8 +102,8 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             ContentValues contentValues = new ContentValues();
             contentValues.put(ArticleDAO.ISDELETED, 1);
             int dbupdated = contentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE
-                    + " < ? AND " + ArticleDAO.READ + " = ?", new String[] { String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)),
-                    "1" });
+                    + " < ? AND " + ArticleDAO.READ + " IS NOT NULL",
+                    new String[] { String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)) });
             Log.v(TAG, "id_" + mFeedID + ": Marked " + dbupdated + " old articles as deleted");
 
             // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
@@ -365,7 +365,6 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             contentValues.put(ArticleDAO.IMAGE, image.absUrl("src"));
         }
 
-        contentValues.put(ArticleDAO.READ, 0);
         contentValues.put(ArticleDAO.ISDELETED, 0);
 
         return contentValues;

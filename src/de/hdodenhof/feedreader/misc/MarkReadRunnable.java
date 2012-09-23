@@ -1,5 +1,7 @@
 package de.hdodenhof.feedreader.misc;
 
+import java.util.Date;
+
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
@@ -31,8 +33,8 @@ public class MarkReadRunnable implements Runnable {
     public void run() {
         ContentResolver contentResolver = mContext.getContentResolver();
         ContentValues contentValues = new ContentValues();
-        String selection = ArticleDAO.READ + " != ?";
-        String[] selectionArgs = new String[] { String.valueOf(SQLiteHelper.fromBoolean(true)) };
+        String selection = ArticleDAO.READ + " IS NULL";
+        String[] selectionArgs = null;
         Uri uri;
 
         if (mArticleID != -1) {
@@ -41,10 +43,10 @@ public class MarkReadRunnable implements Runnable {
             uri = RSSContentProvider.URI_ARTICLES;
             if (mFeedID != -1) {
                 selection = selection + " AND " + ArticleDAO.FEEDID + " = ? ";
-                selectionArgs = new String[] { selectionArgs[0], String.valueOf(mFeedID) };
+                selectionArgs = new String[] { String.valueOf(mFeedID) };
             }
         }
-        contentValues.put(ArticleDAO.READ, SQLiteHelper.fromBoolean(true));
+        contentValues.put(ArticleDAO.READ, SQLiteHelper.fromDate(new Date()));
         contentResolver.update(uri, contentValues, selection, selectionArgs);
 
     }

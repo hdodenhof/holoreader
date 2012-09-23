@@ -3,7 +3,6 @@ package de.hdodenhof.feedreader.activities;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.regex.Matcher;
@@ -435,19 +434,11 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         case RSSAdapter.TYPE_ARTICLE:
             cursor = ((RSSArticleAdapter) adapter).getCursor();
             cursor.moveToPosition(position);
-
             int articleID = cursor.getInt(cursor.getColumnIndex(ArticleDAO._ID));
-            ArrayList<String> articles = new ArrayList<String>();
-
-            cursor.moveToFirst();
-            do {
-                articles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO._ID)));
-            } while (cursor.moveToNext());
 
             Intent intent = new Intent(this, DisplayFeedActivity.class);
             intent.putExtra("articleid", articleID);
             intent.putExtra("feedid", mSelectedFeed);
-            intent.putStringArrayListExtra("articles", articles);
             startActivity(intent);
             break;
 

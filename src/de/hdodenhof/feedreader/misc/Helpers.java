@@ -114,6 +114,26 @@ public class Helpers {
         return view;
     }
 
+    /**
+     * 
+     * @param selectionArgs
+     * @param newArg
+     * @return
+     */
+    public static String[] addSelectionArg(String[] selectionArgs, String newArg) {
+        int newLength = selectionArgs.length + 1;
+        int newPosition = newLength - 1;
+
+        String newSA[] = new String[newLength];
+
+        for (int i = 0; i < selectionArgs.length; i++) {
+            newSA[i] = selectionArgs[i];
+        }
+
+        newSA[newPosition] = newArg;
+        return newSA;
+    }
+
     /* @formatter:off */
     /**
      * based on AOSP

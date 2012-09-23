@@ -1,8 +1,10 @@
 package de.hdodenhof.feedreader.misc;
 
-import java.util.ArrayList;
+import java.util.Date;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +24,7 @@ import com.viewpagerindicator.UnderlinePageIndicator;
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.fragments.ArticleFragment;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
 /**
@@ -34,6 +37,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
     @SuppressWarnings("unused")
     private static final String TAG = ArticleViewPager.class.getSimpleName();
+    private static final String PREFS_NAME = "Feedreader";
     private static final int LOADER = 30;
     private static final int STATE_LOADING = 1;
     private static final int STATE_LOADED = 2;
@@ -41,12 +45,13 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     private SherlockFragmentActivity mContext;
     private ArticlePagerAdapter mPagerAdapter;
     private ViewPager mPager;
-    private ArrayList<String> mArticles = new ArrayList<String>();
     private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.LINK,
             ArticleDAO.CONTENT };
+    private boolean mUnreadOnly = true;
     private int mPreselectedArticleID = -1;
     private int mCurrentArticleID = -1;
     private int mCurrentPosition = -1;
+    private int mFeedID = -1;
     private int mCurrentState;
 
     public void changePosition(int position) {
@@ -60,8 +65,11 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         mContext = context;
         mCurrentState = STATE_LOADING;
 
-        mArticles = mContext.getIntent().getStringArrayListExtra("articles");
         mPreselectedArticleID = mContext.getIntent().getIntExtra("articleid", 0);
+        mFeedID = mContext.getIntent().getIntExtra("feedid", 0);
+
+        SharedPreferences preferences = mContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mUnreadOnly = preferences.getBoolean("unreadonly", true);
 
         mContext.getSupportLoaderManager().initLoader(LOADER, null, this);
 
@@ -89,29 +97,42 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
     @Override
     public void onPageSelected(int position) {
-        int newArticleID = mPagerAdapter.getArticleID(position);
-        mCurrentArticleID = newArticleID;
+        int oldArticleID = mCurrentArticleID;
+
         mCurrentPosition = position;
-        ((OnArticleChangedListener) mContext).onArticleChanged(mCurrentArticleID, newArticleID, position);
+        mCurrentArticleID = mPagerAdapter.getArticleID(position);
+
+        ((OnArticleChangedListener) mContext).onArticleChanged(oldArticleID, mCurrentArticleID, position);
     }
 
     public String getCurrentLink() {
         return mPagerAdapter.getArticleLink(mCurrentPosition);
     }
 
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String selection = ArticleDAO._ID + " IN (";
-        for (int i = 0; i < mArticles.size() - 1; i++) {
-            selection = selection + "?, ";
+        String selection = null;
+        String selectionArgs[] = null;
+
+        selection = ArticleDAO.ISDELETED + " = ?";
+        selectionArgs = new String[] { "0" };
+
+        if (mUnreadOnly) {
+            selection = selection + " AND (" + ArticleDAO.READ + " > ? OR " + ArticleDAO.READ + " IS NULL)";
+            selectionArgs = Helpers.addSelectionArg(selectionArgs, SQLiteHelper.fromDate(new Date()));
         }
-        selection = selection + "?)";
-        String[] selectionArgs = mArticles.toArray(new String[mArticles.size()]);
+
+        if (mFeedID != -1) {
+            selection = selection + " AND " + ArticleDAO.FEEDID + " = ?";
+            selectionArgs = Helpers.addSelectionArg(selectionArgs, String.valueOf(mFeedID));
+        }
 
         CursorLoader cursorLoader = new CursorLoader(mContext, RSSContentProvider.URI_ARTICLES, mProjection, selection, selectionArgs, ArticleDAO.PUBDATE
                 + " DESC");
         return cursorLoader;
     }
 
+    @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mPagerAdapter.swapCursor(data);
         if (mCurrentState == STATE_LOADING) {

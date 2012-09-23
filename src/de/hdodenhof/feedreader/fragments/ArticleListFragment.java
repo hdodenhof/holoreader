@@ -1,9 +1,8 @@
 package de.hdodenhof.feedreader.fragments;
 
-import java.util.ArrayList;
+import java.util.Date;
 
 import android.annotation.SuppressLint;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -23,7 +22,9 @@ import com.actionbarsherlock.app.SherlockListFragment;
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
+import de.hdodenhof.feedreader.misc.Helpers;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
+import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 
 /**
@@ -42,7 +43,6 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
 
     private ListView mArticlesListView;
     private RSSArticleAdapter mArticleAdapter;
-    private ArrayList<String> mArticles;
     private boolean mUnreadOnly = true;
     private boolean mTwoPane = false;
     private boolean mThisIsPrimaryFragment = false;
@@ -96,10 +96,6 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             mFeedID = getActivity().getIntent().getIntExtra("feedid", mFeedID);
         }
 
-        if (getActivity().getIntent().hasExtra("articles")) {
-            mArticles = getActivity().getIntent().getStringArrayListExtra("articles");
-        }
-
         SharedPreferences preferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         mUnreadOnly = preferences.getBoolean("unreadonly", true);
 
@@ -134,88 +130,28 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
         savedInstanceState.putInt("selectedFeed", mFeedID);
     }
 
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String selection = null;
         String selectionArgs[] = null;
         String[] projection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.SUMMARY, ArticleDAO.IMAGE,
                 ArticleDAO.PUBDATE, ArticleDAO.READ };
 
-        if (mTwoPane) {
-            // DualPane
-            if (mThisIsPrimaryFragment) {
-                // FeedListActivity, articleIDs passed in Intent
-                selection = ArticleDAO._ID + " IN (";
-                for (int i = 0; i < mArticles.size() - 1; i++) {
-                    selection = selection + "?, ";
-                }
-                selection = selection + "?)";
-                selectionArgs = mArticles.toArray(new String[mArticles.size()]);
-            } else {
-                // HomeActivity
-                if (mFeedID == -1) {
-                    // first call no feedID in Intent
-                    if (mUnreadOnly) {
-                        selection = ArticleDAO.READ + " = 0";
-                    }
-                } else {
-                    // feedID passed in Intent
-                    selection = ArticleDAO.FEEDID + " = ?";
-                    selectionArgs = new String[] { String.valueOf(mFeedID) };
-                    if (mUnreadOnly) {
-                        selection = selection + " AND " + ArticleDAO.READ + " = 0";
-                    }
-                }
-            }
+        selection = ArticleDAO.ISDELETED + " = ?";
+        selectionArgs = new String[] { "0" };
 
-            if (selection == null) {
-                selection = ArticleDAO.ISDELETED + " = 0";
-            } else {
-                selection = selection + " AND " + ArticleDAO.ISDELETED + " = 0";
-            }
-        } else {
-            // SinglePane, feedID passed in Intent
-            if (mFeedID != -1) {
-                selection = ArticleDAO.FEEDID + " = ?";
-                selectionArgs = new String[] { String.valueOf(mFeedID) };
-            }
-            if (mUnreadOnly) {
-                if (selection == null) {
-                    selection = ArticleDAO.READ + " IS NULL";
-                } else {
-                    selection = selection + " AND " + ArticleDAO.READ + " IS NULL";
-                }
-            }
-
-            if (selection == null) {
-                selection = ArticleDAO.ISDELETED + " = 0";
-            } else {
-                selection = selection + " AND " + ArticleDAO.ISDELETED + " = 0";
-            }
-
-            mArticles = new ArrayList<String>();
-
-            ContentResolver contentResolver = getActivity().getContentResolver();
-            Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID }, selection, selectionArgs, null);
-
-            if (cursor.getCount() > 0) {
-                cursor.moveToFirst();
-                do {
-                    mArticles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO._ID)));
-                } while (cursor.moveToNext());
-            }
-            cursor.close();
-
-            selection = ArticleDAO._ID + " IN (";
-            for (int i = 0; i < mArticles.size() - 1; i++) {
-                selection = selection + "?, ";
-            }
-            selection = selection + "?)";
-            selectionArgs = mArticles.toArray(new String[mArticles.size()]);
+        if (mUnreadOnly) {
+            selection = selection + " AND (" + ArticleDAO.READ + " > ? OR " + ArticleDAO.READ + " IS NULL)";
+            selectionArgs = Helpers.addSelectionArg(selectionArgs, SQLiteHelper.fromDate(new Date()));
         }
-
+        if (mFeedID != -1) {
+            selection = selection + " AND " + ArticleDAO.FEEDID + " = ?";
+            selectionArgs = Helpers.addSelectionArg(selectionArgs, String.valueOf(mFeedID));
+        }
         return new CursorLoader(getActivity(), RSSContentProvider.URI_ARTICLES, projection, selection, selectionArgs, ArticleDAO.PUBDATE + " DESC");
     }
 
+    @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mArticleAdapter.swapCursor(data);
         if (mScrollTop) {

@@ -314,7 +314,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         }
         mFeedsUpdating.add(feedID);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            new RefreshFeedTask(mAsyncHandler, this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, feedID);
+            new RefreshFeedTask(mAsyncHandler, this).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, feedID);
         } else {
             new RefreshFeedTask(mAsyncHandler, this).execute(feedID);
         }

@@ -331,7 +331,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         Date parsedDate = null;
         for (int j = 0; j < DATE_FORMATS.length; j++) {
             try {
-                parsedDate = mSimpleDateFormats[j].parse(rawDate);
+                parsedDate = mSimpleDateFormats[j].parse(rawDate.replaceAll("([\\+\\-]\\d\\d):(\\d\\d)", "$1$2"));
                 break;
             } catch (ParseException mParserException) {
                 if (j == DATE_FORMATS.length - 1) {

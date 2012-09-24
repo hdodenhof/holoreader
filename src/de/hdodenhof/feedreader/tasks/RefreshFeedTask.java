@@ -153,25 +153,22 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         summary = safeNextText(pullParser);
                     } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
                             .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
-                        if (pullParser.getText() != null) {
-                            content = safeNextText(pullParser);
-                        } else {
+                        if (pullParser.getAttributeCount() > 0) {
                             boolean isEncodedContent = false;
-                            if (pullParser.getAttributeCount() > 0) {
-                                for (int i = 0; i < pullParser.getAttributeCount(); i++) {
-                                    if (pullParser.getAttributeName(i).equals("type")) {
-                                        isEncodedContent = (pullParser.getAttributeValue(i).equals("html") || pullParser.getAttributeValue(i).equals("xhtml"));
-                                        break;
-                                    }
+                            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+                                if (pullParser.getAttributeName(i).equals("type")) {
+                                    isEncodedContent = (pullParser.getAttributeValue(i).equals("html") || pullParser.getAttributeValue(i).equals("xhtml"));
+                                    break;
                                 }
                             }
                             if (isEncodedContent) {
+                                // ignore content for now, needs work
                                 while (pullParser.getEventType() != XmlPullParser.END_TAG && !pullParser.getName().equals("content")) {
                                     pullParser.next();
                                 }
-                            } else {
-                                pullParser.next();
                             }
+                        } else {
+                            content = safeNextText(pullParser);
                         }
                     } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
                         guid = safeNextText(pullParser);
@@ -181,18 +178,20 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                     } else if (currentTag.equalsIgnoreCase("updated") && isArticle == true) {
                         updated = parsePubdate(safeNextText(pullParser));
                     } else if (currentTag.equalsIgnoreCase("link") && isArticle == true) {
-                        String tmpLink = pullParser.getText();
-                        if (tmpLink == null) {
-                            if (pullParser.getAttributeCount() > 0) {
-                                for (int i = 0; i < pullParser.getAttributeCount(); i++) {
-                                    if (pullParser.getAttributeName(i).equals("href")) {
-                                        tmpLink = pullParser.getAttributeValue(i);
-                                        break;
-                                    }
+                        String tmpLink = null;
+                        if (pullParser.getAttributeCount() > 0) {
+                            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+                                if (pullParser.getAttributeName(i).equals("href")) {
+                                    tmpLink = pullParser.getAttributeValue(i);
+                                    break;
                                 }
                             }
                         }
-                        if (!linkOverride && tmpLink != null) {
+                        if (tmpLink == null) {
+                            pullParser.next();
+                            tmpLink = pullParser.getText();
+                        }
+                        if (!linkOverride) {
                             link = tmpLink;
                             pullParser.next();
                         }

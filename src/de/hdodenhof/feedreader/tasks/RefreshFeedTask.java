@@ -153,7 +153,26 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         summary = pullParser.nextText();
                     } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
                             .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
-                        content = pullParser.nextText();
+                        if (pullParser.getText() != null) {
+                            content = pullParser.nextText();
+                        } else {
+                            boolean isEncodedContent = false;
+                            if (pullParser.getAttributeCount() > 0) {
+                                for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+                                    if (pullParser.getAttributeName(i).equals("type")) {
+                                        isEncodedContent = (pullParser.getAttributeValue(i).equals("html") || pullParser.getAttributeValue(i).equals("xhtml"));
+                                        break;
+                                    }
+                                }
+                            }
+                            if (isEncodedContent) {
+                                while (pullParser.getEventType() != XmlPullParser.END_TAG && !pullParser.getName().equals("content")) {
+                                    pullParser.next();
+                                }
+                            } else {
+                                pullParser.next();
+                            }
+                        }
                     } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
                         guid = pullParser.nextText();
                     } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")
@@ -162,8 +181,20 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                     } else if (currentTag.equalsIgnoreCase("updated") && isArticle == true) {
                         updated = parsePubdate(pullParser.nextText());
                     } else if (currentTag.equalsIgnoreCase("link") && isArticle == true) {
-                        if (!linkOverride) {
-                            link = pullParser.nextText();
+                        String tmpLink = pullParser.getText();
+                        if (tmpLink == null) {
+                            if (pullParser.getAttributeCount() > 0) {
+                                for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+                                    if (pullParser.getAttributeName(i).equals("href")) {
+                                        tmpLink = pullParser.getAttributeValue(i);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (!linkOverride && tmpLink != null) {
+                            link = tmpLink;
+                            pullParser.next();
                         }
                     } else if (currentTag.equalsIgnoreCase("origLink") && isArticle == true) {
                         link = pullParser.nextText();
@@ -220,11 +251,13 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             contentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, contentValuesArray);
 
         } catch (IOException e) {
+            Log.v(TAG, "id_" + mFeedID + ": IOEXCEPTION");
             returnCondition = ERROR_IOEXCEPTION;
         } catch (XmlPullParserException e) {
+            Log.v(TAG, "id_" + mFeedID + ": XMLPULLPARSEREXCEPTION");
             returnCondition = ERROR_XMLPULLPARSEREXCEPTION;
         } catch (RuntimeException e) {
-            Log.v(TAG, "id_" + mFeedID + ": EXCEPTION");
+            Log.v(TAG, "id_" + mFeedID + ": RUNTIMEEXCEPTION");
             e.printStackTrace();
         }
         return mFeedID;

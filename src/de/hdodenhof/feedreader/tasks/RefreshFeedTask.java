@@ -147,14 +147,14 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                     if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
                         isArticle = true;
                     } else if (currentTag.equalsIgnoreCase("title") && isArticle == true) {
-                        title = pullParser.nextText();
+                        title = safeNextText(pullParser);
                     } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && isArticle == true
                             && currentPrefix.equalsIgnoreCase("")) {
-                        summary = pullParser.nextText();
+                        summary = safeNextText(pullParser);
                     } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
                             .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
                         if (pullParser.getText() != null) {
-                            content = pullParser.nextText();
+                            content = safeNextText(pullParser);
                         } else {
                             boolean isEncodedContent = false;
                             if (pullParser.getAttributeCount() > 0) {
@@ -174,12 +174,12 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                             }
                         }
                     } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
-                        guid = pullParser.nextText();
+                        guid = safeNextText(pullParser);
                     } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")
                             && isArticle == true) {
-                        pubdate = parsePubdate(pullParser.nextText());
+                        pubdate = parsePubdate(safeNextText(pullParser));
                     } else if (currentTag.equalsIgnoreCase("updated") && isArticle == true) {
-                        updated = parsePubdate(pullParser.nextText());
+                        updated = parsePubdate(safeNextText(pullParser));
                     } else if (currentTag.equalsIgnoreCase("link") && isArticle == true) {
                         String tmpLink = pullParser.getText();
                         if (tmpLink == null) {
@@ -197,7 +197,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                             pullParser.next();
                         }
                     } else if (currentTag.equalsIgnoreCase("origLink") && isArticle == true) {
-                        link = pullParser.nextText();
+                        link = safeNextText(pullParser);
                         linkOverride = true;
                     }
 
@@ -275,6 +275,17 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         msg.arg1 = result;
         msg.arg2 = returnCondition;
         mMainUIHandler.sendMessage(msg);
+    }
+
+    /*
+     * Work around a bug in early XMLPullParser versions, see http://android-developers.blogspot.de/2011/12/watch-out-for-xmlpullparsernexttext.html
+     */
+    private String safeNextText(XmlPullParser parser) throws XmlPullParserException, IOException {
+        String result = parser.nextText();
+        if (parser.getEventType() != XmlPullParser.END_TAG) {
+            parser.nextTag();
+        }
+        return result;
     }
 
     private ArrayList<String> queryArticles(ContentResolver contentResolver, int feedID) {

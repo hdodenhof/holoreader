@@ -162,10 +162,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                                 }
                             }
                             if (isEncodedContent) {
-                                // ignore content for now, needs work
-                                while (pullParser.getEventType() != XmlPullParser.END_TAG && !pullParser.getName().equals("content")) {
-                                    pullParser.next();
-                                }
+                                content = extractContent(pullParser);
                             }
                         } else {
                             content = safeNextText(pullParser);
@@ -274,6 +271,84 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         msg.arg1 = result;
         msg.arg2 = returnCondition;
         mMainUIHandler.sendMessage(msg);
+    }
+
+    private String extractContent(XmlPullParser pullParser) throws XmlPullParserException, IOException {
+        StringBuilder sb = new StringBuilder();
+        String ret = "";
+
+        pullParser.next();
+        int eventType = pullParser.getEventType();
+
+        if (eventType == XmlPullParser.TEXT) {
+            String txt = pullParser.getText().replace("\n", "").replace("\t", "").replace("\r", "").trim();
+            if (txt.length() > 0) {
+                pullParser.next();
+                return txt;
+            } else {
+                eventType = pullParser.next();
+            }
+        }
+
+        if (eventType == XmlPullParser.START_TAG) {
+            while (!isContentEnd(pullParser)) {
+                if (eventType == XmlPullParser.START_TAG) {
+                    if (pullParser.isEmptyElementTag()) {
+                        String tag = pullParser.getName();
+                        sb.append("<");
+                        sb.append(tag);
+                        if (tag.equals("img")) {
+                            sb.append(" src=\"");
+                            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+                                if (pullParser.getAttributeName(i).equals("src")) {
+                                    sb.append(pullParser.getAttributeValue(i));
+                                    break;
+                                }
+                            }
+                            sb.append("\"");
+                        }
+                        sb.append("/>");
+                        pullParser.next();
+                    } else {
+                        String tag = pullParser.getName();
+                        sb.append("<");
+                        sb.append(pullParser.getName());
+                        if (tag.equals("a")) {
+                            sb.append(" href=\"");
+                            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+                                if (pullParser.getAttributeName(i).equals("href")) {
+                                    sb.append(pullParser.getAttributeValue(i));
+                                    break;
+                                }
+                            }
+                            sb.append("\"");
+                        }
+                        sb.append(">");
+                    }
+                } else if (eventType == XmlPullParser.TEXT) {
+                    sb.append(pullParser.getText().replace("\n", "").replace("\t", "").replace("\r", "").trim());
+                } else if (eventType == XmlPullParser.END_TAG) {
+                    sb.append("</");
+                    sb.append(pullParser.getName());
+                    sb.append(">");
+                }
+                eventType = pullParser.next();
+            }
+            ret = sb.toString();
+        }
+        return ret;
+    }
+
+    private boolean isContentEnd(XmlPullParser pullParser) throws XmlPullParserException {
+        if (pullParser.getEventType() != XmlPullParser.END_TAG) {
+            return false;
+        }
+
+        if (pullParser.getName().equals("content")) {
+            return true;
+        }
+
+        return false;
     }
 
     /*

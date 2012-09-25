@@ -153,20 +153,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         summary = safeNextText(pullParser);
                     } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
                             .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
-                        if (pullParser.getAttributeCount() > 0) {
-                            boolean isEncodedContent = false;
-                            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
-                                if (pullParser.getAttributeName(i).equals("type")) {
-                                    isEncodedContent = (pullParser.getAttributeValue(i).equals("html") || pullParser.getAttributeValue(i).equals("xhtml"));
-                                    break;
-                                }
-                            }
-                            if (isEncodedContent) {
-                                content = extractContent(pullParser);
-                            }
-                        } else {
-                            content = safeNextText(pullParser);
-                        }
+                        content = extractContent(pullParser);
                     } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
                         guid = safeNextText(pullParser);
                     } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")
@@ -175,22 +162,8 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                     } else if (currentTag.equalsIgnoreCase("updated") && isArticle == true) {
                         updated = parsePubdate(safeNextText(pullParser));
                     } else if (currentTag.equalsIgnoreCase("link") && isArticle == true) {
-                        String tmpLink = null;
-                        if (pullParser.getAttributeCount() > 0) {
-                            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
-                                if (pullParser.getAttributeName(i).equals("href")) {
-                                    tmpLink = pullParser.getAttributeValue(i);
-                                    break;
-                                }
-                            }
-                        }
-                        if (tmpLink == null) {
-                            pullParser.next();
-                            tmpLink = pullParser.getText();
-                        }
                         if (!linkOverride) {
-                            link = tmpLink;
-                            pullParser.next();
+                            link = extractLink(pullParser);
                         }
                     } else if (currentTag.equalsIgnoreCase("origLink") && isArticle == true) {
                         link = safeNextText(pullParser);
@@ -273,15 +246,53 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
         mMainUIHandler.sendMessage(msg);
     }
 
+    private String extractLink(XmlPullParser pullParser) throws XmlPullParserException, IOException {
+        String link = null;
+        if (pullParser.getAttributeCount() > 0) {
+            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+                if (pullParser.getAttributeName(i).equals("href")) {
+                    link = pullParser.getAttributeValue(i);
+                    break;
+                }
+            }
+        }
+        if (link == null) {
+            pullParser.next();
+            link = pullParser.getText();
+        }
+        pullParser.next();
+        return link;
+    }
+
     private String extractContent(XmlPullParser pullParser) throws XmlPullParserException, IOException {
+        String content = "";
+
+        if (pullParser.getAttributeCount() > 0) {
+            boolean isEncodedContent = false;
+            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+                if (pullParser.getAttributeName(i).equals("type")) {
+                    isEncodedContent = (pullParser.getAttributeValue(i).equals("html") || pullParser.getAttributeValue(i).equals("xhtml"));
+                    break;
+                }
+            }
+            if (isEncodedContent) {
+                content = parseEncodedContent(pullParser);
+            }
+        } else {
+            content = safeNextText(pullParser);
+        }
+
+        return content;
+    }
+
+    private String parseEncodedContent(XmlPullParser pullParser) throws XmlPullParserException, IOException {
         StringBuilder sb = new StringBuilder();
-        String ret = "";
 
         pullParser.next();
         int eventType = pullParser.getEventType();
 
         if (eventType == XmlPullParser.TEXT) {
-            String txt = pullParser.getText().replace("\n", "").replace("\t", "").replace("\r", "").trim();
+            String txt = cleanText(pullParser.getText());
             if (txt.length() > 0) {
                 pullParser.next();
                 return txt;
@@ -298,14 +309,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         sb.append("<");
                         sb.append(tag);
                         if (tag.equals("img")) {
-                            sb.append(" src=\"");
-                            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
-                                if (pullParser.getAttributeName(i).equals("src")) {
-                                    sb.append(pullParser.getAttributeValue(i));
-                                    break;
-                                }
-                            }
-                            sb.append("\"");
+                            sb.append(getAttribute(pullParser, "src"));
                         }
                         sb.append("/>");
                         pullParser.next();
@@ -314,19 +318,12 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         sb.append("<");
                         sb.append(pullParser.getName());
                         if (tag.equals("a")) {
-                            sb.append(" href=\"");
-                            for (int i = 0; i < pullParser.getAttributeCount(); i++) {
-                                if (pullParser.getAttributeName(i).equals("href")) {
-                                    sb.append(pullParser.getAttributeValue(i));
-                                    break;
-                                }
-                            }
-                            sb.append("\"");
+                            sb.append(getAttribute(pullParser, "href"));
                         }
                         sb.append(">");
                     }
                 } else if (eventType == XmlPullParser.TEXT) {
-                    sb.append(pullParser.getText().replace("\n", "").replace("\t", "").replace("\r", "").trim());
+                    sb.append(cleanText(pullParser.getText()));
                 } else if (eventType == XmlPullParser.END_TAG) {
                     sb.append("</");
                     sb.append(pullParser.getName());
@@ -334,9 +331,27 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                 }
                 eventType = pullParser.next();
             }
-            ret = sb.toString();
         }
-        return ret;
+        return sb.toString();
+    }
+
+    private String cleanText(String text) {
+        return text.replace("\n", "").replace("\t", "").replace("\r", "").trim();
+    }
+
+    private String getAttribute(XmlPullParser pullParser, String name) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(" ");
+        sb.append(name);
+        sb.append("=\"");
+        for (int i = 0; i < pullParser.getAttributeCount(); i++) {
+            if (pullParser.getAttributeName(i).equals(name)) {
+                sb.append(pullParser.getAttributeValue(i));
+                break;
+            }
+        }
+        sb.append("\"");
+        return sb.toString();
     }
 
     private boolean isContentEnd(XmlPullParser pullParser) throws XmlPullParserException {

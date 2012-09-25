@@ -48,6 +48,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
         boolean isFeed = false;
         boolean isArticle = false;
         boolean hasContent = false;
+        boolean hasSummary = false;
         boolean foundName = false;
 
         try {
@@ -70,23 +71,27 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
 
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if (eventType == XmlPullParser.START_TAG) {
-                    if (pullParser.getName().equalsIgnoreCase("rss") || pullParser.getName().equalsIgnoreCase("feed")) {
+                    String currentTag = pullParser.getName();
+                    String currentPrefix = pullParser.getPrefix();
+
+                    if (currentTag.equalsIgnoreCase("rss") || currentTag.equalsIgnoreCase("feed")) {
                         isFeed = true;
-                    }
-                    if (pullParser.getName().equalsIgnoreCase("title") && isFeed && foundName == false) {
+                    } else if (currentTag.equalsIgnoreCase("title") && isFeed && foundName == false) {
                         name = pullParser.nextText();
                         foundName = true;
-                    }
-                    if ((pullParser.getName().equalsIgnoreCase("item") || pullParser.getName().equalsIgnoreCase("entry")) && isFeed) {
+                    } else if ((currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) && isFeed) {
                         isArticle = true;
-                    } else if ((pullParser.getName().equalsIgnoreCase("encoded") || pullParser.getName().equalsIgnoreCase("content") || pullParser.getName()
-                            .equalsIgnoreCase("description")) && isArticle == true) {
+                    } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
+                            .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
                         hasContent = true;
-                        break;
+                    } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && isArticle == true
+                            && currentPrefix.equalsIgnoreCase("")) {
+                        hasSummary = true;
                     }
-
                 } else if (eventType == XmlPullParser.END_TAG) {
-                    if ((pullParser.getName().equalsIgnoreCase("item") || pullParser.getName().equalsIgnoreCase("entry")) && isFeed) {
+                    String currentTag = pullParser.getName();
+
+                    if ((currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) && isFeed) {
                         break;
                     }
                 }
@@ -94,7 +99,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
             }
             inputStream.close();
 
-            if (isFeed && hasContent) {
+            if (isFeed && (hasContent || hasSummary)) {
                 ContentResolver contentResolver = mContext.getContentResolver();
                 ContentValues contentValues = new ContentValues();
 

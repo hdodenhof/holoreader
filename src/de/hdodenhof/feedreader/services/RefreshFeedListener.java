@@ -5,7 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
-import android.widget.Toast;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
@@ -25,8 +24,6 @@ public class RefreshFeedListener implements WakefulIntentService.AlarmListener {
     }
 
     public void scheduleAlarms(AlarmManager alarmManager, PendingIntent pendingIntent, Context context) {
-        Toast.makeText(context, "Setting alarm at " + (SystemClock.elapsedRealtime() + ((mWaitMilis == null) ? WAIT_MILIS : mWaitMilis)), Toast.LENGTH_LONG)
-                .show();
         alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + ((mWaitMilis == null) ? WAIT_MILIS : mWaitMilis),
                 INTERVAL_MILIS, pendingIntent);
     }

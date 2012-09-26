@@ -3,15 +3,12 @@ package de.hdodenhof.feedreader.activities;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,9 +43,9 @@ import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
 import de.hdodenhof.feedreader.misc.Helpers;
 import de.hdodenhof.feedreader.misc.MarkReadRunnable;
-import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
+import de.hdodenhof.feedreader.services.RefreshFeedListener;
 import de.hdodenhof.feedreader.services.RefreshFeedService;
 import de.hdodenhof.feedreader.tasks.AddFeedTask;
 
@@ -61,7 +58,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
     @SuppressWarnings("unused")
     private static final String TAG = HomeActivity.class.getSimpleName();
-    private static final String PREFS_NAME = "Feedreader";
 
     private SharedPreferences mPreferences;
     private Resources mResources;
@@ -136,12 +132,12 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private BroadcastReceiver mFeedsRefreshedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mRefreshItem.getActionView().clearAnimation();
-            mRefreshItem.setActionView(null);
+            try {
+                mRefreshItem.getActionView().clearAnimation();
+                mRefreshItem.setActionView(null);
+            } catch (NullPointerException e) {
 
-            SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putLong("refreshed", (new Date()).getTime());
-            editor.commit();
+            }
         }
     };
 
@@ -152,7 +148,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         setContentView(R.layout.activity_home);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
 
         mResources = getResources();
@@ -175,6 +171,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 Helpers.showDialog(HomeActivity.this, "Error adding feed", "Invalid URL");
             }
         }
+
     }
 
     @Override
@@ -193,6 +190,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     protected void onResume() {
         super.onResume();
 
+        RefreshFeedService.cancelAlarms(this);
+
         IntentFilter filter = new IntentFilter();
         filter.addAction("de.hdodenhof.feedreader.FEEDS_REFRESHED");
         registerReceiver(mFeedsRefreshedReceiver, filter);
@@ -209,16 +208,13 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (refreshing) {
             mRefreshItem.setActionView(R.layout.actionview_refresh);
         }
-
-        long mRefreshed = mPreferences.getLong("refreshed", (new Date(0)).getTime());
-        if (mRefreshed < (new Date()).getTime() - 3600000) {
-            refreshFeeds(false);
-        }
     }
 
     @Override
     protected void onPause() {
         unregisterReceiver(mFeedsRefreshedReceiver);
+        RefreshFeedService.scheduleAlarms(new RefreshFeedListener(RefreshFeedListener.INTERVAL_MILIS), this, true);
+
         super.onPause();
     }
 
@@ -266,15 +262,15 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * @param item
      *            MenuItem that holds the refresh animation
      */
-    private void refreshFeeds(boolean forced) {
+    private void refreshFeeds(boolean manual) {
         boolean isConnected = Helpers.isConnected(this);
 
         if (isConnected) {
-            for (Integer mFeedID : queryFeeds()) {
+            for (Integer mFeedID : Helpers.queryFeeds(getContentResolver())) {
                 refreshFeed(mFeedID);
             }
         } else {
-            if (forced) {
+            if (manual) {
                 Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
             }
         }
@@ -296,28 +292,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
         intent.putExtra("feedid", feedID);
         startService(intent);
-    }
-
-    /**
-     * Queries all feed ids
-     * 
-     * @return HashMap of all feed ids
-     */
-    private HashSet<Integer> queryFeeds() {
-        HashSet<Integer> feeds = new HashSet<Integer>();
-
-        ContentResolver contentResolver = getContentResolver();
-        Cursor cursor = contentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL }, null, null, null);
-
-        if (cursor.getCount() > 0) {
-            cursor.moveToFirst();
-            do {
-                feeds.add(cursor.getInt(cursor.getColumnIndex(FeedDAO._ID)));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-
-        return feeds;
     }
 
     /**

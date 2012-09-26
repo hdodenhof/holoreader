@@ -1,11 +1,11 @@
 package de.hdodenhof.feedreader.fragments;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -34,7 +34,6 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
     @SuppressWarnings("unused")
     private static final String TAG = FeedListFragment.class.getSimpleName();
-    private static final String PREFS_NAME = "Feedreader";
     private static final int LOADER = 10;
 
     private SimpleCursorAdapter mFeedAdapter;
@@ -46,7 +45,7 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        SharedPreferences preferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUnreadOnly = preferences.getBoolean("unreadonly", true);
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);

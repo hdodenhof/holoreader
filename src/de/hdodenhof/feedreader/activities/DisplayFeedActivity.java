@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.AdapterView;
@@ -41,7 +42,6 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayFeedActivity.class.getSimpleName();
-    private static final String PREFS_NAME = "Feedreader";
 
     private ArticleViewPager mViewPager;
     private SharedPreferences mPreferences;
@@ -61,7 +61,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
             mFeedID = getIntent().getIntExtra("feedid", -1);
         }
 
-        mPreferences = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
 
         mResources = getResources();

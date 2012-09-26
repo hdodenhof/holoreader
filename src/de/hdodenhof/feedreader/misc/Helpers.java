@@ -3,6 +3,7 @@ package de.hdodenhof.feedreader.misc;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 
 import android.content.ContentResolver;
@@ -48,6 +49,27 @@ public class Helpers {
         dialogFragment.setTitle(title);
         dialogFragment.setMessage(message);
         dialogFragment.show(((SherlockFragmentActivity) context).getSupportFragmentManager(), "dialog");
+    }
+
+    /**
+     * Queries all feed ids
+     * 
+     * @return HashMap of all feed ids
+     */
+    public static HashSet<Integer> queryFeeds(ContentResolver contentResolver) {
+        HashSet<Integer> feeds = new HashSet<Integer>();
+
+        Cursor cursor = contentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL }, null, null, null);
+
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            do {
+                feeds.add(cursor.getInt(cursor.getColumnIndex(FeedDAO._ID)));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        return feeds;
     }
 
     /**

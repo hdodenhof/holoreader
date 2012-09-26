@@ -3,12 +3,12 @@ package de.hdodenhof.feedreader.fragments;
 import java.util.Date;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -36,7 +36,6 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
 
     @SuppressWarnings("unused")
     private static final String TAG = ArticleListFragment.class.getSimpleName();
-    private static final String PREFS_NAME = "Feedreader";
     private static final int LOADER = 20;
     private static final int STATE_LOADING = 1;
     private static final int STATE_LOADED = 2;
@@ -97,7 +96,7 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             mFeedID = getActivity().getIntent().getIntExtra("feedid", mFeedID);
         }
 
-        SharedPreferences preferences = getActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUnreadOnly = preferences.getBoolean("unreadonly", true);
 
         mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);

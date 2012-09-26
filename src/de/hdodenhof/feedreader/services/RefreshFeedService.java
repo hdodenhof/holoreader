@@ -22,7 +22,6 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
-import android.app.IntentService;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -31,13 +30,15 @@ import android.database.Cursor;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
+import com.commonsware.cwac.wakeful.WakefulIntentService;
+
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
-public class RefreshFeedService extends IntentService {
+public class RefreshFeedService extends WakefulIntentService {
 
     @SuppressWarnings("unused")
     private static final String TAG = RefreshFeedService.class.getSimpleName();
@@ -98,7 +99,7 @@ public class RefreshFeedService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void doWakefulWork(Intent intent) {
         if (intent.getAction() == NO_ACTION) {
             return;
         }
@@ -528,4 +529,5 @@ public class RefreshFeedService extends IntentService {
 
         return contentValues;
     }
+
 }

@@ -10,14 +10,14 @@ import java.util.regex.Pattern;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -49,8 +49,8 @@ import de.hdodenhof.feedreader.misc.MarkReadRunnable;
 import de.hdodenhof.feedreader.provider.RSSContentProvider;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
+import de.hdodenhof.feedreader.services.RefreshFeedService;
 import de.hdodenhof.feedreader.tasks.AddFeedTask;
-import de.hdodenhof.feedreader.tasks.RefreshFeedTask;
 
 /**
  * 
@@ -68,7 +68,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private ArticleListFragment mArticleListFragment;
     private FeedListFragment mFeedListFragment;
     private ProgressDialog mSpinner;
-    private HashSet<Integer> mFeedsUpdating;
     private MenuItem mRefreshItem;
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
@@ -95,19 +94,9 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 // return from adding a feed
                 target.callbackFeedAdded(msg.arg1);
                 break;
-            case 2:
-                // TODO
-                // return from refreshing a feed
-                target.callbackFeedRefreshed(msg.arg1);
-                break;
             case 8:
                 // return from adding a feed with error condition
                 target.callbackFeedAddedError(msg.arg1);
-                break;
-            case 9:
-                // TODO
-                // return from refreshing a feed with error condition
-                target.callbackFeedRefreshedError(msg.arg1, msg.arg2);
                 break;
             default:
                 break;
@@ -144,32 +133,17 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         }
     }
 
-    /**
-     * 
-     */
-    @SuppressLint("NewApi")
-    private void callbackFeedRefreshed(int feedID) {
-        mFeedsUpdating.remove(feedID);
-        if (mFeedsUpdating.size() == 0) {
+    private BroadcastReceiver mFeedsRefreshedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
             mRefreshItem.getActionView().clearAnimation();
             mRefreshItem.setActionView(null);
-        }
-    }
 
-    /**
-     * 
-     */
-    private void callbackFeedRefreshedError(int feedID, int returnCondition) {
-        mFeedsUpdating.remove(feedID);
-        switch (returnCondition) {
-        case AddFeedTask.ERROR_IOEXCEPTION:
-        case AddFeedTask.ERROR_XMLPULLPARSEREXCEPTION:
-            Toast.makeText(this, "Error while updating a feed", Toast.LENGTH_SHORT).show();
-            break;
-        default:
-            break;
+            SharedPreferences.Editor editor = mPreferences.edit();
+            editor.putLong("refreshed", (new Date()).getTime());
+            editor.commit();
         }
-    }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -182,7 +156,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
 
         mResources = getResources();
-        mFeedsUpdating = new HashSet<Integer>();
 
         mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
         mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
@@ -219,6 +192,11 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     @Override
     protected void onResume() {
         super.onResume();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("de.hdodenhof.feedreader.FEEDS_REFRESHED");
+        registerReceiver(mFeedsRefreshedReceiver, filter);
+
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
         invalidateOptionsMenu();
 
@@ -227,7 +205,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             mArticleListFragment.setUnreadOnly(mUnreadOnly);
         }
 
-        if (mFeedsUpdating.size() != 0) {
+        boolean refreshing = mPreferences.getBoolean("refreshing", false);
+        if (refreshing) {
             mRefreshItem.setActionView(R.layout.actionview_refresh);
         }
 
@@ -235,6 +214,12 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (mRefreshed < (new Date()).getTime() - 3600000) {
             refreshFeeds(false);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(mFeedsRefreshedReceiver);
+        super.onPause();
     }
 
     /**
@@ -285,10 +270,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         boolean isConnected = Helpers.isConnected(this);
 
         if (isConnected) {
-            SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putLong("refreshed", (new Date()).getTime());
-            editor.commit();
-
             for (Integer mFeedID : queryFeeds()) {
                 refreshFeed(mFeedID);
             }
@@ -306,18 +287,15 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      */
     @SuppressLint("NewApi")
     private void refreshFeed(int feedID) {
-        if (mFeedsUpdating.size() == 0) {
+        boolean refreshing = mPreferences.getBoolean("refreshing", false);
+        if (!refreshing) {
             mRefreshItem.setActionView(R.layout.actionview_refresh);
         }
-        if (mFeedsUpdating.contains(feedID)) {
-            return;
-        }
-        mFeedsUpdating.add(feedID);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            new RefreshFeedTask(mAsyncHandler, this).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, feedID);
-        } else {
-            new RefreshFeedTask(mAsyncHandler, this).execute(feedID);
-        }
+
+        Intent intent = new Intent(this, RefreshFeedService.class);
+
+        intent.putExtra("feedid", feedID);
+        startService(intent);
     }
 
     /**

@@ -1,4 +1,4 @@
-package de.hdodenhof.feedreader.tasks;
+package de.hdodenhof.feedreader.services;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -21,14 +22,12 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import android.app.IntentService;
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -38,14 +37,16 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
 
-public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
+public class RefreshFeedService extends IntentService {
 
     @SuppressWarnings("unused")
-    private static final String TAG = RefreshFeedTask.class.getSimpleName();
+    private static final String TAG = RefreshFeedService.class.getSimpleName();
 
     public static final int SUCCESS = 0;
     public static final int ERROR_IOEXCEPTION = 1;
     public static final int ERROR_XMLPULLPARSEREXCEPTION = 2;
+
+    private static final String NO_ACTION = "no_action";
 
     private static final int SUMMARY_MAXLENGTH = 250;
     private static final String DATE_FORMATS[] = { "EEE, dd MMM yyyy HH:mm:ss Z", "EEE, dd MMM yyyy HH:mm:ss z", "yyyy-MM-dd'T'HH:mm:ssz",
@@ -55,78 +56,104 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
     private int mKeepReadArticlesDays;
     private int mKeepUnreadArticlesDays;
 
-    private Handler mMainUIHandler;
-    private Context mContext;
     private int returnCondition = SUCCESS;
 
-    public RefreshFeedTask(Handler mainUIHandler, Context context) {
-        mMainUIHandler = mainUIHandler;
-        mContext = context;
+    private HashSet<Integer> mFeedsUpdating;
+
+    public RefreshFeedService() {
+        super("RefreshFeedService");
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
 
         for (int i = 0; i < DATE_FORMATS.length; i++) {
             mSimpleDateFormats[i] = new SimpleDateFormat(DATE_FORMATS[i], Locale.US);
             mSimpleDateFormats[i].setTimeZone(TimeZone.getTimeZone("GMT"));
         }
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(mContext);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mKeepReadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_read_articles_days", "3"));
         mKeepUnreadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_unread_articles_days", "7"));
+
+        mFeedsUpdating = new HashSet<Integer>();
     }
 
-    protected Integer doInBackground(Integer... params) {
-        int mFeedID = params[0];
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        int feedID = intent.getIntExtra("feedid", -1);
 
-        ContentResolver contentResolver = mContext.getContentResolver();
-        ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
-        ArrayList<String> existingArticles = new ArrayList<String>();
-        Date minimumDate;
-        Date newestArticleDate = new Date(0);
-        Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
+        if (mFeedsUpdating.contains(feedID)) {
+            intent.setAction(NO_ACTION);
+        } else {
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.putBoolean("refreshing", true);
+            editor.commit();
 
-        boolean isArticle = false;
-        boolean linkOverride = false;
-        String title = null;
-        String summary = null;
-        String content = null;
-        String guid = null;
-        Date pubdate = null;
-        Date updated = null;
-        String link = null;
+            mFeedsUpdating.add(feedID);
+        }
+
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    @Override
+    protected void onHandleIntent(Intent intent) {
+        if (intent.getAction() == NO_ACTION) {
+            return;
+        }
+        int feedID = intent.getIntExtra("feedid", -1);
 
         try {
 
-            String feedURL = queryURL(mFeedID);
-            Log.v(TAG, "id_" + mFeedID + ": " + feedURL);
+            ContentResolver contentResolver = getContentResolver();
+            ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
+            ArrayList<String> existingArticles = new ArrayList<String>();
+            Date minimumDate;
+            Date newestArticleDate = new Date(0);
+            Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
+
+            boolean isArticle = false;
+            boolean linkOverride = false;
+            String title = null;
+            String summary = null;
+            String content = null;
+            String guid = null;
+            Date pubdate = null;
+            Date updated = null;
+            String link = null;
+
+            String feedURL = queryURL(feedID);
+            Log.v(TAG, "id_" + feedID + ": " + feedURL);
 
             // mark read articles after KEEP_READ_ARTICLES_DAYS as deleted
             ContentValues contentValues = new ContentValues();
             contentValues.put(ArticleDAO.ISDELETED, 1);
             int dbupdated = contentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE
                     + " < ? AND " + ArticleDAO.READ + " IS NOT NULL",
-                    new String[] { String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)) });
-            Log.v(TAG, "id_" + mFeedID + ": Marked " + dbupdated + " old articles as deleted");
+                    new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)) });
+            Log.v(TAG, "id_" + feedID + ": Marked " + dbupdated + " old articles as deleted");
 
             // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
             int deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?", new String[] {
-                    String.valueOf(mFeedID), SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
-            Log.v(TAG, "id_" + mFeedID + ": Deleted " + deleted + " old unread articles");
+                    String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
+            Log.v(TAG, "id_" + feedID + ": Deleted " + deleted + " old unread articles");
 
-            existingArticles = queryArticles(contentResolver, mFeedID);
-            newestArticleDate = queryNewestArticleDate(contentResolver, mFeedID);
+            existingArticles = queryArticles(contentResolver, feedID);
+            newestArticleDate = queryNewestArticleDate(contentResolver, feedID);
 
-            Log.v(TAG, "id_" + mFeedID + ": existing articles: " + existingArticles.size());
-            Log.v(TAG, "id_" + mFeedID + ": newestArticleDate: " + newestArticleDate);
-            Log.v(TAG, "id_" + mFeedID + ": articleNotOlderThan: " + articleNotOlderThan);
+            Log.v(TAG, "id_" + feedID + ": existing articles: " + existingArticles.size());
+            Log.v(TAG, "id_" + feedID + ": newestArticleDate: " + newestArticleDate);
+            Log.v(TAG, "id_" + feedID + ": articleNotOlderThan: " + articleNotOlderThan);
             if (newestArticleDate.equals(new Date(0))) {
                 minimumDate = articleNotOlderThan;
             } else {
                 minimumDate = articleNotOlderThan.before(newestArticleDate) ? newestArticleDate : articleNotOlderThan;
             }
-            Log.v(TAG, "id_" + mFeedID + ": minimumDate: " + minimumDate);
+            Log.v(TAG, "id_" + feedID + ": minimumDate: " + minimumDate);
 
             URLConnection connection = new URL(feedURL).openConnection();
-            connection.setRequestProperty("User-agent",
-                    mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName));
+            connection.setRequestProperty("User-agent", getResources().getString(R.string.AppName) + "/" + getResources().getString(R.string.AppVersionName));
             InputStream inputStream = connection.getInputStream();
 
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
@@ -176,7 +203,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                     if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
                         isArticle = false;
 
-                        Log.v(TAG, "id_" + mFeedID + ": working on " + guid);
+                        Log.v(TAG, "id_" + feedID + ": working on " + guid);
                         if (pubdate == null) {
                             pubdate = updated;
                         }
@@ -185,19 +212,19 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
                         }
 
                         if (pubdate.before(minimumDate)) {
-                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
+                            Log.v(TAG, "id_" + feedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
                             break;
                         } else {
-                            Log.v(TAG, "id_" + mFeedID + ": pubdate (" + pubdate + ") >=  minimumDate (" + minimumDate + ")");
+                            Log.v(TAG, "id_" + feedID + ": pubdate (" + pubdate + ") >=  minimumDate (" + minimumDate + ")");
                         }
 
                         if (!existingArticles.contains(guid)) {
-                            ContentValues newArticle = prepareArticle(mFeedID, guid, link, pubdate, title, summary, content);
+                            ContentValues newArticle = prepareArticle(feedID, guid, link, pubdate, title, summary, content);
                             if (newArticle != null) {
-                                Log.v(TAG, "id_" + mFeedID + ": adding " + guid);
+                                Log.v(TAG, "id_" + feedID + ": adding " + guid);
                                 contentValuesArrayList.add(newArticle);
                             } else {
-                                Log.e(TAG, "id_" + mFeedID + ": " + guid + " cannot be added");
+                                Log.e(TAG, "id_" + feedID + ": " + guid + " cannot be added");
                             }
                         }
 
@@ -220,30 +247,29 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
             contentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, contentValuesArray);
 
         } catch (IOException e) {
-            Log.v(TAG, "id_" + mFeedID + ": IOEXCEPTION");
+            Log.v(TAG, "id_" + feedID + ": IOEXCEPTION");
             returnCondition = ERROR_IOEXCEPTION;
         } catch (XmlPullParserException e) {
-            Log.v(TAG, "id_" + mFeedID + ": XMLPULLPARSEREXCEPTION");
+            Log.v(TAG, "id_" + feedID + ": XMLPULLPARSEREXCEPTION");
             returnCondition = ERROR_XMLPULLPARSEREXCEPTION;
         } catch (RuntimeException e) {
-            Log.v(TAG, "id_" + mFeedID + ": RUNTIMEEXCEPTION");
+            Log.v(TAG, "id_" + feedID + ": RUNTIMEEXCEPTION");
             e.printStackTrace();
+        } catch (Exception e) {
+            Log.v(TAG, "id_" + feedID + ": EXCEPTION");
+            e.printStackTrace();
+        } finally {
+            mFeedsUpdating.remove(feedID);
+            if (mFeedsUpdating.size() == 0) {
+                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+                editor.putBoolean("refreshing", false);
+                editor.commit();
+
+                Intent broadcastIntent = new Intent();
+                broadcastIntent.setAction("de.hdodenhof.feedreader.FEEDS_REFRESHED");
+                sendBroadcast(broadcastIntent);
+            }
         }
-        return mFeedID;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
-
-    @Override
-    protected void onPostExecute(Integer result) {
-        Message msg = Message.obtain();
-        msg.what = 2;
-        msg.arg1 = result;
-        msg.arg2 = returnCondition;
-        mMainUIHandler.sendMessage(msg);
     }
 
     private String extractLink(XmlPullParser pullParser) throws XmlPullParserException, IOException {
@@ -416,7 +442,7 @@ public class RefreshFeedTask extends AsyncTask<Integer, Void, Integer> {
 
     private String queryURL(int feedID) {
         String feedURL = "";
-        ContentResolver contentResolver = mContext.getContentResolver();
+        ContentResolver contentResolver = getContentResolver();
         Cursor cursor = contentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.URL }, FeedDAO._ID + " = ?",
                 new String[] { String.valueOf(feedID) }, null);
         if (cursor.getCount() > 0) {

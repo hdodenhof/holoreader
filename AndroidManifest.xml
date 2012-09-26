@@ -76,6 +76,8 @@
         <activity android:name=".activities.DisplayArticleActivity" />
         <activity android:name=".activities.EditFeedsActivity" />
         <activity android:name=".activities.SettingsActivity" />
+        
+        <service android:name=".services.RefreshFeedService"></service>
 
         <provider
             android:name=".provider.RSSContentProvider"

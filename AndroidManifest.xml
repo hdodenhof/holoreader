@@ -46,8 +46,6 @@
                 <data android:host="*" />
                 <data android:pathPattern=".*\\.xml" />
                 <data android:pathPattern=".*\\.rss" />
-                <data android:pathPattern=".*feed.*" />
-                <data android:pathPattern=".*rss.*" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
@@ -125,7 +124,7 @@ public class RefreshFeedService extends WakefulIntentService {
             String link = null;
 
             String feedURL = queryURL(feedID);
-            Log.v(TAG, "id_" + feedID + ": " + feedURL);
+            // Log.v(TAG, "id_" + feedID + ": " + feedURL);
 
             // mark read articles after KEEP_READ_ARTICLES_DAYS as deleted
             ContentValues contentValues = new ContentValues();
@@ -133,25 +132,25 @@ public class RefreshFeedService extends WakefulIntentService {
             int dbupdated = contentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE
                     + " < ? AND " + ArticleDAO.READ + " IS NOT NULL",
                     new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)) });
-            Log.v(TAG, "id_" + feedID + ": Marked " + dbupdated + " old articles as deleted");
+            // Log.v(TAG, "id_" + feedID + ": Marked " + dbupdated + " old articles as deleted");
 
             // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
             int deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?", new String[] {
                     String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
-            Log.v(TAG, "id_" + feedID + ": Deleted " + deleted + " old unread articles");
+            // Log.v(TAG, "id_" + feedID + ": Deleted " + deleted + " old unread articles");
 
             existingArticles = queryArticles(contentResolver, feedID);
             newestArticleDate = queryNewestArticleDate(contentResolver, feedID);
 
-            Log.v(TAG, "id_" + feedID + ": existing articles: " + existingArticles.size());
-            Log.v(TAG, "id_" + feedID + ": newestArticleDate: " + newestArticleDate);
-            Log.v(TAG, "id_" + feedID + ": articleNotOlderThan: " + articleNotOlderThan);
+            // Log.v(TAG, "id_" + feedID + ": existing articles: " + existingArticles.size());
+            // Log.v(TAG, "id_" + feedID + ": newestArticleDate: " + newestArticleDate);
+            // Log.v(TAG, "id_" + feedID + ": articleNotOlderThan: " + articleNotOlderThan);
             if (newestArticleDate.equals(new Date(0))) {
                 minimumDate = articleNotOlderThan;
             } else {
                 minimumDate = articleNotOlderThan.before(newestArticleDate) ? newestArticleDate : articleNotOlderThan;
             }
-            Log.v(TAG, "id_" + feedID + ": minimumDate: " + minimumDate);
+            // Log.v(TAG, "id_" + feedID + ": minimumDate: " + minimumDate);
 
             URLConnection connection = new URL(feedURL).openConnection();
             connection.setRequestProperty("User-agent", getResources().getString(R.string.AppName) + "/" + getResources().getString(R.string.AppVersionName));
@@ -204,7 +203,7 @@ public class RefreshFeedService extends WakefulIntentService {
                     if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
                         isArticle = false;
 
-                        Log.v(TAG, "id_" + feedID + ": working on " + guid);
+                        // Log.v(TAG, "id_" + feedID + ": working on " + guid);
                         if (pubdate == null) {
                             pubdate = updated;
                         }
@@ -213,19 +212,19 @@ public class RefreshFeedService extends WakefulIntentService {
                         }
 
                         if (pubdate.before(minimumDate)) {
-                            Log.v(TAG, "id_" + feedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
+                            // Log.v(TAG, "id_" + feedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
                             break;
                         } else {
-                            Log.v(TAG, "id_" + feedID + ": pubdate (" + pubdate + ") >=  minimumDate (" + minimumDate + ")");
+                            // Log.v(TAG, "id_" + feedID + ": pubdate (" + pubdate + ") >=  minimumDate (" + minimumDate + ")");
                         }
 
                         if (!existingArticles.contains(guid)) {
                             ContentValues newArticle = prepareArticle(feedID, guid, link, pubdate, title, summary, content);
                             if (newArticle != null) {
-                                Log.v(TAG, "id_" + feedID + ": adding " + guid);
+                                // Log.v(TAG, "id_" + feedID + ": adding " + guid);
                                 contentValuesArrayList.add(newArticle);
                             } else {
-                                Log.e(TAG, "id_" + feedID + ": " + guid + " cannot be added");
+                                // Log.e(TAG, "id_" + feedID + ": " + guid + " cannot be added");
                             }
                         }
 
@@ -248,16 +247,16 @@ public class RefreshFeedService extends WakefulIntentService {
             contentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, contentValuesArray);
 
         } catch (IOException e) {
-            Log.v(TAG, "id_" + feedID + ": IOEXCEPTION");
+            // Log.v(TAG, "id_" + feedID + ": IOEXCEPTION");
             returnCondition = ERROR_IOEXCEPTION;
         } catch (XmlPullParserException e) {
-            Log.v(TAG, "id_" + feedID + ": XMLPULLPARSEREXCEPTION");
+            // Log.v(TAG, "id_" + feedID + ": XMLPULLPARSEREXCEPTION");
             returnCondition = ERROR_XMLPULLPARSEREXCEPTION;
         } catch (RuntimeException e) {
-            Log.v(TAG, "id_" + feedID + ": RUNTIMEEXCEPTION");
+            // Log.v(TAG, "id_" + feedID + ": RUNTIMEEXCEPTION");
             e.printStackTrace();
         } catch (Exception e) {
-            Log.v(TAG, "id_" + feedID + ": EXCEPTION");
+            // Log.v(TAG, "id_" + feedID + ": EXCEPTION");
             e.printStackTrace();
         } finally {
             mFeedsUpdating.remove(feedID);

@@ -52,10 +52,19 @@ public class DiskLruImageCache {
     }
 
     private File getDiskCacheDir(Context context, String uniqueName) {
-        final String cachePath = Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED || !isExternalStorageRemovable() ? getExternalCacheDir(
-                context).getPath() : context.getCacheDir().getPath();
+        File cacheDir;
 
-        return new File(cachePath + File.separator + uniqueName);
+        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED || !isExternalStorageRemovable()) {
+            if (context.getExternalCacheDir() != null) {
+                cacheDir = context.getExternalCacheDir();
+            } else {
+                cacheDir = context.getCacheDir();
+            }
+        } else {
+            cacheDir = context.getCacheDir();
+        }
+
+        return new File(cacheDir.getPath() + File.separator + uniqueName);
     }
 
     public void put(String key, Bitmap data) {
@@ -139,17 +148,6 @@ public class DiskLruImageCache {
 
     public File getCacheFolder() {
         return mDiskCache.getDirectory();
-    }
-
-    @SuppressLint("NewApi")
-    private static File getExternalCacheDir(Context context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-            return context.getExternalCacheDir();
-        } else {
-            File extCacheDir = new File(Environment.getExternalStorageDirectory(), "/Android/data/" + context.getApplicationInfo().packageName + "/cache/");
-            extCacheDir.mkdirs();
-            return extCacheDir;
-        }
     }
 
     @SuppressLint("NewApi")

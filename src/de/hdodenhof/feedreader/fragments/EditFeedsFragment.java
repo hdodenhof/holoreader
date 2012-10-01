@@ -166,10 +166,6 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
         }
     }
 
-    protected void updateFeedName(long id, String name) {
-
-    }
-
     private class FeedCallback implements Callback {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {

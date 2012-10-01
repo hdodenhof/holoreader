@@ -13,7 +13,6 @@ import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
-import android.view.View;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
@@ -118,9 +117,6 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
 
         mArticlesListView = getListView();
         mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            mArticlesListView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        }
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);
     }

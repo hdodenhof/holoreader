@@ -6,7 +6,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -15,7 +14,6 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.view.View;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -81,10 +79,6 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         UnderlinePageIndicator pageIndicator = (UnderlinePageIndicator) mContext.findViewById(R.id.titles);
         pageIndicator.setViewPager(mPager);
         pageIndicator.setOnPageChangeListener(this);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            mPager.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        }
     }
 
     @Override

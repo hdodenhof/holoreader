@@ -3,7 +3,6 @@ package de.hdodenhof.feedreader.fragments;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -57,9 +56,6 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
         mFeedsListView = getListView();
         mFeedsListView.addHeaderView(getHeaderView());
         mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD) {
-            mFeedsListView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        }
 
         this.setEmptyText(getResources().getString(R.string.LoadingFeeds));
         this.setListAdapter(mFeedAdapter);

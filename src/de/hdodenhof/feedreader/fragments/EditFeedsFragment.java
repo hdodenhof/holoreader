@@ -44,6 +44,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
     @SuppressWarnings("unused")
     private static final String TAG = EditFeedsFragment.class.getSimpleName();
     private static final int LOADER = 10;
+    private static final String BUNDLE_CHECKEDITEMS = "checkeditems";
 
     private SimpleCursorAdapter mFeedAdapter;
     private ListView mFeedsListView;
@@ -67,6 +68,66 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
         this.setEmptyText(getResources().getString(R.string.LoadingFeeds));
         this.setListAdapter(mFeedAdapter);
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.getBooleanArray(BUNDLE_CHECKEDITEMS) != null) {
+                boolean[] checkedItems = savedInstanceState.getBooleanArray("checkeditems");
+                int checkedItemsCount = 0;
+
+                for (int i = 0; i < checkedItems.length; i++) {
+                    mFeedsListView.setItemChecked(i, checkedItems[i]);
+                    if (checkedItems[i]) {
+                        checkedItemsCount++;
+                    }
+                }
+                if (checkedItemsCount > 0) {
+                    updateActionMode(checkedItemsCount);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        SparseBooleanArray checkedItemPositions = mFeedsListView.getCheckedItemPositions();
+        boolean[] checkedItems = new boolean[mFeedsListView.getCount()];
+        for (int i = 0; i < mFeedsListView.getCount(); i++) {
+            checkedItems[i] = checkedItemPositions.get(i, false);
+        }
+
+        savedInstanceState.putBooleanArray(BUNDLE_CHECKEDITEMS, checkedItems);
+    }
+
+    /*
+     * For some reason getCheckedItemIds returns an empty array on some API levels when items where checked using setItemChecked(), so we need to provide the
+     * checkedCount (this is only the case when called from onCreate() to restore state, all other calls are done using updateActionMode() without parameters)
+     */
+    private void updateActionMode(int checkedCount) {
+        if (mActionMode == null || mActionViewVisible == false) {
+            mActionMode = ((SherlockFragmentActivity) getActivity()).startActionMode(new FeedCallback());
+            mActionViewVisible = true;
+        }
+
+        MenuItem edit = mActionMode.getMenu().getItem(0);
+
+        String feedsFound = getResources().getQuantityString(R.plurals.numberOfFeedsSelected, checkedCount, checkedCount);
+        mActionMode.setSubtitle(feedsFound);
+
+        if (checkedCount == 1) {
+            if (!edit.isVisible()) {
+                edit.setVisible(true);
+            }
+        } else {
+            if (edit.isVisible()) {
+                edit.setVisible(false);
+            }
+        }
+    }
+
+    private void updateActionMode() {
+        updateActionMode(getCheckedItemCount());
     }
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -85,37 +146,14 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
     }
 
     private class FeedOnItemClickListener implements OnItemClickListener {
-
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-            final int checkedCount = getCheckedItemCount();
-
-            if (checkedCount > 0) {
-                if (mActionMode == null || mActionViewVisible == false) {
-                    mActionMode = ((SherlockFragmentActivity) getActivity()).startActionMode(new FeedCallback());
-                    mActionViewVisible = true;
-                }
-
-                MenuItem edit = mActionMode.getMenu().getItem(0);
-
-                String feedsFound = getResources().getQuantityString(R.plurals.numberOfFeedsSelected, checkedCount, checkedCount);
-                mActionMode.setSubtitle(feedsFound);
-
-                if (checkedCount == 1) {
-                    if (!edit.isVisible()) {
-                        edit.setVisible(true);
-                    }
-                } else {
-                    if (edit.isVisible()) {
-                        edit.setVisible(false);
-                    }
-                }
+            if (getCheckedItemCount() > 0) {
+                updateActionMode();
             } else {
                 mActionMode.finish();
                 mActionViewVisible = false;
             }
-
         }
     }
 

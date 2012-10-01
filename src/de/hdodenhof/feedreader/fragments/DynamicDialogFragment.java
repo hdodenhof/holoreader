@@ -259,6 +259,20 @@ public interface DynamicDialogFragment {
         }
 
         @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setRetainInstance(true);
+        }
+
+        // workaround for #17423 in AOSP
+        @Override
+        public void onDestroyView() {
+            if (getDialog() != null && getRetainInstance())
+                getDialog().setDismissMessage(null);
+            super.onDestroyView();
+        }
+
+        @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             mAlertDialog = new AlertDialog.Builder(mContext);
             mAlertDialog.setTitle(mTitle);

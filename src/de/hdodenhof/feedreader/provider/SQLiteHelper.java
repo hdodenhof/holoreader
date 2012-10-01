@@ -74,14 +74,21 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         { "The CommonsBlog", "http://commonsware.com/blog/feed.atom" },
         { "The Oatmeal - Comics, Quizzes, & Stories", "http://theoatmeal.com/feed/rss" },
         { "The Official Google Blog", "http://googleblog.blogspot.com/atom.xml" }, 
-        { "SPIEGEL ONLINE - Schlagzeilen", "http://www.spiegel.de/schlagzeilen/index.rss"},
-        { "DIE WELT", "http://www.welt.de/?service=Rss"},
-        { "tagesschau.de - Die Nachrichten der ARD", "http://www.tagesschau.de/xml/rss2"},
-        { "FOCUS Online - News", "http://rss.focus.de/fol/XML/rss_folnews.xml"},
-        { "Handelsblatt Online Schlagzeilen", "http://www.handelsblatt.com/contentexport/feed/schlagzeilen"},
-        { "RSS-Feed - die neusten Meldungen von STERN.DE", "http://www.stern.de/feed/standard/all/"},
-        { "BILD.de alle Artikel", "http://rss.bild.de/bild.xml"},
-        { "heise online News", "http://www.heise.de/newsticker/heise-atom.xml"}
+        { "SPIEGEL ONLINE - Schlagzeilen", "http://www.spiegel.de/schlagzeilen/index.rss" },
+        { "DIE WELT", "http://www.welt.de/?service=Rss" },
+        { "tagesschau.de - Die Nachrichten der ARD", "http://www.tagesschau.de/xml/rss2" },
+        { "FOCUS Online - News", "http://rss.focus.de/fol/XML/rss_folnews.xml" },
+        { "Handelsblatt Online Schlagzeilen", "http://www.handelsblatt.com/contentexport/feed/schlagzeilen" },
+        { "RSS-Feed - die neusten Meldungen von STERN.DE", "http://www.stern.de/feed/standard/all/" },
+        { "BILD.de alle Artikel", "http://rss.bild.de/bild.xml" },
+        { "heise online News", "http://www.heise.de/newsticker/heise-atom.xml" },
+        { "Huffington Post", "http://feeds.huffingtonpost.com/huffingtonpost/raw_feed" },
+        { "Buzzfeed", "http://www.buzzfeed.com/index.xml" },
+        { "TechCrunch", "http://feeds.feedburner.com/TechCrunch/" },
+        { "Mashable", "http://feeds.mashable.com/Mashable?format=xml" },
+        { "Gawker.com", "http://feeds.gawker.com/Gawker/full" },
+        { "Business Insider", "http://feeds2.feedburner.com/businessinsider" },
+        { "CNN Top Stories", "http://rss.cnn.com/rss/cnn_topstories.rss" }
     };
     /* @formatter:on */
 

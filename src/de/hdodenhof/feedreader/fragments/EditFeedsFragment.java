@@ -162,21 +162,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             return mFeedsListView.getCheckedItemCount();
         } else {
-            return getCheckedItemIds().length;
-        }
-    }
-
-    @SuppressLint("NewApi")
-    private long[] getCheckedItemIds() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.FROYO) {
-            return mFeedsListView.getCheckedItemIds();
-        } else {
-            SparseBooleanArray checkedPositions = mFeedsListView.getCheckedItemPositions();
-            long[] ids = new long[checkedPositions.size()];
-            for (int i = 0; i < checkedPositions.size(); i++) {
-                ids[i] = mFeedsListView.getItemIdAtPosition(checkedPositions.keyAt(i));
-            }
-            return ids;
+            return mFeedsListView.getCheckedItemIds().length;
         }
     }
 
@@ -202,7 +188,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            long[] checkFeedIDs = getCheckedItemIds();
+            long[] checkFeedIDs = mFeedsListView.getCheckedItemIds();
             switch (item.getItemId()) {
             case R.id.item_delete:
                 ContentResolver contentResolver = getActivity().getContentResolver();

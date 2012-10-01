@@ -78,7 +78,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
                         currentPrefix = "";
                     }
 
-                    if (currentTag.equalsIgnoreCase("rss") || currentTag.equalsIgnoreCase("feed")) {
+                    if (currentTag.equalsIgnoreCase("rss") || currentTag.equalsIgnoreCase("feed") || currentTag.equalsIgnoreCase("rdf")) {
                         isFeed = true;
                     } else if (currentTag.equalsIgnoreCase("title") && isFeed && foundName == false) {
                         name = pullParser.nextText();

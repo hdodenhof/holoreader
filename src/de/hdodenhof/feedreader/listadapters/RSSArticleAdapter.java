@@ -1,5 +1,6 @@
 package de.hdodenhof.feedreader.listadapters;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -228,8 +229,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                     }
                 }
 
-            } catch (Exception e) {
-                e.printStackTrace();
+            } catch (IOException e) {
                 return null;
             }
         }

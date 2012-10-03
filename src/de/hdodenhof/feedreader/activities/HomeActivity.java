@@ -404,9 +404,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         MenuInflater menuInflater = getSupportMenuInflater();
         menuInflater.inflate(R.menu.main, menu);
 
-        if (!mUnreadOnly) {
-            menu.getItem(2).setIcon(R.drawable.ab_btn_checkbox_checked);
-        }
         mRefreshItem = menu.getItem(0);
 
         return true;
@@ -430,10 +427,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
             if (mUnreadOnly) {
                 Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
-                item.setIcon(R.drawable.ab_btn_checkbox_unchecked);
             } else {
                 Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
-                item.setIcon(R.drawable.ab_btn_checkbox_checked);
             }
             mFeedListFragment.setUnreadOnly(mUnreadOnly);
             if (mTwoPane) {

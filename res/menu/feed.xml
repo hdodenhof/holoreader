@@ -8,12 +8,10 @@
         android:title="@string/MenuWeb"/>
     <item
         android:id="@+id/item_toggle"
-        android:icon="@drawable/ab_btn_checkbox_unchecked"
         android:showAsAction="never"
         android:title="@string/MenuToogleUnread"/>
     <item
         android:id="@+id/item_markread"
-        android:icon="@drawable/ab_btn_markread"
         android:showAsAction="never"
         android:title="@string/MenuMarkRead"/>
 

@@ -147,7 +147,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
 
         setContentView(R.layout.activity_home);
 
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
 
@@ -449,9 +448,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             return true;
         case R.id.item_editfeeds:
             startActivity(new Intent(this, EditFeedsActivity.class));
-            return true;
-        case R.id.item_settings:
-            startActivity(new Intent(this, SettingsActivity.class));
             return true;
         default:
             return super.onOptionsItemSelected(item);

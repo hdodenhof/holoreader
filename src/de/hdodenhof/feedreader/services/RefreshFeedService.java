@@ -47,14 +47,13 @@ public class RefreshFeedService extends WakefulIntentService {
     public static final int ERROR_XMLPULLPARSEREXCEPTION = 2;
 
     private static final String NO_ACTION = "no_action";
+    private static final int KEEP_READ_ARTICLES_DAYS = 3;
+    private static final int KEEP_UNREAD_ARTICLES_DAYS = 7;
 
     private static final int SUMMARY_MAXLENGTH = 250;
     private static final String DATE_FORMATS[] = { "EEE, dd MMM yyyy HH:mm:ss Z", "EEE, dd MMM yyyy HH:mm:ss z", "yyyy-MM-dd'T'HH:mm:ssz",
             "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
     private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
-
-    private int mKeepReadArticlesDays;
-    private int mKeepUnreadArticlesDays;
 
     private int returnCondition = SUCCESS;
 
@@ -74,8 +73,6 @@ public class RefreshFeedService extends WakefulIntentService {
         }
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mKeepReadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_read_articles_days", "3"));
-        mKeepUnreadArticlesDays = Integer.parseInt(sharedPrefs.getString("pref_keep_unread_articles_days", "7"));
 
         mFeedsUpdating = new HashSet<Integer>();
     }
@@ -111,7 +108,7 @@ public class RefreshFeedService extends WakefulIntentService {
             ArrayList<String> existingArticles = new ArrayList<String>();
             Date minimumDate;
             Date newestArticleDate = new Date(0);
-            Date articleNotOlderThan = pastDate(mKeepUnreadArticlesDays);
+            Date articleNotOlderThan = pastDate(KEEP_UNREAD_ARTICLES_DAYS);
 
             boolean isArticle = false;
             boolean linkOverride = false;
@@ -131,12 +128,12 @@ public class RefreshFeedService extends WakefulIntentService {
             contentValues.put(ArticleDAO.ISDELETED, 1);
             int dbupdated = contentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE
                     + " < ? AND " + ArticleDAO.READ + " IS NOT NULL",
-                    new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(mKeepReadArticlesDays)) });
+                    new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_READ_ARTICLES_DAYS)) });
             // Log.v(TAG, "id_" + feedID + ": Marked " + dbupdated + " old articles as deleted");
 
             // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
             int deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?", new String[] {
-                    String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(mKeepUnreadArticlesDays)) });
+                    String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_UNREAD_ARTICLES_DAYS)) });
             // Log.v(TAG, "id_" + feedID + ": Deleted " + deleted + " old unread articles");
 
             existingArticles = queryArticles(contentResolver, feedID);

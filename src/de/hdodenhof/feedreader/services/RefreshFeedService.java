@@ -69,8 +69,8 @@ public class RefreshFeedService extends WakefulIntentService {
             mSimpleDateFormats[i].setTimeZone(TimeZone.getTimeZone("GMT"));
         }
 
+        mContentResolver = getContentResolver();
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         mFeedsUpdating = new HashSet<Integer>();
     }
 

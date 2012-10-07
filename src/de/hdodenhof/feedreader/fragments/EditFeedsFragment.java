@@ -47,7 +47,6 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
 
     private SimpleCursorAdapter mFeedAdapter;
     private ListView mFeedsListView;
-    private View mRootView;
     private ActionMode mActionMode;
     private boolean mActionViewVisible = false;
 

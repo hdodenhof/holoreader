@@ -20,12 +20,12 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String TAG = SQLiteHelper.class.getSimpleName();
 
     private static final String DATABASE_NAME = "feedreader.db";
-    private static final int DATABASE_VERSION = 16;
+    private static final int DATABASE_VERSION = 17;
 
-    private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " integer primary key autoincrement, "
+    private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT);";
 
-    private static final String ARTICLE_TABLE_CREATE = "CREATE TABLE " + ArticleDAO.TABLE + " (" + ArticleDAO._ID + " integer primary key autoincrement, "
+    private static final String ARTICLE_TABLE_CREATE = "CREATE TABLE " + ArticleDAO.TABLE + " (" + ArticleDAO._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + ArticleDAO.FEEDID + " integer, " + ArticleDAO.GUID + " TEXT, " + ArticleDAO.PUBDATE + " TEXT, " + ArticleDAO.TITLE + " TEXT , "
             + ArticleDAO.SUMMARY + " TEXT, " + ArticleDAO.CONTENT + " TEXT, " + ArticleDAO.IMAGE + " TEXT, " + ArticleDAO.LINK + " TEXT, " + ArticleDAO.READ
             + " TEXT, " + ArticleDAO.ISDELETED + " INTEGER);";
@@ -46,6 +46,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + ArticleDAO.LINK + " AS " + ArticleDAO.LINK + ", " + ArticleDAO.TABLE + "." + ArticleDAO.READ + " AS " + ArticleDAO.READ + ", " + ArticleDAO.TABLE
             + "." + ArticleDAO.ISDELETED + " AS " + ArticleDAO.ISDELETED + " FROM " + ArticleDAO.TABLE + " LEFT JOIN " + FeedDAO.TABLE + " ON "
             + ArticleDAO.TABLE + "." + ArticleDAO.FEEDID + " = " + FeedDAO.TABLE + "." + FeedDAO._ID + ";";
+
+    private static final String ARTICLE_INDEX_FEEDID_CREATE = "CREATE INDEX " + ArticleDAO.IDX_FEEDID + " ON " + ArticleDAO.TABLE + " (" + ArticleDAO.FEEDID
+            + ");";
 
     /* @formatter:off */
     private static final String mDummydata[][] = {
@@ -104,6 +107,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(ARTICLE_TABLE_CREATE);
         database.execSQL(FEED_VIEW_CREATE);
         database.execSQL(ARTICLE_VIEW_CREATE);
+        database.execSQL(ARTICLE_INDEX_FEEDID_CREATE);
 
         for (String[] data : mDummydata) {
             ContentValues contentValues = new ContentValues();
@@ -120,6 +124,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + ArticleDAO.TABLE);
         db.execSQL("DROP VIEW IF EXISTS " + FeedDAO.VIEW);
         db.execSQL("DROP VIEW IF EXISTS " + ArticleDAO.VIEW);
+        db.execSQL("DROP INDE IF EXISTS " + ArticleDAO.IDX_FEEDID);
         onCreate(db);
     }
 
@@ -153,6 +158,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         public static final String ISDELETED = "isdeleted";
 
         public static final String VIEW = "articles_view";
+
+        private static final String IDX_FEEDID = "idx_article_feedid";
 
     }
 

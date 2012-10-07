@@ -6,11 +6,11 @@
     android:gravity="center" >
 
     <ProgressBar
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginRight="4dp"
         android:indeterminate="true"
-        android:indeterminateDrawable="@drawable/progress_small_holo" />
+        android:indeterminateDrawable="@drawable/progress_medium_holo" />
 
     <TextView
         android:id="@+id/loading"

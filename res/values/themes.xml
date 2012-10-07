@@ -46,7 +46,7 @@
 
     <!-- Copied and merged from AOSP -->
     <style name="CustomIndeterminateProgress">
-        <item name="android:indeterminateDrawable">@drawable/progress_small_holo</item>
+        <item name="android:indeterminateDrawable">@drawable/progress_medium_holo</item>
         <item name="android:animationResolution">33</item>
         <item name="android:minWidth">16dip</item>
         <item name="android:maxWidth">16dip</item>

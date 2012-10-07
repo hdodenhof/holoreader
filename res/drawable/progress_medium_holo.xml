@@ -17,7 +17,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <rotate
-             android:drawable="@drawable/spinner_16_outer_holo"
+             android:drawable="@drawable/spinner_48_outer_holo"
              android:pivotX="50%"
              android:pivotY="50%"
              android:fromDegrees="0"
@@ -25,7 +25,7 @@
     </item>
     <item>
         <rotate
-             android:drawable="@drawable/spinner_16_inner_holo"
+             android:drawable="@drawable/spinner_48_inner_holo"
              android:pivotX="50%"
              android:pivotY="50%"
              android:fromDegrees="720"

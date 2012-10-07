@@ -2,6 +2,7 @@ package de.hdodenhof.feedreader.services;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
@@ -42,10 +43,6 @@ public class RefreshFeedService extends WakefulIntentService {
     @SuppressWarnings("unused")
     private static final String TAG = RefreshFeedService.class.getSimpleName();
 
-    public static final int SUCCESS = 0;
-    public static final int ERROR_IOEXCEPTION = 1;
-    public static final int ERROR_XMLPULLPARSEREXCEPTION = 2;
-
     private static final String NO_ACTION = "no_action";
     private static final int KEEP_READ_ARTICLES_DAYS = 3;
     private static final int KEEP_UNREAD_ARTICLES_DAYS = 7;
@@ -55,8 +52,8 @@ public class RefreshFeedService extends WakefulIntentService {
             "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
     private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
 
-    private int returnCondition = SUCCESS;
-
+    private ContentResolver mContentResolver;
+    private SharedPreferences mSharedPrefs;
     private HashSet<Integer> mFeedsUpdating;
 
     public RefreshFeedService() {
@@ -72,7 +69,7 @@ public class RefreshFeedService extends WakefulIntentService {
             mSimpleDateFormats[i].setTimeZone(TimeZone.getTimeZone("GMT"));
         }
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         mFeedsUpdating = new HashSet<Integer>();
     }
@@ -84,7 +81,7 @@ public class RefreshFeedService extends WakefulIntentService {
         if (mFeedsUpdating.contains(feedID)) {
             intent.setAction(NO_ACTION);
         } else {
-            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            SharedPreferences.Editor editor = mSharedPrefs.edit();
             editor.putBoolean("refreshing", true);
             editor.commit();
 
@@ -101,164 +98,95 @@ public class RefreshFeedService extends WakefulIntentService {
         }
         int feedID = intent.getIntExtra("feedid", -1);
 
+        ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
+
+        boolean isArticle = false;
+        boolean linkOverride = false;
+        String title = null;
+        String summary = null;
+        String content = null;
+        String guid = null;
+        Date pubdate = null;
+        Date updated = null;
+        String link = null;
+
         try {
+            deleteOldArticles(feedID);
 
-            ContentResolver contentResolver = getContentResolver();
-            ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
-            ArrayList<String> existingArticles = new ArrayList<String>();
-            Date minimumDate;
-            Date newestArticleDate = new Date(0);
-            Date articleNotOlderThan = pastDate(KEEP_UNREAD_ARTICLES_DAYS);
+            ArrayList<String> existingArticles = queryArticles(feedID);
+            Date minimumDate = getMinimumDate(feedID);
 
-            boolean isArticle = false;
-            boolean linkOverride = false;
-            String title = null;
-            String summary = null;
-            String content = null;
-            String guid = null;
-            Date pubdate = null;
-            Date updated = null;
-            String link = null;
-
-            String feedURL = queryURL(feedID);
-            // Log.v(TAG, "id_" + feedID + ": " + feedURL);
-
-            // mark read articles after KEEP_READ_ARTICLES_DAYS as deleted
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(ArticleDAO.ISDELETED, 1);
-            int dbupdated = contentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE
-                    + " < ? AND " + ArticleDAO.READ + " IS NOT NULL",
-                    new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_READ_ARTICLES_DAYS)) });
-            // Log.v(TAG, "id_" + feedID + ": Marked " + dbupdated + " old articles as deleted");
-
-            // delete all articles after MAX_NEW_ARTICLES_AGE_DAYS
-            int deleted = contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?", new String[] {
-                    String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_UNREAD_ARTICLES_DAYS)) });
-            // Log.v(TAG, "id_" + feedID + ": Deleted " + deleted + " old unread articles");
-
-            existingArticles = queryArticles(contentResolver, feedID);
-            newestArticleDate = queryNewestArticleDate(contentResolver, feedID);
-
-            // Log.v(TAG, "id_" + feedID + ": existing articles: " + existingArticles.size());
-            // Log.v(TAG, "id_" + feedID + ": newestArticleDate: " + newestArticleDate);
-            // Log.v(TAG, "id_" + feedID + ": articleNotOlderThan: " + articleNotOlderThan);
-            if (newestArticleDate.equals(new Date(0))) {
-                minimumDate = articleNotOlderThan;
-            } else {
-                minimumDate = articleNotOlderThan.before(newestArticleDate) ? newestArticleDate : articleNotOlderThan;
-            }
-            // Log.v(TAG, "id_" + feedID + ": minimumDate: " + minimumDate);
-
-            URLConnection connection = new URL(feedURL).openConnection();
-            connection.setRequestProperty("User-agent", getResources().getString(R.string.AppName) + "/" + getResources().getString(R.string.AppVersionName));
-            InputStream inputStream = connection.getInputStream();
-
-            XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
-            parserFactory.setNamespaceAware(true);
-            XmlPullParser pullParser = parserFactory.newPullParser();
-            pullParser.setInput(inputStream, null);
+            InputStream inputStream = getURLInputStream(queryURL(feedID));
+            XmlPullParser pullParser = getParser(inputStream);
 
             int eventType = pullParser.getEventType();
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 if (eventType == XmlPullParser.START_TAG) {
                     String currentTag = pullParser.getName();
-                    String currentPrefix = pullParser.getPrefix();
+                    String currentPrefix = pullParser.getPrefix() != null ? pullParser.getPrefix() : "";
 
-                    if (currentPrefix == null) {
-                        currentPrefix = "";
-                    }
-
-                    if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
+                    if (isItemTag(currentTag, currentPrefix)) {
                         isArticle = true;
-                    } else if (currentTag.equalsIgnoreCase("title") && isArticle == true) {
+                    } else if (isTitleTag(currentTag, currentPrefix) && isArticle) {
                         title = safeNextText(pullParser);
-                    } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && isArticle == true
-                            && currentPrefix.equalsIgnoreCase("")) {
+                    } else if (isSummaryTag(currentTag, currentPrefix) && isArticle) {
                         summary = safeNextText(pullParser);
-                    } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
-                            .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
+                    } else if (isContentTag(currentTag, currentPrefix) && isArticle) {
                         content = extractContent(pullParser);
-                    } else if ((currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id")) && isArticle == true) {
+                    } else if (isGuidTag(currentTag, currentPrefix) && isArticle) {
                         guid = safeNextText(pullParser);
-                    } else if (currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date")
-                            && isArticle == true) {
+                    } else if (isDateTag(currentTag, currentPrefix) && isArticle) {
                         pubdate = parsePubdate(safeNextText(pullParser));
-                    } else if (currentTag.equalsIgnoreCase("updated") && isArticle == true) {
+                    } else if (isUpdatedTag(currentTag, currentPrefix) && isArticle) {
                         updated = parsePubdate(safeNextText(pullParser));
-                    } else if (currentTag.equalsIgnoreCase("link") && isArticle == true) {
+                    } else if (isLinkTag(currentTag, currentPrefix) && isArticle) {
                         if (!linkOverride) {
                             link = extractLink(pullParser);
                         }
-                    } else if (currentTag.equalsIgnoreCase("origLink") && isArticle == true) {
+                    } else if (isOrigLinkTag(currentTag, currentPrefix) && isArticle) {
                         link = safeNextText(pullParser);
                         linkOverride = true;
                     }
 
-                } else if (eventType == XmlPullParser.END_TAG) {
-                    String currentTag = pullParser.getName();
+                } else if (eventType == XmlPullParser.END_TAG && isItemTag(pullParser.getName(), "")) {
+                    pubdate = pubdate != null ? pubdate : updated;
+                    guid = guid != null ? guid : link;
 
-                    if (currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) {
-                        isArticle = false;
-
-                        // Log.v(TAG, "id_" + feedID + ": working on " + guid);
-                        if (pubdate == null) {
-                            pubdate = updated;
-                        }
-                        if (guid == null) {
-                            guid = link;
-                        }
-
-                        if (pubdate.before(minimumDate)) {
-                            // Log.v(TAG, "id_" + feedID + ": pubdate (" + pubdate + ") <  minimumDate (" + minimumDate + "), breaking");
-                            break;
-                        } else {
-                            // Log.v(TAG, "id_" + feedID + ": pubdate (" + pubdate + ") >=  minimumDate (" + minimumDate + ")");
-                        }
-
-                        if (!existingArticles.contains(guid)) {
-                            ContentValues newArticle = prepareArticle(feedID, guid, link, pubdate, title, summary, content);
-                            if (newArticle != null) {
-                                // Log.v(TAG, "id_" + feedID + ": adding " + guid);
-                                contentValuesArrayList.add(newArticle);
-                            } else {
-                                // Log.e(TAG, "id_" + feedID + ": " + guid + " cannot be added");
-                            }
-                        }
-
-                        title = null;
-                        summary = null;
-                        content = null;
-                        guid = null;
-                        pubdate = null;
-                        updated = null;
-                        link = null;
+                    if (pubdate.before(minimumDate)) {
+                        break;
                     }
+
+                    if (!existingArticles.contains(guid)) {
+                        ContentValues newArticle = prepareArticle(feedID, guid, link, pubdate, title, summary, content);
+                        if (newArticle != null) {
+                            contentValuesArrayList.add(newArticle);
+                        }
+                    }
+
+                    isArticle = false;
+                    title = null;
+                    summary = null;
+                    content = null;
+                    guid = null;
+                    pubdate = null;
+                    updated = null;
+                    link = null;
+
                 }
                 eventType = pullParser.next();
             }
 
             inputStream.close();
-
-            ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
-            contentValuesArray = contentValuesArrayList.toArray(contentValuesArray);
-            contentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, contentValuesArray);
+            storeArticles(contentValuesArrayList);
 
         } catch (IOException e) {
-            // Log.v(TAG, "id_" + feedID + ": IOEXCEPTION");
-            returnCondition = ERROR_IOEXCEPTION;
         } catch (XmlPullParserException e) {
-            // Log.v(TAG, "id_" + feedID + ": XMLPULLPARSEREXCEPTION");
-            returnCondition = ERROR_XMLPULLPARSEREXCEPTION;
-        } catch (RuntimeException e) {
-            // Log.v(TAG, "id_" + feedID + ": RUNTIMEEXCEPTION");
-            e.printStackTrace();
         } catch (Exception e) {
-            // Log.v(TAG, "id_" + feedID + ": EXCEPTION");
             e.printStackTrace();
         } finally {
             mFeedsUpdating.remove(feedID);
             if (mFeedsUpdating.size() == 0) {
-                SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+                SharedPreferences.Editor editor = mSharedPrefs.edit();
                 editor.putBoolean("refreshing", false);
                 editor.commit();
 
@@ -267,6 +195,84 @@ public class RefreshFeedService extends WakefulIntentService {
                 sendBroadcast(broadcastIntent);
             }
         }
+    }
+
+    private boolean isItemTag(String tag, String prefix) {
+        return tag.equalsIgnoreCase("item") || tag.equalsIgnoreCase("entry");
+    }
+
+    private boolean isTitleTag(String currentTag, String prefix) {
+        return currentTag.equalsIgnoreCase("title");
+    }
+
+    private boolean isSummaryTag(String currentTag, String currentPrefix) {
+        return (currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && currentPrefix.equalsIgnoreCase("");
+    }
+
+    private boolean isContentTag(String currentTag, String currentPrefix) {
+        return (currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content"))
+                || (currentTag.equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""));
+    }
+
+    private boolean isGuidTag(String currentTag, String currentPrefix) {
+        return currentTag.equalsIgnoreCase("guid") || currentTag.equalsIgnoreCase("id");
+    }
+
+    private boolean isDateTag(String currentTag, String currentPrefix) {
+        return currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date");
+    }
+
+    private boolean isUpdatedTag(String currentTag, String currentPrefix) {
+        return currentTag.equalsIgnoreCase("updated");
+    }
+
+    private boolean isLinkTag(String currentTag, String currentPrefix) {
+        return currentTag.equalsIgnoreCase("link");
+    }
+
+    private boolean isOrigLinkTag(String currentTag, String currentPrefix) {
+        return currentTag.equalsIgnoreCase("origLink");
+    }
+
+    private XmlPullParser getParser(InputStream inputStream) throws XmlPullParserException {
+        XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
+        parserFactory.setNamespaceAware(true);
+        XmlPullParser pullParser = parserFactory.newPullParser();
+        pullParser.setInput(inputStream, null);
+        return pullParser;
+    }
+
+    private InputStream getURLInputStream(String feedURL) throws IOException, MalformedURLException {
+        URLConnection connection = new URL(feedURL).openConnection();
+        connection.setRequestProperty("User-agent", getResources().getString(R.string.AppName) + "/" + getResources().getString(R.string.AppVersionName));
+        return connection.getInputStream();
+    }
+
+    private Date getMinimumDate(int feedID) {
+        Date newestArticleDate = queryNewestArticleDate(feedID);
+        Date articleNotOlderThan = pastDate(KEEP_UNREAD_ARTICLES_DAYS);
+
+        if (newestArticleDate == null) {
+            return articleNotOlderThan;
+        } else {
+            return articleNotOlderThan.before(newestArticleDate) ? newestArticleDate : articleNotOlderThan;
+        }
+    }
+
+    private void deleteOldArticles(int feedID) {
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(ArticleDAO.ISDELETED, 1);
+        mContentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ? AND "
+                + ArticleDAO.READ + " IS NOT NULL", new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_READ_ARTICLES_DAYS)) });
+
+        mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?",
+                new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_UNREAD_ARTICLES_DAYS)) });
+    }
+
+    private void storeArticles(ArrayList<ContentValues> contentValuesArrayList) {
+        ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
+        contentValuesArray = contentValuesArrayList.toArray(contentValuesArray);
+        mContentResolver.bulkInsert(RSSContentProvider.URI_ARTICLES, contentValuesArray);
     }
 
     private String extractLink(XmlPullParser pullParser) throws XmlPullParserException, IOException {
@@ -400,10 +406,10 @@ public class RefreshFeedService extends WakefulIntentService {
         return result;
     }
 
-    private ArrayList<String> queryArticles(ContentResolver contentResolver, int feedID) {
+    private ArrayList<String> queryArticles(int feedID) {
         ArrayList<String> articles = new ArrayList<String>();
 
-        Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
+        Cursor cursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
                 ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) }, ArticleDAO.PUBDATE + " DESC");
 
         if (cursor.getCount() > 0) {
@@ -417,10 +423,10 @@ public class RefreshFeedService extends WakefulIntentService {
         return articles;
     }
 
-    private Date queryNewestArticleDate(ContentResolver contentResolver, int feedID) {
-        Date maxDate = new Date(0);
-        Cursor cursor = contentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.PUBDATE }, ArticleDAO.FEEDID + " = ?",
-                new String[] { String.valueOf(feedID) }, ArticleDAO.PUBDATE + " DESC");
+    private Date queryNewestArticleDate(int feedID) {
+        Date maxDate = null;
+        Cursor cursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.PUBDATE },
+                ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) }, ArticleDAO.PUBDATE + " DESC");
 
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();

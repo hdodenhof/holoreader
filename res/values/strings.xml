@@ -65,7 +65,4 @@
         <item quantity="other">%d feeds selected</item>
     </plurals>
 
-    <!-- Settings -->
-    <string name="pref_delete_articles">Delete articles older than %s days</string>
-
 </resources>

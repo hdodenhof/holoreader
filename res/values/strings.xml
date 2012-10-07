@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- FIXME -->
-    <string name="LayoutSize">default</string>
-
-    <!-- Not to be translated -->
-    <string name="AppName">Feedreader</string>
-    <string name="AppVersionName">0.8</string>
-    <string name="MetaDivider">\u0020\u2013\u0020</string>
-
     <!-- General -->
     <string name="Today">Today</string>
     <string name="Yesterday">Yesterday</string>

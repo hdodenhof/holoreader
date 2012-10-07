@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="MissingTranslation">
+
+    <!-- FIXME -->
+    <string name="LayoutSize">default</string>
+    
+    <string name="AppName">Feedreader</string>
+    <string name="AppVersionName">0.8</string>
+    <string name="MetaDivider">\u0020\u2013\u0020</string>
+
+</resources>

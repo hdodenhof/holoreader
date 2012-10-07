@@ -4,9 +4,12 @@
     <!-- FIXME -->
     <string name="LayoutSize">default</string>
 
-    <!-- General -->
+    <!-- Not to be translated -->
     <string name="AppName">Feedreader</string>
     <string name="AppVersionName">0.8</string>
+    <string name="MetaDivider">\u0020\u2013\u0020</string>
+
+    <!-- General -->
     <string name="Today">Today</string>
     <string name="Yesterday">Yesterday</string>
     <string name="PleaseWait">Please wait…</string>
@@ -23,16 +26,14 @@
     <!-- Menu -->
     <string name="MenuRefresh">Refresh Feeds</string>
     <string name="MenuAdd">Add feed</string>
-    <string name="MenuSettings">Settings</string>
     <string name="MenuEditFeeds">Edit Feeds</string>
-    <string name="MenuToogleUnread">Toogle unread items</string>
+    <string name="MenuToogleUnread">Toggle unread items</string>
     <string name="MenuMarkRead">Mark all as read</string>
     <string name="MenuWeb">Open link</string>
 
     <!-- Article -->
     <!-- Using unicode to keep whitespaces, it's " - " -->
     <string name="LoadingArticle">Loading article…</string>
-    <string name="MetaDivider">\u0020\u2013\u0020</string>
 
     <!-- Article List -->
     <string name="LoadingArticles">Loading articles…</string>

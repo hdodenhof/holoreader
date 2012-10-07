@@ -1,9 +1,11 @@
 package de.hdodenhof.feedreader.fragments;
 
 import android.annotation.SuppressLint;
+import android.app.ProgressDialog;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -45,6 +47,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
     private static final int LOADER = 10;
     private static final String BUNDLE_CHECKEDITEMS = "checkeditems";
 
+    private ProgressDialog mSpinner;
     private SimpleCursorAdapter mFeedAdapter;
     private ListView mFeedsListView;
     private ActionMode mActionMode;
@@ -185,15 +188,11 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
 
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-            long[] checkFeedIDs = mFeedsListView.getCheckedItemIds();
+            long[] checkedFeedIDs = mFeedsListView.getCheckedItemIds();
             switch (item.getItemId()) {
             case R.id.item_delete:
-                ContentResolver contentResolver = getActivity().getContentResolver();
-                for (long feedID : checkFeedIDs) {
-                    contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) });
-                    contentResolver.delete(RSSContentProvider.URI_FEEDS, FeedDAO._ID + " = ?", new String[] { String.valueOf(feedID) });
-                }
-                mode.finish();
+                mSpinner = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.PleaseWait), true);
+                (new DeleteFeedsTask()).execute(checkedFeedIDs);
                 return true;
             case R.id.item_edit:
                 Cursor feed = (Cursor) mFeedsListView.getItemAtPosition(mFeedsListView.getCheckedItemPositions().keyAt(0));
@@ -234,5 +233,25 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
             }
             mActionViewVisible = false;
         }
+    }
+
+    private class DeleteFeedsTask extends AsyncTask<long[], Void, Void> {
+        @Override
+        protected Void doInBackground(long[]... params) {
+            ContentResolver contentResolver = getActivity().getContentResolver();
+            for (long feedID : params[0]) {
+                contentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) });
+                contentResolver.delete(RSSContentProvider.URI_FEEDS, FeedDAO._ID + " = ?", new String[] { String.valueOf(feedID) });
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            mSpinner.dismiss();
+            mActionMode.finish();
+        }
+
     }
 }

@@ -124,7 +124,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + ArticleDAO.TABLE);
         db.execSQL("DROP VIEW IF EXISTS " + FeedDAO.VIEW);
         db.execSQL("DROP VIEW IF EXISTS " + ArticleDAO.VIEW);
-        db.execSQL("DROP INDE IF EXISTS " + ArticleDAO.IDX_FEEDID);
+        db.execSQL("DROP INDEX IF EXISTS " + ArticleDAO.IDX_FEEDID);
         onCreate(db);
     }
 

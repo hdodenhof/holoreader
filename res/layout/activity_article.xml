@@ -4,8 +4,10 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
 
+    <include layout="@layout/include_loading" />
+
     <android.support.v4.view.ViewPager
-        android:id="@+android:id/viewpager_article"
+        android:id="@+id/viewpager_article"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
 
@@ -13,8 +15,8 @@
         android:id="@+id/titles"
         android:layout_width="fill_parent"
         android:layout_height="2dp"
+        android:layout_alignParentBottom="true"
         android:background="#00FFFFFF"
-        app:selectedColor="#FFCC0000"
-        android:layout_alignParentBottom="true" />
+        app:selectedColor="#FFCC0000" />
 
 </RelativeLayout>

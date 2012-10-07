@@ -1,6 +1,5 @@
 package de.hdodenhof.feedreader.fragments;
 
-import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -15,8 +14,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
-
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
@@ -29,7 +26,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class FeedListFragment extends SherlockListFragment implements LoaderCallbacks<Cursor> {
+public class FeedListFragment extends CustomListFragment implements LoaderCallbacks<Cursor> {
 
     @SuppressWarnings("unused")
     private static final String TAG = FeedListFragment.class.getSimpleName();
@@ -37,13 +34,12 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
     private SimpleCursorAdapter mFeedAdapter;
     private ListView mFeedsListView;
+    private View mRootView;
     private boolean mUnreadOnly = true;
 
-    @SuppressLint("NewApi")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUnreadOnly = preferences.getBoolean("unreadonly", true);
 
@@ -57,11 +53,10 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
         mFeedsListView.addHeaderView(getHeaderView());
         mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
-        this.setEmptyText(getResources().getString(R.string.LoadingFeeds));
         this.setListAdapter(mFeedAdapter);
+        this.setLoadingText(getResources().getString(R.string.LoadingFeeds));
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);
-
     }
 
     private View getHeaderView() {
@@ -96,7 +91,14 @@ public class FeedListFragment extends SherlockListFragment implements LoaderCall
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mFeedAdapter.swapCursor(data);
-        this.setEmptyText(getResources().getString(R.string.NoUnreadFeeds));
+
+        if (mUnreadOnly) {
+            setEmptyText(getResources().getString(R.string.NoUnreadFeeds));
+        } else {
+            setEmptyText(getResources().getString(R.string.NoFeeds));
+        }
+
+        setLoadingFinished();
     }
 
     public void onLoaderReset(Loader<Cursor> loader) {

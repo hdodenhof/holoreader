@@ -21,7 +21,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.app.SherlockListFragment;
 import com.actionbarsherlock.view.ActionMode;
 import com.actionbarsherlock.view.ActionMode.Callback;
 import com.actionbarsherlock.view.Menu;
@@ -39,7 +38,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.FeedDAO;
  * @author Henning Dodenhof
  * 
  */
-public class EditFeedsFragment extends SherlockListFragment implements LoaderCallbacks<Cursor> {
+public class EditFeedsFragment extends CustomListFragment implements LoaderCallbacks<Cursor> {
 
     @SuppressWarnings("unused")
     private static final String TAG = EditFeedsFragment.class.getSimpleName();
@@ -48,6 +47,7 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
     private SimpleCursorAdapter mFeedAdapter;
     private ListView mFeedsListView;
+    private View mRootView;
     private ActionMode mActionMode;
     private boolean mActionViewVisible = false;
 
@@ -66,8 +66,8 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
         mFeedsListView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
         mFeedsListView.setOnItemClickListener(new FeedOnItemClickListener());
 
-        this.setEmptyText(getResources().getString(R.string.LoadingFeeds));
         this.setListAdapter(mFeedAdapter);
+        this.setLoadingText(getResources().getString(R.string.LoadingFeeds));
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getBooleanArray(BUNDLE_CHECKEDITEMS) != null) {
@@ -138,7 +138,9 @@ public class EditFeedsFragment extends SherlockListFragment implements LoaderCal
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mFeedAdapter.swapCursor(data);
-        this.setEmptyText(getResources().getString(R.string.NoFeeds));
+
+        setEmptyText(getResources().getString(R.string.NoFeeds));
+        setLoadingFinished();
     }
 
     public void onLoaderReset(Loader<Cursor> loader) {

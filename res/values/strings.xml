@@ -3,7 +3,7 @@
 
     <!-- FIXME -->
     <string name="LayoutSize">default</string>
-    
+
     <!-- General -->
     <string name="AppName">Feedreader</string>
     <string name="AppVersionName">0.8</string>
@@ -28,9 +28,10 @@
     <string name="MenuToogleUnread">Toogle unread items</string>
     <string name="MenuMarkRead">Mark all as read</string>
     <string name="MenuWeb">Open link</string>
-    
+
     <!-- Article -->
     <!-- Using unicode to keep whitespaces, it's " - " -->
+    <string name="LoadingArticle">Loading article…</string>
     <string name="MetaDivider">\u0020\u2013\u0020</string>
 
     <!-- Article List -->
@@ -52,7 +53,7 @@
     <string name="EditFeedsTitle">Edit feeds</string>
     <string name="EditFeedsMenuDelete">Delete selected feeds</string>
     <string name="EditFeedsMenuEdit">Edit selected feed</string>
-    
+
     <!-- Feed edit dialog -->
     <string name="EditFeedDialogTitle">Edit feed</string>
     <string name="EditFeedDialogName">Feed name</string>
@@ -62,7 +63,7 @@
         <item quantity="one">One feed selected</item>
         <item quantity="other">%d feeds selected</item>
     </plurals>
-    
+
     <!-- Settings -->
     <string name="pref_delete_articles">Delete articles older than %s days</string>
 

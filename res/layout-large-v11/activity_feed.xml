@@ -22,8 +22,10 @@
         android:layout_height="fill_parent"
         android:layout_weight="@integer/dualpane_feedactivity_article_weight" >
 
+        <include layout="@layout/include_loading" />
+
         <android.support.v4.view.ViewPager
-            android:id="@+android:id/viewpager_article"
+            android:id="@+id/viewpager_article"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent" />
 

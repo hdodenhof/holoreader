@@ -16,8 +16,6 @@ import android.support.v4.widget.CursorAdapter;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockListFragment;
-
 import de.hdodenhof.feedreader.R;
 import de.hdodenhof.feedreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.feedreader.misc.FragmentCallback;
@@ -31,7 +29,7 @@ import de.hdodenhof.feedreader.provider.SQLiteHelper.ArticleDAO;
  * @author Henning Dodenhof
  * 
  */
-public class ArticleListFragment extends SherlockListFragment implements LoaderCallbacks<Cursor> {
+public class ArticleListFragment extends CustomListFragment implements LoaderCallbacks<Cursor> {
 
     @SuppressWarnings("unused")
     private static final String TAG = ArticleListFragment.class.getSimpleName();
@@ -112,8 +110,8 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
                 && !mThisIsPrimaryFragment && !isLargeDeviceInPortrait) ? RSSArticleAdapter.MODE_EXTENDED : RSSArticleAdapter.MODE_COMPACT, mTwoPane ? true
                 : false);
 
-        this.setEmptyText(getResources().getString(R.string.LoadingArticles));
         this.setListAdapter(mArticleAdapter);
+        this.setLoadingText(getResources().getString(R.string.LoadingArticles));
 
         mArticlesListView = getListView();
         mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
@@ -155,7 +153,14 @@ public class ArticleListFragment extends SherlockListFragment implements LoaderC
             mArticlesListView.scrollTo(0, 0);
             mScrollTop = false;
         }
-        this.setEmptyText(getResources().getString(R.string.NoUnreadArticles));
+
+        if (mUnreadOnly) {
+            setEmptyText(getResources().getString(R.string.NoUnreadArticles));
+        } else {
+            setEmptyText(getResources().getString(R.string.NoArticles));
+        }
+
+        setLoadingFinished();
 
         mCurrentState = STATE_LOADED;
 

@@ -14,6 +14,9 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
 import com.actionbarsherlock.app.SherlockFragmentActivity;
@@ -75,6 +78,8 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
         mPager = (ViewPager) mContext.findViewById(R.id.viewpager_article);
         mPager.setAdapter(mPagerAdapter);
+
+        ((TextView) ((View) mPager.getParent()).findViewById(R.id.loading)).setText(R.string.LoadingArticle);
 
         UnderlinePageIndicator pageIndicator = (UnderlinePageIndicator) mContext.findViewById(R.id.titles);
         pageIndicator.setViewPager(mPager);
@@ -142,8 +147,10 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
             }
             mCurrentState = STATE_LOADED;
         }
+        ((LinearLayout) mContext.findViewById(R.id.loadingContainer)).setVisibility(View.GONE);
     }
 
+    @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mPagerAdapter.swapCursor(null);
     }

@@ -1,7 +1,5 @@
 package de.hdodenhof.feedreader.activities;
 
-import java.util.ArrayList;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -195,17 +193,9 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
                 cursor.moveToPosition(position);
                 int articleID = cursor.getInt(cursor.getColumnIndex(ArticleDAO._ID));
 
-                ArrayList<String> articles = new ArrayList<String>();
-
-                cursor.moveToFirst();
-                do {
-                    articles.add(cursor.getString(cursor.getColumnIndex(ArticleDAO._ID)));
-                } while (cursor.moveToNext());
-
                 Intent intent = new Intent(this, DisplayArticleActivity.class);
                 intent.putExtra("articleid", articleID);
                 intent.putExtra("feedid", mFeedID);
-                intent.putStringArrayListExtra("articles", articles);
                 startActivity(intent);
             }
             break;

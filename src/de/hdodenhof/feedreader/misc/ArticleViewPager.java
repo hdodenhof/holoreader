@@ -3,10 +3,10 @@ package de.hdodenhof.feedreader.misc;
 import java.util.Date;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -69,7 +69,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         mPreselectedArticleID = mContext.getIntent().getIntExtra("articleid", 0);
         mFeedID = mContext.getIntent().getIntExtra("feedid", 0);
 
-        SharedPreferences preferences = mContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         mUnreadOnly = preferences.getBoolean("unreadonly", true);
 
         mContext.getSupportLoaderManager().initLoader(LOADER, null, this);

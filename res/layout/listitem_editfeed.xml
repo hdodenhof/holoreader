@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<de.hdodenhof.feedreader.misc.CheckableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<de.hdodenhof.holoreader.misc.CheckableLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="72dp"
     android:layout_weight="1"
@@ -39,4 +39,4 @@
             android:textColor="?android:attr/textColorSecondary" />
     </LinearLayout>
 
-</de.hdodenhof.feedreader.misc.CheckableLinearLayout>
+</de.hdodenhof.holoreader.misc.CheckableLinearLayout>

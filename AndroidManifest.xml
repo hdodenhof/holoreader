@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="de.hdodenhof.feedreader"
+    package="de.hdodenhof.holoreader"
     android:versionCode="1"
     android:versionName="@string/AppVersionName" >
 
@@ -20,7 +20,7 @@
         android:label="@string/AppName"
         android:theme="@style/Default" >
         <activity
-            android:name=".activities.HomeActivity"
+            android:name="de.hdodenhof.holoreader.activities.HomeActivity"
             android:label="@string/AppName" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -72,12 +72,12 @@
                 <data android:mimeType="application/xml" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.DisplayFeedActivity" />
-        <activity android:name=".activities.DisplayArticleActivity" />
-        <activity android:name=".activities.EditFeedsActivity" />
-        <activity android:name=".activities.SettingsActivity" />
+        <activity android:name="de.hdodenhof.holoreader.activities.DisplayFeedActivity" />
+        <activity android:name="de.hdodenhof.holoreader.activities.DisplayArticleActivity" />
+        <activity android:name="de.hdodenhof.holoreader.activities.EditFeedsActivity" />
+        <activity android:name="de.hdodenhof.holoreader.activities.SettingsActivity" />
         
-        <service android:name=".services.RefreshFeedService"></service>
+        <service android:name="de.hdodenhof.holoreader.services.RefreshFeedService"></service>
 
         <receiver android:name="com.commonsware.cwac.wakeful.AlarmReceiver">
 			<intent-filter>
@@ -90,8 +90,8 @@
 		</receiver>
         
         <provider
-            android:name=".provider.RSSContentProvider"
-            android:authorities="de.hdodenhof.feedreader.RSSProvider"
+            android:name="de.hdodenhof.holoreader.provider.RSSContentProvider"
+            android:authorities="de.hdodenhof.holoreader.RSSProvider"
             android:exported="false" >
         </provider>
     </application>

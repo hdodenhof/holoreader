@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/fragment_feedlist"
-        android:name="de.hdodenhof.feedreader.fragments.FeedListFragment"
+        android:name="de.hdodenhof.holoreader.fragments.FeedListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="@integer/dualpane_homeactivity_feeds_weight" />
@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/fragment_articlelist"
-        android:name="de.hdodenhof.feedreader.fragments.ArticleListFragment"
+        android:name="de.hdodenhof.holoreader.fragments.ArticleListFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="@integer/dualpane_homeactivity_articles_weight" />

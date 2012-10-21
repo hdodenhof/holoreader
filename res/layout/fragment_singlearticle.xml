@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<de.hdodenhof.feedreader.misc.CustomScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<de.hdodenhof.holoreader.misc.CustomScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/article_scrollview"
     android:layout_width="fill_parent"
@@ -76,4 +76,4 @@
             android:layout_marginTop="16dp" />
     </RelativeLayout>
 
-</de.hdodenhof.feedreader.misc.CustomScrollView>
+</de.hdodenhof.holoreader.misc.CustomScrollView>

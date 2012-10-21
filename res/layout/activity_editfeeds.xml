@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/fragment_editfeeds"
-        android:name="de.hdodenhof.feedreader.fragments.EditFeedsFragment"
+        android:name="de.hdodenhof.holoreader.fragments.EditFeedsFragment"
         android:layout_width="0dp"
         android:layout_height="fill_parent"
         android:layout_weight="1" />

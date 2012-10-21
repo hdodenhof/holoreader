@@ -1,1 +1,1 @@
-<WakefulIntentService listener="de.hdodenhof.feedreader.services.RefreshFeedListener" />
+<WakefulIntentService listener="de.hdodenhof.holoreader.services.RefreshFeedListener" />

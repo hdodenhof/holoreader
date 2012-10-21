@@ -77,6 +77,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         mDiskImageCache = new DiskLruImageCache(context, "images", cacheSize * 2);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         String title = cursor.getString(cursor.getColumnIndex(ArticleDAO.TITLE));

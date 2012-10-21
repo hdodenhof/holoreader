@@ -20,7 +20,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String TAG = SQLiteHelper.class.getSimpleName();
 
     private static final String DATABASE_NAME = "holoreader.db";
-    private static final int DATABASE_VERSION = 17;
+    private static final int DATABASE_VERSION = 1;
 
     private static final String FEED_TABLE_CREATE = "CREATE TABLE " + FeedDAO.TABLE + " (" + FeedDAO._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + FeedDAO.NAME + " TEXT, " + FeedDAO.URL + " TEXT);";

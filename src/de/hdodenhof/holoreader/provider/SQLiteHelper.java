@@ -4,7 +4,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -50,51 +49,6 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String ARTICLE_INDEX_FEEDID_CREATE = "CREATE INDEX " + ArticleDAO.IDX_FEEDID + " ON " + ArticleDAO.TABLE + " (" + ArticleDAO.FEEDID
             + ");";
 
-    /* @formatter:off */
-    private static final String mDummydata[][] = {
-        { "Android Developers Blog", "http://android-developers.blogspot.com/atom.xml" },
-        { "Android Police - Android News, Apps, Games, Phones, Tablets", "http://feeds.feedburner.com/AndroidPolice" },
-        { "Android UI Patterns", "http://feeds.feedburner.com/AndroidUiDesignPatterns" },
-        { "AndroidDevBlog", "http://android.cyrilmottier.com/?feed=rss2" },
-        { "BuildMobile » Android", "http://buildmobile.com/category/android/feed/" },
-        { "Clients From Hell", "http://clientsfromhell.net/rss" },
-        { "Engadget German", "http://de.engadget.com/rss.xml" },
-        { "Facebook Blog", "http://blog.facebook.com/atom.php" },
-        { "geek-week.de", "http://www.geek-week.de/feed/" },
-        { "Gmail Blog", "http://gmailblog.blogspot.com/atom.xml" },
-        { "Google Mobile Blog", "http://googlemobile.blogspot.com/atom.xml" },
-        { "Gründerszene", "http://www.gruenderszene.de/feed" },
-        { "Holo Everywhere", "http://feeds.feedburner.com/HoloEverywhere" },
-        { "In web we trust", "http://feeds.feedburner.com/in_web_we_trust" },
-        { "mobiFlip.de", "http://feeds.feedburner.com/mobiflip" },
-        { "mobile zeitgeist", "http://feeds.feedburner.com/MobileZeitgeist" },
-        { "netzpolitik.org", "http://netzpolitik.org/feed/" },
-        { "Official Android Blog", "http://feeds.feedburner.com/OfficialAndroidBlog" },
-        { "Pushing Pixels", "http://www.pushing-pixels.org/feed" },
-        { "Smashing Magazine Feed", "http://rss1.smashingmagazine.com/feed/" },
-        { "t3n News", "http://feeds.feedburner.com/aktuell/feeds/rss" },
-        { "Techi.com", "http://feeds.feedburner.com/techirss" },
-        { "The CommonsBlog", "http://commonsware.com/blog/feed.atom" },
-        { "The Oatmeal - Comics, Quizzes, & Stories", "http://theoatmeal.com/feed/rss" },
-        { "The Official Google Blog", "http://googleblog.blogspot.com/atom.xml" }, 
-        { "SPIEGEL ONLINE - Schlagzeilen", "http://www.spiegel.de/schlagzeilen/index.rss" },
-        { "DIE WELT", "http://www.welt.de/?service=Rss" },
-        { "tagesschau.de - Die Nachrichten der ARD", "http://www.tagesschau.de/xml/rss2" },
-        { "FOCUS Online - News", "http://rss.focus.de/fol/XML/rss_folnews.xml" },
-        { "Handelsblatt Online Schlagzeilen", "http://www.handelsblatt.com/contentexport/feed/schlagzeilen" },
-        { "RSS-Feed - die neusten Meldungen von STERN.DE", "http://www.stern.de/feed/standard/all/" },
-        { "BILD.de alle Artikel", "http://rss.bild.de/bild.xml" },
-        { "heise online News", "http://www.heise.de/newsticker/heise-atom.xml" },
-        { "Huffington Post", "http://feeds.huffingtonpost.com/huffingtonpost/raw_feed" },
-        { "Buzzfeed", "http://www.buzzfeed.com/index.xml" },
-        { "TechCrunch", "http://feeds.feedburner.com/TechCrunch/" },
-        { "Mashable", "http://feeds.mashable.com/Mashable?format=xml" },
-        { "Gawker.com", "http://feeds.gawker.com/Gawker/full" },
-        { "Business Insider", "http://feeds2.feedburner.com/businessinsider" },
-        { "CNN Top Stories", "http://rss.cnn.com/rss/cnn_topstories.rss" }
-    };
-    /* @formatter:on */
-
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public SQLiteHelper(Context context) {
@@ -108,14 +62,6 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         database.execSQL(FEED_VIEW_CREATE);
         database.execSQL(ARTICLE_VIEW_CREATE);
         database.execSQL(ARTICLE_INDEX_FEEDID_CREATE);
-
-        for (String[] data : mDummydata) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put(FeedDAO.NAME, data[0]);
-            contentValues.put(FeedDAO.URL, data[1]);
-
-            database.insert(FeedDAO.TABLE, null, contentValues);
-        }
     }
 
     @Override

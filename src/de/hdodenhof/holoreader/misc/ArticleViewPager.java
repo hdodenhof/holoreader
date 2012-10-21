@@ -38,7 +38,6 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
     @SuppressWarnings("unused")
     private static final String TAG = ArticleViewPager.class.getSimpleName();
-    private static final String PREFS_NAME = "Holoreader";
     private static final int LOADER = 30;
     private static final int STATE_LOADING = 1;
     private static final int STATE_LOADED = 2;

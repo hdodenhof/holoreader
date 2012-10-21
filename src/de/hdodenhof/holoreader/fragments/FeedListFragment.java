@@ -34,7 +34,6 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
 
     private SimpleCursorAdapter mFeedAdapter;
     private ListView mFeedsListView;
-    private View mRootView;
     private boolean mUnreadOnly = true;
 
     @Override

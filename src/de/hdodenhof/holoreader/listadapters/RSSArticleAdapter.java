@@ -80,6 +80,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     @SuppressWarnings("deprecation")
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+        long id = cursor.getLong(cursor.getColumnIndex(ArticleDAO._ID));
         String title = cursor.getString(cursor.getColumnIndex(ArticleDAO.TITLE));
         String summary = cursor.getString(cursor.getColumnIndex(ArticleDAO.SUMMARY));
         String pubdate = Helpers.formatToYesterdayOrToday(SQLiteHelper.toDate(cursor.getString(cursor.getColumnIndex(ArticleDAO.PUBDATE))));
@@ -117,17 +118,17 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
             setInvisible(articleImage);
 
             if (imageURL != null && imageURL != "") {
-                prepareImage(imageURL, articleImage);
+                prepareImage(id, imageURL, articleImage);
             }
         }
     }
 
     @SuppressLint("NewApi")
-    private void prepareImage(String imageURL, final ImageView articleImage) {
+    private void prepareImage(long id, String imageURL, final ImageView articleImage) {
         try {
             URL url = new URL(imageURL);
 
-            String key = getFileName(url);
+            String key = getUniqueKey(id, url);
             Bitmap image = mImageCache.get(key);
             if (image == null) {
                 image = mDiskImageCache.getBitmap(key);
@@ -137,7 +138,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                     int imageDimension = (mIsModeExtendedPossible) ? mContext.getResources().getDimensionPixelSize(R.dimen.image_dimension_extended) : mContext
                             .getResources().getDimensionPixelSize(R.dimen.image_dimension_compact);
 
-                    ImageDownloaderTask task = new ImageDownloaderTask(articleImage, imageDimension);
+                    ImageDownloaderTask task = new ImageDownloaderTask(id, articleImage, imageDimension);
                     DownloadDrawable downloadDrawable = new DownloadDrawable(task);
                     articleImage.setImageDrawable(downloadDrawable);
 
@@ -187,12 +188,14 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     public class ImageDownloaderTask extends AsyncTask<String, Void, Bitmap> {
         private final WeakReference<ImageView> mImageViewReference;
 
+        private long mID;
         private URL mURL;
         private int mImageDimension;
 
-        public ImageDownloaderTask(ImageView imageView, int imageDimension) {
+        public ImageDownloaderTask(long id, ImageView imageView, int imageDimension) {
             mImageViewReference = new WeakReference<ImageView>(imageView);
             mImageDimension = imageDimension;
+            mID = id;
         }
 
         @Override
@@ -213,7 +216,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                     }
 
                     if (!isCancelled()) {
-                        String key = getFileName(mURL);
+                        String key = getUniqueKey(mID, mURL);
                         synchronized (mDiskImageCache) {
                             if (mDiskImageCache.getBitmap(key) == null) {
                                 mDiskImageCache.put(key, bitmap);
@@ -311,7 +314,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     /*
      * From http://stackoverflow.com/a/1856542
      */
-    private static String getFileName(URL extUrl) {
+    private static String getUniqueKey(long id, URL extUrl) {
         String filename = "";
         String path = extUrl.getPath();
         String[] pathContents = path.split("[\\\\/]");
@@ -333,7 +336,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                 filename = name + "." + extension;
             }
         }
-        return filename;
+        return id + "_" + filename;
     }
 
 }

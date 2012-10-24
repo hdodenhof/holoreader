@@ -31,6 +31,10 @@ public interface DynamicDialogFragment {
 
     public void setPositiveButtonListener(OnClickListener listener);
 
+    public void setPositiveButtonListener(OnClickListener listener, String text);
+
+    public void setNegativeButtonText(String text);
+
     public void setLayout(int ressourceID);
 
     public void setInitialValues(SparseArray<String> map);
@@ -86,6 +90,8 @@ public interface DynamicDialogFragment {
         private OnClickListener mPositiveButtonListener;
         private String mTitle;
         private String mMessage;
+        private String mPositiveButtonText;
+        private String mNegativeButtonText;
         private SparseArray<String> mValues;
         private String mTag;
 
@@ -108,6 +114,16 @@ public interface DynamicDialogFragment {
         @Override
         public void setPositiveButtonListener(OnClickListener listener) {
             mPositiveButtonListener = listener;
+        }
+
+        @Override
+        public void setPositiveButtonListener(OnClickListener listener, String text) {
+            mPositiveButtonListener = listener;
+            mPositiveButtonText = text;
+        }
+
+        public void setNegativeButtonText(String text) {
+            mNegativeButtonText = text;
         }
 
         @Override
@@ -161,6 +177,9 @@ public interface DynamicDialogFragment {
                 buttonCancel.setVisibility(View.VISIBLE);
                 buttonNeutral.setVisibility(View.GONE);
 
+                if (mPositiveButtonText != null) {
+                    buttonOk.setText(mPositiveButtonText);
+                }
                 buttonOk.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -169,6 +188,9 @@ public interface DynamicDialogFragment {
                         mPositiveButtonListener.onClick(HCDialogFragment.this, mTag, map);
                     }
                 });
+                if (mNegativeButtonText != null) {
+                    buttonCancel.setText(mNegativeButtonText);
+                }
                 buttonCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -201,7 +223,6 @@ public interface DynamicDialogFragment {
 
             return rootView;
         }
-
     }
 
     public class PreHCDialogFragment extends DialogFragment implements DynamicDialogFragment {
@@ -213,6 +234,8 @@ public interface DynamicDialogFragment {
         private View mRootView;
         private String mTitle;
         private String mMessage;
+        private String mPositiveButtonText;
+        private String mNegativeButtonText;
         private SparseArray<String> mValues;
         private String mTag;
 
@@ -236,6 +259,16 @@ public interface DynamicDialogFragment {
         @Override
         public void setPositiveButtonListener(OnClickListener listener) {
             mPositiveButtonListener = listener;
+        }
+
+        @Override
+        public void setPositiveButtonListener(OnClickListener listener, String text) {
+            mPositiveButtonListener = listener;
+            mPositiveButtonText = text;
+        }
+
+        public void setNegativeButtonText(String text) {
+            mNegativeButtonText = text;
         }
 
         @Override
@@ -286,20 +319,22 @@ public interface DynamicDialogFragment {
             }
 
             if (mPositiveButtonListener != null && mMessage == null) {
-                mAlertDialog.setPositiveButton(mContext.getResources().getString(R.string.PositiveButton), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        SparseArray<String> map = Helper.readValues((LinearLayout) mRootView);
-                        mPositiveButtonListener.onClick(PreHCDialogFragment.this, mTag, map);
-                    }
-                });
+                mAlertDialog.setPositiveButton(mPositiveButtonText != null ? mPositiveButtonText : mContext.getResources().getString(R.string.PositiveButton),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                SparseArray<String> map = Helper.readValues((LinearLayout) mRootView);
+                                mPositiveButtonListener.onClick(PreHCDialogFragment.this, mTag, map);
+                            }
+                        });
 
-                mAlertDialog.setNegativeButton(mContext.getResources().getString(R.string.NegativeButton), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        PreHCDialogFragment.this.dismiss();
-                    }
-                });
+                mAlertDialog.setNegativeButton(mNegativeButtonText != null ? mNegativeButtonText : mContext.getResources().getString(R.string.NegativeButton),
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                PreHCDialogFragment.this.dismiss();
+                            }
+                        });
             } else {
                 mAlertDialog.setNeutralButton(mContext.getResources().getString(R.string.NeutralButton), new DialogInterface.OnClickListener() {
                     @Override

@@ -266,7 +266,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 addDefaultFeeds();
                 df.dismiss();
             }
-        });
+        }, mResources.getString(R.string.AddDefaultFeedsDialogOk));
+        dialogFragment.setNegativeButtonText(mResources.getString(R.string.AddDefaultFeedsDialogCancel));
 
         dialogFragment.show(getSupportFragmentManager(), "firstrun");
         mPreferences.edit().putBoolean("firstrun", false).commit();

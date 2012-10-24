@@ -70,6 +70,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private SharedPreferences mPreferences;
     private Resources mResources;
     private ArticleListFragment mArticleListFragment;
+    private DialogFragment mPendingDialogFragment;
     private FeedListFragment mFeedListFragment;
     private ProgressDialog mSpinner;
     private MenuItem mRefreshItem;
@@ -113,6 +114,9 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      */
     private void callbackFeedAdded(int feedID) {
         mSpinner.dismiss();
+        if (mPendingDialogFragment != null) {
+            mPendingDialogFragment.dismiss();
+        }
         refreshFeed(feedID);
     }
 
@@ -381,8 +385,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
                 @Override
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
+                    mPendingDialogFragment = df;
                     addFeed(map.get(R.id.enterUrl));
-                    df.dismiss();
                 }
             }, mResources.getString(R.string.AddFeedDialogOk));
 

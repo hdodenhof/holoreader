@@ -3,6 +3,7 @@ package de.hdodenhof.holoreader.activities;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -265,8 +266,13 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         boolean isConnected = Helpers.isConnected(this);
 
         if (isConnected) {
-            for (Integer mFeedID : Helpers.queryFeeds(getContentResolver())) {
-                refreshFeed(mFeedID);
+            HashSet<Integer> feedIDs = Helpers.queryFeeds(getContentResolver());
+            if (!feedIDs.isEmpty())
+                for (Integer mFeedID : Helpers.queryFeeds(getContentResolver())) {
+                    refreshFeed(mFeedID);
+                }
+            else {
+                Toast.makeText(this, mResources.getString(R.string.ToastNothingToRefresh), Toast.LENGTH_SHORT).show();
             }
         } else {
             if (manual) {

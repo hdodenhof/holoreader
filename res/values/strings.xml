@@ -11,6 +11,7 @@
     <string name="NeutralButton">OK</string>
     <string name="ToastUnreadArticles">Show unread items only</string>
     <string name="ToastAllArticles">Show all items</string>
+    <string name="ToastNothingToRefresh">There\'s nothing to refresh.</string>
 
     <!-- Menu -->
     <string name="MenuRefresh">Refresh Feeds</string>

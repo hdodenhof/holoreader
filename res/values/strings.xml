@@ -29,14 +29,14 @@
 
     <!-- Article List -->
     <string name="LoadingArticles">Loading articles…</string>
-    <string name="NoArticles">No articles</string>
-    <string name="NoUnreadArticles">No unread articles</string>
+    <string name="NoArticles">No articles yet.</string>
+    <string name="NoUnreadArticles">No unread articles.</string>
     <string name="ArticleImageDesc">Article Image</string>
 
     <!-- Feed List -->
     <string name="LoadingFeeds">Loading feeds…</string>
-    <string name="NoFeeds">No feeds</string>
-    <string name="NoUnreadFeeds">No unread feeds</string>
+    <string name="NoFeeds">You haven\'t added any feeds yet. Just go to the menu and choose \"Add feed\" to get started.</string>
+    <string name="NoUnreadFeeds">No unread feeds.</string>
     <string name="AllFeeds">All feeds</string>
     <string name="LastUpdate">Last Update</string>
     <string name="RSSIconDesc">RSS Icon</string>

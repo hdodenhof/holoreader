@@ -153,7 +153,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                 setVisible(articleImage);
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            // nothing to do here
         }
     }
 
@@ -231,6 +231,8 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                 }
 
             } catch (IOException e) {
+                return null;
+            } catch (NullPointerException e) {
                 return null;
             }
         }

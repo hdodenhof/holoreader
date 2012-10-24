@@ -162,13 +162,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         String action = intent.getAction();
         if (action == Intent.ACTION_VIEW) {
             String url = intent.getData().toString();
-            URL parsedUrl = parseUrl(url);
-
-            if (parsedUrl != null) {
-                addFeed(parsedUrl);
-            } else {
-                Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorInvalidUrl));
-            }
+            addFeed(url);
         }
 
     }
@@ -249,10 +243,16 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
      * @param feedUrl
      *            URL of the feed to fetch
      */
-    private void addFeed(URL feedUrl) {
-        mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PleaseWait), true);
-        AddFeedTask addFeedTask = new AddFeedTask(mAsyncHandler, this);
-        addFeedTask.execute(feedUrl);
+    private void addFeed(String url) {
+        URL parsedUrl = parseUrl(url);
+
+        if (parsedUrl != null) {
+            mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PleaseWait), true);
+            AddFeedTask addFeedTask = new AddFeedTask(mAsyncHandler, this);
+            addFeedTask.execute(parsedUrl);
+        } else {
+            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorInvalidUrl));
+        }
     }
 
     /**
@@ -307,15 +307,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
                 @Override
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
-                    URL parsedUrl = parseUrl(map.get(R.id.enterUrl));
-
-                    if (parsedUrl != null) {
-                        addFeed(parsedUrl);
-                        df.dismiss();
-                    } else {
-                        Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.AddFeedError),
-                                mResources.getString(R.string.AddFeedErrorInvalidUrl));
-                    }
+                    addFeed(map.get(R.id.enterUrl));
                 }
             });
 

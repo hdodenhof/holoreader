@@ -183,7 +183,6 @@ public class RefreshFeedService extends WakefulIntentService {
         } catch (IOException e) {
         } catch (XmlPullParserException e) {
         } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             mFeedsUpdating.remove(feedID);
             if (mFeedsUpdating.size() == 0) {

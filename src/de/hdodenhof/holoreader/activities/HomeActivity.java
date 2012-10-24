@@ -3,6 +3,7 @@ package de.hdodenhof.holoreader.activities;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,12 +11,15 @@ import java.util.regex.Pattern;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -45,6 +49,7 @@ import de.hdodenhof.holoreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
 import de.hdodenhof.holoreader.misc.MarkReadRunnable;
+import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
 import de.hdodenhof.holoreader.services.RefreshFeedListener;
@@ -165,6 +170,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (action == Intent.ACTION_VIEW) {
             String url = intent.getData().toString();
             addFeed(url);
+        } else if (mPreferences.getBoolean("firstrun", true)) {
+            firstRun();
         }
 
     }
@@ -246,6 +253,55 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     @Override
     public boolean isPrimaryFragment(Fragment fragment) {
         return fragment instanceof FeedListFragment;
+    }
+
+    private void firstRun() {
+        DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(this);
+
+        dialogFragment.setTitle(mResources.getString(R.string.AddDefaultFeedsDialogTitle));
+        dialogFragment.setLayout(R.layout.fragment_firstrun);
+        dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
+            @Override
+            public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
+                addDefaultFeeds();
+                df.dismiss();
+            }
+        });
+
+        dialogFragment.show(getSupportFragmentManager(), "firstrun");
+        mPreferences.edit().putBoolean("firstrun", false).commit();
+    }
+
+    private void addDefaultFeeds() {
+        mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.AddDefaultFeedsSpinner), true);
+
+        AsyncTask<Void, Void, Void> addDefaultFeedsTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+                ContentResolver contentResolver = getContentResolver();
+                ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
+
+                for (String[] strings : Helpers.DEFAULTFEEDS) {
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(FeedDAO.NAME, strings[0]);
+                    contentValues.put(FeedDAO.URL, strings[1]);
+                    contentValuesArrayList.add(contentValues);
+                }
+
+                ContentValues[] contentValuesArray = new ContentValues[contentValuesArrayList.size()];
+                contentValuesArray = contentValuesArrayList.toArray(contentValuesArray);
+
+                contentResolver.bulkInsert(RSSContentProvider.URI_FEEDS, contentValuesArray);
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                mSpinner.dismiss();
+                refreshFeeds(true);
+            }
+        };
+        addDefaultFeedsTask.execute();
     }
 
     /**

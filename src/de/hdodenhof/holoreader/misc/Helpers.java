@@ -158,6 +158,18 @@ public class Helpers {
     }
 
     /* @formatter:off */
+    public static final String DEFAULTFEEDS[][] = {
+        { "Huffington Post", "http://feeds.huffingtonpost.com/huffingtonpost/raw_feed" },
+        { "Buzzfeed", "http://www.buzzfeed.com/index.xml" },
+        { "TechCrunch", "http://feeds.feedburner.com/TechCrunch/" },
+        { "Mashable", "http://feeds.mashable.com/Mashable?format=xml" },
+        { "Gawker.com", "http://feeds.gawker.com/Gawker/full" },
+        { "Business Insider", "http://feeds2.feedburner.com/businessinsider" },
+        { "CNN Top Stories", "http://rss.cnn.com/rss/cnn_topstories.rss" }
+    };
+    /* @formatter:on */
+
+    /* @formatter:off */
     /**
      * based on AOSP
      */

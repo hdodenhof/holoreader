@@ -13,7 +13,7 @@
     <string name="ToastAllArticles">Show all items</string>
     <string name="ToastNothingToRefresh">There\'s nothing to refresh.</string>
     <string name="AddDefaultFeedsDialogTitle">Welcome to Holo Reader</string>
-    <string name="AddDefaultFeedsDialogText">Thanks for downloading Holo Reader! To get you started right away I could add some feeds for you to explore. You can later always remove them choosing "Edit Feeds" in the menu or add your own feeds choosing "Add Feed".</string>
+    <string name="AddDefaultFeedsDialogText">Thank you for using Holo Reader! To get you started right away there are some default feeds you can add now. You can later easily remove them choosing "Edit Feeds" from the menu or add your own feeds choosing "Add Feed".</string>
     <string name="AddDefaultFeedsDialogOk">Yes, add feeds</string>
     <string name="AddDefaultFeedsDialogCancel">No, thanks</string>
     <string name="AddDefaultFeedsSpinner">Adding feeds…</string>
@@ -24,10 +24,9 @@
     <string name="MenuEditFeeds">Edit Feeds</string>
     <string name="MenuToogleUnread">Toggle unread items</string>
     <string name="MenuMarkRead">Mark all as read</string>
-    <string name="MenuWeb">Open link</string>
+    <string name="MenuWeb">Open link in browser</string>
 
     <!-- Article -->
-    <!-- Using unicode to keep whitespaces, it's " - " -->
     <string name="LoadingArticle">Loading article…</string>
 
     <!-- Article List -->

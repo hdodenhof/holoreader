@@ -55,6 +55,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
             URLConnection connection = url.openConnection();
             connection.setRequestProperty("User-agent",
                     mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName));
+            connection.connect();
             String contentType = connection.getContentType();
             if (!contentType.contains("xml")) {
                 returnCondition = ERROR_NOFEED;

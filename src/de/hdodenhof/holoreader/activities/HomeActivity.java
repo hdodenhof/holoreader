@@ -126,13 +126,15 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private void callbackFeedAddedError(int returnCondition) {
         mSpinner.dismiss();
         switch (returnCondition) {
+        case AddFeedTask.ERROR_IOEXCEPTION:
+            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorConnection));
+            break;
         case AddFeedTask.ERROR_NOFEED:
             Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorNoFeed));
             break;
         case AddFeedTask.ERROR_NOCONTENT:
             Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorIncompatibleFeed));
             break;
-        case AddFeedTask.ERROR_IOEXCEPTION:
         case AddFeedTask.ERROR_XMLPULLPARSEREXCEPTION:
             Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorOther));
             break;

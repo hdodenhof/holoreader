@@ -268,7 +268,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         if (isConnected) {
             HashSet<Integer> feedIDs = Helpers.queryFeeds(getContentResolver());
             if (!feedIDs.isEmpty())
-                for (Integer mFeedID : Helpers.queryFeeds(getContentResolver())) {
+                for (Integer mFeedID : feedIDs) {
                     refreshFeed(mFeedID);
                 }
             else {

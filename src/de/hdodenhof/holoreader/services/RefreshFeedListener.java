@@ -1,5 +1,7 @@
 package de.hdodenhof.holoreader.services;
 
+import java.util.HashSet;
+
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -32,11 +34,14 @@ public class RefreshFeedListener implements WakefulIntentService.AlarmListener {
         boolean isConnected = Helpers.isConnected(context);
 
         if (isConnected) {
-            for (Integer mFeedID : Helpers.queryFeeds(context.getContentResolver())) {
-                Intent intent = new Intent(context, RefreshFeedService.class);
-                intent.putExtra("feedid", mFeedID);
+            HashSet<Integer> feedIDs = Helpers.queryFeeds(context.getContentResolver());
+            if (!feedIDs.isEmpty()) {
+                for (Integer mFeedID : feedIDs) {
+                    Intent intent = new Intent(context, RefreshFeedService.class);
+                    intent.putExtra("feedid", mFeedID);
 
-                WakefulIntentService.sendWakefulWork(context, intent);
+                    WakefulIntentService.sendWakefulWork(context, intent);
+                }
             }
         }
     }

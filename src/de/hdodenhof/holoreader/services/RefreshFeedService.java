@@ -247,6 +247,7 @@ public class RefreshFeedService extends WakefulIntentService {
     private InputStream getURLInputStream(String feedURL) throws IOException, MalformedURLException {
         URLConnection connection = new URL(feedURL).openConnection();
         connection.setRequestProperty("User-agent", getResources().getString(R.string.AppName) + "/" + getResources().getString(R.string.AppVersionName));
+        connection.connect();
         return connection.getInputStream();
     }
 

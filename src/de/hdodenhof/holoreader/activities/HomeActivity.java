@@ -115,14 +115,14 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         mSpinner.dismiss();
         switch (returnCondition) {
         case AddFeedTask.ERROR_NOFEED:
-            Helpers.showDialog(this, "An error occured", "No feed found at supplied URL");
+            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorNoFeed));
             break;
         case AddFeedTask.ERROR_NOCONTENT:
-            Helpers.showDialog(this, "An error occured", "The supplied feed is not compatible");
+            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorIncompatibleFeed));
             break;
         case AddFeedTask.ERROR_IOEXCEPTION:
         case AddFeedTask.ERROR_XMLPULLPARSEREXCEPTION:
-            Helpers.showDialog(this, "An error occured", "Something went wrong while adding the feed");
+            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorOther));
             break;
         default:
             break;
@@ -167,7 +167,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             if (parsedUrl != null) {
                 addFeed(parsedUrl);
             } else {
-                Helpers.showDialog(HomeActivity.this, "Error adding feed", "Invalid URL");
+                Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorInvalidUrl));
             }
         }
 
@@ -313,7 +313,8 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                         addFeed(parsedUrl);
                         df.dismiss();
                     } else {
-                        Helpers.showDialog(HomeActivity.this, "Error adding feed", "Invalid URL");
+                        Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.AddFeedError),
+                                mResources.getString(R.string.AddFeedErrorInvalidUrl));
                     }
                 }
             });

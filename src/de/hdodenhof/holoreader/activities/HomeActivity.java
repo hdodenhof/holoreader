@@ -4,6 +4,7 @@ import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -457,6 +458,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             Intent intent = new Intent(this, DisplayFeedActivity.class);
             intent.putExtra("articleid", articleID);
             intent.putExtra("feedid", mSelectedFeed);
+            intent.putExtra("unreadAfter", new Date());
             startActivity(intent);
             break;
 

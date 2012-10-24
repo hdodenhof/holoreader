@@ -150,7 +150,7 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mArticleAdapter.swapCursor(data);
         if (mScrollTop) {
-            mArticlesListView.scrollTo(0, 0);
+            mArticlesListView.setSelection(0);
             mScrollTop = false;
         }
 

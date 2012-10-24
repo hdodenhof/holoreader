@@ -314,6 +314,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                 @Override
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
                     addFeed(map.get(R.id.enterUrl));
+                    df.dismiss();
                 }
             });
 

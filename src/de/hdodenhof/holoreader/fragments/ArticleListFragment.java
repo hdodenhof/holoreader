@@ -98,7 +98,9 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
 
         mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
         mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
-        mIsLargeDevice = getResources().getString(R.string.LayoutSize).equals("large");
+
+        String layoutSize = getResources().getString(R.string.LayoutSize);
+        mIsLargeDevice = layoutSize.equals("large") || layoutSize.equals("xlarge");
 
         String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.IMAGE, ArticleDAO.READ };
         int[] uiBindTo = { R.id.list_item_entry_title, R.id.list_item_entry_image, R.layout.listitem_article };

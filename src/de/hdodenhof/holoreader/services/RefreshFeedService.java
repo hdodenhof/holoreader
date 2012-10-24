@@ -197,12 +197,12 @@ public class RefreshFeedService extends WakefulIntentService {
         }
     }
 
-    private boolean isItemTag(String tag, String prefix) {
-        return tag.equalsIgnoreCase("item") || tag.equalsIgnoreCase("entry");
+    private boolean isItemTag(String currentTag, String currentPrefix) {
+        return currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry");
     }
 
-    private boolean isTitleTag(String currentTag, String prefix) {
-        return currentTag.equalsIgnoreCase("title");
+    private boolean isTitleTag(String currentTag, String currentPrefix) {
+        return currentTag.equalsIgnoreCase("title") && currentPrefix.equalsIgnoreCase("");
     }
 
     private boolean isSummaryTag(String currentTag, String currentPrefix) {

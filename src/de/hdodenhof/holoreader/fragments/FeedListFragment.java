@@ -9,7 +9,9 @@ import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -35,6 +37,7 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
     private SimpleCursorAdapter mFeedAdapter;
     private ListView mFeedsListView;
     private boolean mUnreadOnly = true;
+    private boolean mFirstrun = true;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -56,6 +59,13 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
         this.setLoadingText(getResources().getString(R.string.LoadingFeeds));
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        // has to be checked before activity is created
+        mFirstrun = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("firstrun", true);
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     private View getHeaderView() {
@@ -91,7 +101,10 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mFeedAdapter.swapCursor(data);
 
-        if (mUnreadOnly) {
+        if (mFirstrun) {
+            mFirstrun = false;
+            setEmptyText(getResources().getString(R.string.NoFeedsHint));
+        } else if (mUnreadOnly) {
             setEmptyText(getResources().getString(R.string.NoUnreadFeeds));
         } else {
             setEmptyText(getResources().getString(R.string.NoFeeds));

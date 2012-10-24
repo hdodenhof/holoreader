@@ -1,5 +1,7 @@
 package de.hdodenhof.holoreader.activities;
 
+import java.util.Date;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -48,6 +50,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
     private boolean mWebLinkHide = false;
     private boolean mTwoPane = false;
     private boolean mUnreadOnly = true;
+    private Date mUnreadAfter;
     private int mArticleID = -1;
     private int mFeedID = -1;
 
@@ -61,6 +64,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+        mUnreadAfter = new Date();
 
         mResources = getResources();
 
@@ -135,6 +139,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
 
             if (mUnreadOnly) {
                 Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
+                mUnreadAfter = new Date();
             } else {
                 Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
             }
@@ -196,6 +201,7 @@ public class DisplayFeedActivity extends SherlockFragmentActivity implements Fra
                 Intent intent = new Intent(this, DisplayArticleActivity.class);
                 intent.putExtra("articleid", articleID);
                 intent.putExtra("feedid", mFeedID);
+                intent.putExtra("unreadAfter", mUnreadAfter);
                 startActivity(intent);
             }
             break;

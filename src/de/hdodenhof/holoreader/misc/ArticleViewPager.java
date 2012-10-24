@@ -48,6 +48,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
     private String[] mProjection = { ArticleDAO._ID, ArticleDAO.FEEDID, ArticleDAO.FEEDNAME, ArticleDAO.TITLE, ArticleDAO.PUBDATE, ArticleDAO.LINK,
             ArticleDAO.CONTENT };
     private boolean mUnreadOnly = true;
+    private Date mUnreadAfter;
     private int mPreselectedArticleID = -1;
     private int mCurrentArticleID = -1;
     private int mCurrentPosition = -1;
@@ -67,6 +68,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
         mPreselectedArticleID = mContext.getIntent().getIntExtra("articleid", 0);
         mFeedID = mContext.getIntent().getIntExtra("feedid", 0);
+        mUnreadAfter = (Date) mContext.getIntent().getSerializableExtra("unreadAfter");
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         mUnreadOnly = preferences.getBoolean("unreadonly", true);
@@ -117,7 +119,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
 
         if (mUnreadOnly) {
             selection = selection + " AND (" + ArticleDAO.READ + " > ? OR " + ArticleDAO.READ + " IS NULL)";
-            selectionArgs = Helpers.addSelectionArg(selectionArgs, SQLiteHelper.fromDate(new Date()));
+            selectionArgs = Helpers.addSelectionArg(selectionArgs, SQLiteHelper.fromDate(mUnreadAfter));
         }
 
         if (mFeedID != -1) {

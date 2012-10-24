@@ -141,7 +141,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mFeedAdapter.swapCursor(data);
 
-        setEmptyText(getResources().getString(R.string.NoFeeds));
+        setEmptyText(getResources().getString(R.string.EditFeedsNoFeeds));
         setLoadingFinished();
     }
 

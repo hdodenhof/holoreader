@@ -44,6 +44,7 @@
     <string name="EditFeedsTitle">Edit feeds</string>
     <string name="EditFeedsMenuDelete">Delete selected feeds</string>
     <string name="EditFeedsMenuEdit">Edit selected feed</string>
+    <string name="EditFeedsNoFeeds">No feeds.</string>
 
     <!-- Feed edit dialog -->
     <string name="EditFeedDialogTitle">Edit feed</string>

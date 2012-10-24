@@ -191,7 +191,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
             long[] checkedFeedIDs = mFeedsListView.getCheckedItemIds();
             switch (item.getItemId()) {
             case R.id.item_delete:
-                mSpinner = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.PleaseWait), true);
+                mSpinner = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.EditFeedDeleteSpinner), true);
                 (new DeleteFeedsTask()).execute(checkedFeedIDs);
                 return true;
             case R.id.item_edit:

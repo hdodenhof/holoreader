@@ -4,7 +4,6 @@
     <!-- General -->
     <string name="Today">Today</string>
     <string name="Yesterday">Yesterday</string>
-    <string name="PleaseWait">Please wait…</string>
     <string name="NoConnectionTitle">No connection</string>
     <string name="NoConnectionText">You are not connected to the internet, please retry later.</string>
     <string name="PositiveButton">Save</string>
@@ -49,6 +48,7 @@
     <string name="EditFeedDialogTitle">Edit feed</string>
     <string name="EditFeedDialogName">Feed name</string>
     <string name="EditFeedDialogURL">Feed URL</string>
+    <string name="EditFeedDeleteSpinner">Deleting feed(s)…</string>
 
     <plurals name="numberOfFeedsSelected">
         <item quantity="one">One feed selected</item>
@@ -58,6 +58,7 @@
     <!-- Add feed -->
     <string name="AddFeedDialogTitle">@string/MenuAdd</string>
     <string name="AddFeedDialogText">Feed URL</string>
+    <string name="AddFeedSpinner">Adding feed…</string>
     <string name="AddFeedErrorInvalidUrl">The supplied URL is not valid.</string>
     <string name="AddFeedErrorNoFeed">No feed found at supplied URL.</string>
     <string name="AddFeedErrorIncompatibleFeed">The supplied feed is not compatible.</string>

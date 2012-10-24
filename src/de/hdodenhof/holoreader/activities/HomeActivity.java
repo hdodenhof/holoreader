@@ -247,7 +247,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
         URL parsedUrl = parseUrl(url);
 
         if (parsedUrl != null) {
-            mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PleaseWait), true);
+            mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.AddFeedSpinner), true);
             AddFeedTask addFeedTask = new AddFeedTask(mAsyncHandler, this);
             addFeedTask.execute(parsedUrl);
         } else {

@@ -332,7 +332,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     private URL parseUrl(String url) {
         URL parsedUrl = null;
 
-        if (!url.substring(0, 7).equalsIgnoreCase("http://")) {
+        if (url.length() < 7 || !url.substring(0, 7).equalsIgnoreCase("http://")) {
             url = "http://" + url;
         }
 

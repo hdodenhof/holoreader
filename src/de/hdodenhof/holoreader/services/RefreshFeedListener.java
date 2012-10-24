@@ -13,21 +13,21 @@ import com.commonsware.cwac.wakeful.WakefulIntentService;
 import de.hdodenhof.holoreader.misc.Helpers;
 
 public class RefreshFeedListener implements WakefulIntentService.AlarmListener {
-    public static final long INTERVAL_MILIS = 14400000; // 4h
-    private static final long WAIT_MILIS = 60000; // 1min
+    public static final long INTERVAL_MILLIS = 14400000; // 4h
+    public static final long WAIT_MILLIS = 60000; // 1min
 
-    private Long mWaitMilis = null;
+    private Long mWaitMillis = null;
 
     public RefreshFeedListener() {
     }
 
-    public RefreshFeedListener(long waitMilis) {
-        mWaitMilis = waitMilis;
+    public RefreshFeedListener(long waitMillis) {
+        mWaitMillis = waitMillis;
     }
 
     public void scheduleAlarms(AlarmManager alarmManager, PendingIntent pendingIntent, Context context) {
-        alarmManager.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime() + ((mWaitMilis == null) ? WAIT_MILIS : mWaitMilis),
-                INTERVAL_MILIS, pendingIntent);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()
+                + ((mWaitMillis == null) ? WAIT_MILLIS : mWaitMillis), INTERVAL_MILLIS, pendingIntent);
     }
 
     public void sendWakefulWork(Context context) {
@@ -47,6 +47,6 @@ public class RefreshFeedListener implements WakefulIntentService.AlarmListener {
     }
 
     public long getMaxAge() {
-        return (INTERVAL_MILIS + AlarmManager.INTERVAL_FIFTEEN_MINUTES);
+        return (INTERVAL_MILLIS + AlarmManager.INTERVAL_FIFTEEN_MINUTES);
     }
 }

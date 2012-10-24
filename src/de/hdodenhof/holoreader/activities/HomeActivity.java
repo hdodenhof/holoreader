@@ -19,6 +19,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -207,7 +208,16 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     @Override
     protected void onPause() {
         unregisterReceiver(mFeedsRefreshedReceiver);
-        RefreshFeedService.scheduleAlarms(new RefreshFeedListener(RefreshFeedListener.INTERVAL_MILIS), this, true);
+
+        long waitMillis;
+        long millisSinceBoot = SystemClock.elapsedRealtime();
+        long lastRefreshed = mPreferences.getLong("lastRefreshed", millisSinceBoot);
+        if (lastRefreshed + RefreshFeedListener.INTERVAL_MILLIS < millisSinceBoot) {
+            waitMillis = RefreshFeedListener.WAIT_MILLIS;
+        } else {
+            waitMillis = (lastRefreshed + RefreshFeedListener.INTERVAL_MILLIS - millisSinceBoot);
+        }
+        RefreshFeedService.scheduleAlarms(new RefreshFeedListener(waitMillis), this, true);
 
         super.onPause();
     }

@@ -28,6 +28,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
@@ -188,6 +189,7 @@ public class RefreshFeedService extends WakefulIntentService {
             if (mFeedsUpdating.size() == 0) {
                 SharedPreferences.Editor editor = mSharedPrefs.edit();
                 editor.putBoolean("refreshing", false);
+                editor.putLong("lastRefresh", SystemClock.elapsedRealtime());
                 editor.commit();
 
                 Intent broadcastIntent = new Intent();

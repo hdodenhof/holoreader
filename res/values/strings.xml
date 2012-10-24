@@ -65,6 +65,7 @@
     <!-- Add feed -->
     <string name="AddFeedDialogTitle">@string/MenuAdd</string>
     <string name="AddFeedDialogText">Feed URL</string>
+    <string name="AddFeedDialogOk">Add feed</string>
     <string name="AddFeedSpinner">Adding feed…</string>
     <string name="AddFeedErrorInvalidUrl">The supplied URL is not valid.</string>
     <string name="AddFeedErrorNoFeed">No feed found at supplied URL.</string>

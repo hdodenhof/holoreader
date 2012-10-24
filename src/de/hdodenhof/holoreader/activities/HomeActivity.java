@@ -383,7 +383,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
                     addFeed(map.get(R.id.enterUrl));
                     df.dismiss();
                 }
-            });
+            }, mResources.getString(R.string.AddFeedDialogOk));
 
             dialogFragment.show(getSupportFragmentManager(), "dialog");
         } else {

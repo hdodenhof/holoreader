@@ -16,6 +16,7 @@ import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
@@ -78,6 +79,12 @@ public class ArticleFragment extends SherlockFragment {
         Document doc = Jsoup.parse(mContent);
         doc.head().append(customStyleElement());
 
+        String layoutSize = getActivity().getResources().getString(R.string.LayoutSize);
+        if (layoutSize.equals("large") || layoutSize.equals("xlarge")) {
+            WebSettings webSettings = contentView.getSettings();
+            webSettings.setDefaultFontSize(20); // default is 16
+        }
+
         contentView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -126,6 +133,7 @@ public class ArticleFragment extends SherlockFragment {
         styleStringBuilder.append("body { padding: 0; margin: 0; }");
         styleStringBuilder.append("img { max-width: " + String.valueOf(contentWidth) + "; height: auto; }");
         styleStringBuilder.append("figure { margin: 0 !important; }");
+        styleStringBuilder.append("p { line-height: 1.5; }");
         styleStringBuilder.append("</style>");
 
         return styleStringBuilder.toString();

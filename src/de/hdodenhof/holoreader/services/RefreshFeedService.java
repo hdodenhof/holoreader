@@ -188,7 +188,7 @@ public class RefreshFeedService extends WakefulIntentService {
             if (mFeedsUpdating.size() == 0) {
                 SharedPreferences.Editor editor = mSharedPrefs.edit();
                 editor.putBoolean("refreshing", false);
-                editor.putLong("lastRefresh", SystemClock.elapsedRealtime());
+                editor.putLong("lastRefreshed", SystemClock.elapsedRealtime());
                 editor.commit();
 
                 Intent broadcastIntent = new Intent();

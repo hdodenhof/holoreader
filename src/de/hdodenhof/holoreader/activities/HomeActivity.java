@@ -306,6 +306,7 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
             @Override
             protected void onPostExecute(Void result) {
                 mSpinner.dismiss();
+                Toast.makeText(HomeActivity.this, mResources.getString(R.string.AddDefaultFeedsToast), Toast.LENGTH_LONG).show();
                 refreshFeeds(true);
             }
         };

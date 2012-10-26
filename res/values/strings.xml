@@ -17,6 +17,7 @@
     <string name="AddDefaultFeedsDialogOk">Yes, add feeds</string>
     <string name="AddDefaultFeedsDialogCancel">No, thanks</string>
     <string name="AddDefaultFeedsSpinner">Adding feeds…</string>
+    <string name="AddDefaultFeedsToast">Syncing default feeds…</string>
 
     <!-- Menu -->
     <string name="MenuRefresh">Refresh Feeds</string>

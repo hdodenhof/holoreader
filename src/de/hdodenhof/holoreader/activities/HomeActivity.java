@@ -197,7 +197,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         super.onResume();
 
         IntentFilter filter = new IntentFilter();
-        filter.addAction("de.hdodenhof.holoreader.FEEDS_REFRESHED");
+        filter.addAction(RefreshFeedService.BROADCAST_REFRESHED);
         registerReceiver(mFeedsRefreshedReceiver, filter);
 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);

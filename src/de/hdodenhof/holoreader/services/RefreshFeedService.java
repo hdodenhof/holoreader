@@ -44,6 +44,8 @@ public class RefreshFeedService extends WakefulIntentService {
     @SuppressWarnings("unused")
     private static final String TAG = RefreshFeedService.class.getSimpleName();
 
+    public static final String BROADCAST_REFRESHED = "de.hdodenhof.holoreader.FEEDS_REFRESHED";
+
     private static final String NO_ACTION = "no_action";
     private static final int KEEP_READ_ARTICLES_DAYS = 3;
     private static final int KEEP_UNREAD_ARTICLES_DAYS = 7;
@@ -192,7 +194,7 @@ public class RefreshFeedService extends WakefulIntentService {
                 editor.commit();
 
                 Intent broadcastIntent = new Intent();
-                broadcastIntent.setAction("de.hdodenhof.holoreader.FEEDS_REFRESHED");
+                broadcastIntent.setAction(BROADCAST_REFRESHED);
                 sendBroadcast(broadcastIntent);
             }
         }

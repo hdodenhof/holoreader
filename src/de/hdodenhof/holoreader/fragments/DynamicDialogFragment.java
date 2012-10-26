@@ -219,7 +219,7 @@ public interface DynamicDialogFragment {
             }
             contentFrame.addView(content);
 
-            getDialog().setCanceledOnTouchOutside(true);
+            getDialog().setCanceledOnTouchOutside(false);
 
             return rootView;
         }
@@ -344,7 +344,9 @@ public interface DynamicDialogFragment {
                 });
             }
 
-            return mAlertDialog.create();
+            Dialog dialog = mAlertDialog.create();
+            dialog.setCanceledOnTouchOutside(false);
+            return dialog;
         }
     }
 }

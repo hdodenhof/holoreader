@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -24,7 +23,7 @@ import de.hdodenhof.holoreader.misc.OnArticleChangedListener;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayArticleActivity extends SherlockFragmentActivity implements FragmentCallback, OnArticleChangedListener {
+public class DisplayArticleActivity extends HoloReaderActivity implements FragmentCallback, OnArticleChangedListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayArticleActivity.class.getSimpleName();

@@ -17,7 +17,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -38,7 +37,7 @@ import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
  * @author Henning Dodenhof
  * 
  */
-public class DisplayFeedActivity extends SherlockFragmentActivity implements FragmentCallback, OnArticleChangedListener, OnItemClickListener {
+public class DisplayFeedActivity extends HoloReaderActivity implements FragmentCallback, OnArticleChangedListener, OnItemClickListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = DisplayFeedActivity.class.getSimpleName();

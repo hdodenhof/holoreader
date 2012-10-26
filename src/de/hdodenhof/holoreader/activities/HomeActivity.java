@@ -24,7 +24,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -35,7 +34,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.HeaderViewListAdapter;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
@@ -53,7 +51,6 @@ import de.hdodenhof.holoreader.misc.MarkReadRunnable;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
-import de.hdodenhof.holoreader.services.RefreshFeedListener;
 import de.hdodenhof.holoreader.services.RefreshFeedService;
 import de.hdodenhof.holoreader.tasks.AddFeedTask;
 
@@ -62,7 +59,7 @@ import de.hdodenhof.holoreader.tasks.AddFeedTask;
  * @author Henning Dodenhof
  * 
  */
-public class HomeActivity extends SherlockFragmentActivity implements FragmentCallback, OnItemClickListener {
+public class HomeActivity extends HoloReaderActivity implements FragmentCallback, OnItemClickListener {
 
     @SuppressWarnings("unused")
     private static final String TAG = HomeActivity.class.getSimpleName();
@@ -199,8 +196,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     protected void onResume() {
         super.onResume();
 
-        RefreshFeedService.cancelAlarms(this);
-
         IntentFilter filter = new IntentFilter();
         filter.addAction("de.hdodenhof.holoreader.FEEDS_REFRESHED");
         registerReceiver(mFeedsRefreshedReceiver, filter);
@@ -222,17 +217,6 @@ public class HomeActivity extends SherlockFragmentActivity implements FragmentCa
     @Override
     protected void onPause() {
         unregisterReceiver(mFeedsRefreshedReceiver);
-
-        long waitMillis;
-        long millisSinceBoot = SystemClock.elapsedRealtime();
-        long lastRefreshed = mPreferences.getLong("lastRefreshed", millisSinceBoot);
-        if (lastRefreshed + RefreshFeedListener.INTERVAL_MILLIS < millisSinceBoot) {
-            waitMillis = RefreshFeedListener.WAIT_MILLIS;
-        } else {
-            waitMillis = (lastRefreshed + RefreshFeedListener.INTERVAL_MILLIS - millisSinceBoot);
-        }
-        RefreshFeedService.scheduleAlarms(new RefreshFeedListener(waitMillis), this, true);
-
         super.onPause();
     }
 

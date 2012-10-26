@@ -4,12 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.SherlockFragmentActivity;
 import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.holoreader.R;
 
-public class EditFeedsActivity extends SherlockFragmentActivity {
+public class EditFeedsActivity extends HoloReaderActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

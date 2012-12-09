@@ -11,8 +11,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    
+    <uses-permission android:name="de.hdodenhof.holoreader.permission.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+
+    <permission
+        android:name="de.hdodenhof.holoreader.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
 
     <application
         android:hardwareAccelerated="true"
@@ -76,19 +84,30 @@
         <activity android:name="de.hdodenhof.holoreader.activities.DisplayArticleActivity" />
         <activity android:name="de.hdodenhof.holoreader.activities.EditFeedsActivity" />
         <activity android:name="de.hdodenhof.holoreader.activities.SettingsActivity" />
-        
-        <service android:name="de.hdodenhof.holoreader.services.RefreshFeedService"></service>
 
-        <receiver android:name="com.commonsware.cwac.wakeful.AlarmReceiver">
-			<intent-filter>
-				<action android:name="android.intent.action.BOOT_COMPLETED"/>
-			</intent-filter>
+        <service android:name="de.hdodenhof.holoreader.services.RefreshFeedService" />
+        <service android:name="de.hdodenhof.holoreader.gcm.GCMIntentService" />
 
-			<meta-data
-				android:name="com.commonsware.cwac.wakeful"
-				android:resource="@xml/wakeful"/>
-		</receiver>
-        
+        <receiver android:name="com.commonsware.cwac.wakeful.AlarmReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.commonsware.cwac.wakeful"
+                android:resource="@xml/wakeful" />
+        </receiver>
+        <receiver
+            android:name="de.hdodenhof.holoreader.gcm.GCMReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+
+                <category android:name="de.fourinchworks.scotlandyardlive.client" />
+            </intent-filter>
+        </receiver>
+
         <provider
             android:name="de.hdodenhof.holoreader.provider.RSSContentProvider"
             android:authorities="de.hdodenhof.holoreader.RSSProvider"

@@ -22,5 +22,9 @@
         android:id="@+id/item_editfeeds"
         android:showAsAction="never"
         android:title="@string/MenuEditFeeds"/>
+    <item
+        android:id="@+id/item_regpush"
+        android:showAsAction="never"
+        android:title="@string/MenuRegisterForPush"/>
 
 </menu>

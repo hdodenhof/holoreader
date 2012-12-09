@@ -39,11 +39,14 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
+import com.google.android.gcm.GCMRegistrar;
 
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.fragments.ArticleListFragment;
 import de.hdodenhof.holoreader.fragments.DynamicDialogFragment;
 import de.hdodenhof.holoreader.fragments.FeedListFragment;
+import de.hdodenhof.holoreader.gcm.GCMIntentService;
+import de.hdodenhof.holoreader.gcm.GCMServerUtilities;
 import de.hdodenhof.holoreader.listadapters.RSSAdapter;
 import de.hdodenhof.holoreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.holoreader.listadapters.RSSFeedAdapter;
@@ -165,6 +168,17 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     };
 
+    private BroadcastReceiver mGCMRegisteredReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO might get called without user interaction; add user message
+            try {
+                mSpinner.dismiss();
+            } catch (NullPointerException e) {
+            }
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -213,6 +227,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         filter.addAction(RefreshFeedService.BROADCAST_REFRESHED);
         registerReceiver(mFeedsRefreshedReceiver, filter);
 
+        registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
+
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
         invalidateOptionsMenu();
 
@@ -246,7 +262,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         }
 
-        unregisterReceiver(mFeedsRefreshedReceiver);
+		unregisterReceiver(mGCMRegisteredReceiver);        
+		unregisterReceiver(mFeedsRefreshedReceiver);
         super.onPause();
     }
 
@@ -416,6 +433,44 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     }
 
+    private void registerForPushMessaging() {
+        GCMRegistrar.checkDevice(this);
+        GCMRegistrar.checkManifest(this);
+
+        final String registrationId = GCMRegistrar.getRegistrationId(this);
+
+        if (registrationId.equals("")) {
+            mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
+            // going Async
+            GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
+        } else {
+            if (!GCMRegistrar.isRegisteredOnServer(this)) {
+                mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
+                AsyncTask<Void, Void, Boolean> registerForPushTask = new AsyncTask<Void, Void, Boolean>() {
+                    @Override
+                    protected Boolean doInBackground(Void... params) {
+                        return GCMServerUtilities.registerOnServer("henning.dodenhof@gmail.com", registrationId);
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean success) {
+                        if (success) {
+                            GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
+                            // TODO add user message
+                        } else {
+                            // TODO
+                        }
+                        // TODO
+                        HomeActivity.this.mSpinner.dismiss();
+                    }
+                };
+                registerForPushTask.execute();
+            } else {
+                // TODO all set
+            }
+        }
+    }
+
     /**
      * 
      * @param url
@@ -541,6 +596,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             return true;
         case R.id.item_editfeeds:
             startActivity(new Intent(this, EditFeedsActivity.class));
+            return true;
+        case R.id.item_regpush:
+            registerForPushMessaging();
             return true;
         default:
             return super.onOptionsItemSelected(item);

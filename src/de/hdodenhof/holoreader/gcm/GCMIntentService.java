@@ -11,6 +11,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     @SuppressWarnings("unused")
     private static final String TAG = GCMIntentService.class.getName();
 
+    public static final String BROADCAST_REGISTERED = "de.hdodenhof.holoreader.GCM_REGISTERED";
     public static final String SENDER_ID = "";
 
     public GCMIntentService() {
@@ -20,6 +21,12 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onRegistered(Context context, String registrationId) {
         Log.v(TAG, "onRegistered");
+        // TODO
+        GCMServerUtilities.registerOnServer("henning.dodenhof@gmail.com", registrationId);
+        // TODO use local broadcast manager
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(BROADCAST_REGISTERED);
+        sendBroadcast(broadcastIntent);
     }
 
     @Override

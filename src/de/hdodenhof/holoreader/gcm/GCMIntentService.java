@@ -1,10 +1,16 @@
 package de.hdodenhof.holoreader.gcm;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
 import com.google.android.gcm.GCMBaseIntentService;
+import com.google.gson.Gson;
+
+import de.hdodenhof.holoreader.provider.RSSContentProvider;
+import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
 
 public class GCMIntentService extends GCMBaseIntentService {
 
@@ -13,6 +19,8 @@ public class GCMIntentService extends GCMBaseIntentService {
 
     public static final String BROADCAST_REGISTERED = "de.hdodenhof.holoreader.GCM_REGISTERED";
     public static final String SENDER_ID = "";
+
+    private static final String MESSAGETYPE_ADDFEED = "addfeed";
 
     public GCMIntentService() {
         super(SENDER_ID);
@@ -37,6 +45,12 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onMessage(Context context, Intent intent) {
         Log.v(TAG, "onMessage");
+
+        String messageType = intent.getStringExtra("type");
+        if (messageType.equals(MESSAGETYPE_ADDFEED)) {
+            Log.v(TAG, "... handling addFeed message");
+            handleAddFeedMessage(intent.getStringExtra("data"));
+        }
     }
 
     @Override
@@ -53,6 +67,18 @@ public class GCMIntentService extends GCMBaseIntentService {
     protected boolean onRecoverableError(Context context, String errorId) {
         Log.v(TAG, "onRecoverableError, errorId: " + errorId);
         return super.onRecoverableError(context, errorId);
+    }
+
+    private void handleAddFeedMessage(String data) {
+        VOFeed[] feeds = new Gson().fromJson(data, VOFeed[].class);
+
+        ContentResolver contentResolver = getContentResolver();
+        for (VOFeed voFeed : feeds) {
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(FeedDAO.NAME, voFeed.getTitle());
+            contentValues.put(FeedDAO.URL, voFeed.getUrl());
+            contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
+        }
     }
 
 }

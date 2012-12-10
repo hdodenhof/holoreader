@@ -1,14 +1,20 @@
 package de.hdodenhof.holoreader.gcm;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.gson.Gson;
 
+import de.hdodenhof.holoreader.R;
+import de.hdodenhof.holoreader.activities.HomeActivity;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
 
@@ -73,12 +79,32 @@ public class GCMIntentService extends GCMBaseIntentService {
         VOFeed[] feeds = new Gson().fromJson(data, VOFeed[].class);
 
         ContentResolver contentResolver = getContentResolver();
+        // TODO check for successful inserts
         for (VOFeed voFeed : feeds) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(FeedDAO.NAME, voFeed.getTitle());
             contentValues.put(FeedDAO.URL, voFeed.getUrl());
             contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
         }
+
+        // TODO proper flags
+        Intent notificationIntent = new Intent(this, HomeActivity.class);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+
+        // TODO proper icons
+        NotificationCompat.Builder nb = new NotificationCompat.Builder(this);
+        nb.setContentTitle("Received new feeds via Push");
+        nb.setContentText(feeds.length + " feeds have been added to your list.");
+        nb.setSmallIcon(R.drawable.launcher);
+        nb.setContentIntent(contentIntent);
+
+        Notification notification = nb.getNotification();
+        notification.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        // TODO check if there is already an unread notification
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(0x1, notification);
     }
 
 }

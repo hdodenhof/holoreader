@@ -458,6 +458,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         GCMRegistrar.checkManifest(this);
 
         final String registrationId = GCMRegistrar.getRegistrationId(this);
+        // TODO dev only
+        GCMRegistrar.setRegisteredOnServer(this, false);
 
         if (registrationId.equals("")) {
             mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);

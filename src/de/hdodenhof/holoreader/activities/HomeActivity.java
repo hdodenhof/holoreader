@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
@@ -40,6 +41,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.common.AccountPicker;
 
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.fragments.ArticleListFragment;
@@ -68,6 +70,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     @SuppressWarnings("unused")
     private static final String TAG = HomeActivity.class.getSimpleName();
+
+    private static final int ACCOUNT_REQUEST_CODE = 0x1;
 
     private SharedPreferences mPreferences;
     private Resources mResources;
@@ -267,6 +271,16 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         super.onPause();
     }
 
+    @Override
+    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+        if (requestCode == ACCOUNT_REQUEST_CODE && resultCode == RESULT_OK) {
+            String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+            registerForPushMessaging(accountName);
+        } else {
+            // TODO
+        }
+    }
+
     /**
      * @see de.hdodenhof.holoreader.misc.FragmentCallback#onFragmentReady(android.support.v4.app.Fragment)
      */
@@ -433,7 +447,13 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     }
 
-    private void registerForPushMessaging() {
+    private void initAccountAndGCMRegistration() {
+        // TODO Might need a custom implementation here to match the style of the App
+        Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
+        startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
+    }
+
+    private void registerForPushMessaging(final String eMail) {
         GCMRegistrar.checkDevice(this);
         GCMRegistrar.checkManifest(this);
 
@@ -449,7 +469,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 AsyncTask<Void, Void, Boolean> registerForPushTask = new AsyncTask<Void, Void, Boolean>() {
                     @Override
                     protected Boolean doInBackground(Void... params) {
-                        return GCMServerUtilities.registerOnServer("henning.dodenhof@gmail.com", registrationId);
+                        return GCMServerUtilities.registerOnServer(eMail, registrationId);
                     }
 
                     @Override
@@ -598,7 +618,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             startActivity(new Intent(this, EditFeedsActivity.class));
             return true;
         case R.id.item_regpush:
-            registerForPushMessaging();
+            initAccountAndGCMRegistration();
             return true;
         default:
             return super.onOptionsItemSelected(item);

@@ -92,11 +92,10 @@ public class GCMIntentService extends GCMBaseIntentService {
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        // TODO proper icons
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this);
         nb.setContentTitle("Received new feeds via Push");
         nb.setContentText(feeds.length + " feeds have been added to your list.");
-        nb.setSmallIcon(R.drawable.launcher);
+        nb.setSmallIcon(R.drawable.notification);
         nb.setContentIntent(contentIntent);
 
         Notification notification = nb.getNotification();

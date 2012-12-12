@@ -111,7 +111,6 @@ public class GCMIntentService extends GCMBaseIntentService {
         Notification notification = nb.getNotification();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
-        // TODO check if there is already an unread notification
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0x1, notification);
     }

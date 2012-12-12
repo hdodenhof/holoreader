@@ -7,7 +7,9 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -38,12 +40,17 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onRegistered(Context context, String registrationId) {
         Log.v(TAG, "onRegistered");
-        // TODO
-        GCMServerUtilities.registerOnServer("henning.dodenhof@gmail.com", registrationId);
-        // TODO use local broadcast manager
-        Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction(BROADCAST_REGISTERED);
-        sendBroadcast(broadcastIntent);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        String eMail = prefs.getString("eMail", null);
+
+        if (eMail != null) {
+            GCMServerUtilities.registerOnServer(eMail, registrationId);
+            // TODO use local broadcast manager
+            Intent broadcastIntent = new Intent();
+            broadcastIntent.setAction(BROADCAST_REGISTERED);
+            sendBroadcast(broadcastIntent);
+        }
     }
 
     @Override

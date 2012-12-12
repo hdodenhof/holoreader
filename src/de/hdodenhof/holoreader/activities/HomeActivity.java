@@ -465,6 +465,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     }
 
     private void registerForPushMessaging(final String eMail) {
+        mPreferences.edit().putString("eMail", eMail).commit();
+
         GCMRegistrar.checkDevice(this);
         GCMRegistrar.checkManifest(this);
 

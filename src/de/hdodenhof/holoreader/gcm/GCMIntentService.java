@@ -7,9 +7,11 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.gson.Gson;
 
@@ -17,6 +19,7 @@ import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.activities.HomeActivity;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
+import de.hdodenhof.holoreader.services.RefreshFeedService;
 
 public class GCMIntentService extends GCMBaseIntentService {
 
@@ -79,12 +82,19 @@ public class GCMIntentService extends GCMBaseIntentService {
         VOFeed[] feeds = new Gson().fromJson(data, VOFeed[].class);
 
         ContentResolver contentResolver = getContentResolver();
-        // TODO check for successful inserts
+
         for (VOFeed voFeed : feeds) {
             ContentValues contentValues = new ContentValues();
             contentValues.put(FeedDAO.NAME, voFeed.getTitle());
             contentValues.put(FeedDAO.URL, voFeed.getUrl());
-            contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
+
+            Uri newFeed = contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
+            int feedId = Integer.parseInt(newFeed.getLastPathSegment());
+
+            Intent intent = new Intent(this, RefreshFeedService.class);
+            intent.putExtra("feedid", feedId);
+
+            WakefulIntentService.sendWakefulWork(this, intent);
         }
 
         // TODO proper flags

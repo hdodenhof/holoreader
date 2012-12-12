@@ -78,6 +78,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private FeedListFragment mFeedListFragment;
     private ProgressDialog mSpinner;
     private MenuItem mRefreshItem;
+    private MenuItem mPushItem;
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
     private int mSelectedFeed = -1;
@@ -254,6 +255,10 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         boolean refreshing = mPreferences.getBoolean("refreshing", false);
         if (refreshing) {
             mRefreshItem.setActionView(R.layout.actionview_refresh);
+        }
+
+        if (GCMRegistrar.isRegisteredOnServer(this)) {
+            mPushItem.setTitle(getResources().getString(R.string.MenuUnregisterFromPush));
         }
     }
 
@@ -458,10 +463,14 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     }
 
-    private void initAccountAndGCMRegistration() {
-        // TODO Might need a custom implementation here to match the style of the App
-        Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
-        startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
+    private void dispatchRegisterUnregisterGCM() {
+        if (GCMRegistrar.isRegisteredOnServer(this)) {
+            unregisterFromPushMessaging();
+        } else {
+            // TODO Might need a custom implementation here to match the style of the App
+            Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
+            startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
+        }
     }
 
     private void registerForPushMessaging(final String eMail) {
@@ -471,8 +480,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         GCMRegistrar.checkManifest(this);
 
         final String registrationId = GCMRegistrar.getRegistrationId(this);
-        // TODO dev only
-        GCMRegistrar.setRegisteredOnServer(this, false);
 
         if (registrationId.equals("")) {
             mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
@@ -496,12 +503,49 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                             // TODO
                         }
                         // TODO
+                        mPushItem.setTitle(getResources().getString(R.string.MenuUnregisterFromPush));
                         HomeActivity.this.mSpinner.dismiss();
                     }
                 };
                 registerForPushTask.execute();
             } else {
                 // TODO all set
+            }
+        }
+    }
+
+    private void unregisterFromPushMessaging() {
+        final String registrationId = GCMRegistrar.getRegistrationId(this);
+
+        if (registrationId.equals("")) {
+            // nothing to do
+        } else {
+            if (GCMRegistrar.isRegisteredOnServer(this)) {
+                mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushUnregistrationSpinner), true);
+                AsyncTask<Void, Void, Boolean> unregisterFromPushTask = new AsyncTask<Void, Void, Boolean>() {
+                    @Override
+                    protected Boolean doInBackground(Void... params) {
+                        return GCMServerUtilities.unregisterOnServer(registrationId);
+                    }
+
+                    @Override
+                    protected void onPostExecute(Boolean success) {
+                        if (success) {
+                            GCMRegistrar.setRegisteredOnServer(HomeActivity.this, false);
+                            GCMRegistrar.unregister(HomeActivity.this);
+                            mPreferences.edit().remove("eMail");
+                            mPushItem.setTitle(getResources().getString(R.string.MenuRegisterForPush));
+                        } else {
+                            // TODO
+                        }
+                        // TODO
+                        HomeActivity.this.mSpinner.dismiss();
+                    }
+                };
+                unregisterFromPushTask.execute();
+            } else {
+                // just to be sure
+                GCMRegistrar.unregister(this);
             }
         }
     }
@@ -587,6 +631,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         menuInflater.inflate(R.menu.main, menu);
 
         mRefreshItem = menu.getItem(0);
+        mPushItem = menu.getItem(5);
 
         return true;
     }
@@ -633,7 +678,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             startActivity(new Intent(this, EditFeedsActivity.class));
             return true;
         case R.id.item_regpush:
-            initAccountAndGCMRegistration();
+            dispatchRegisterUnregisterGCM();
             return true;
         default:
             return super.onOptionsItemSelected(item);

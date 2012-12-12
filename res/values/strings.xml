@@ -76,5 +76,12 @@
     <string name="AddFeedErrorIncompatibleFeed">The supplied feed is not compatible.</string>
     <string name="AddFeedErrorOther">I\'m sorry, but I don\'t really know what happend.</string>
     <string name="AddFeedError">Something went wrong</string>
+    
+    <!-- Pushing feeds -->
+     <string name="FeedsAddedViaPush">New feeds received via Push</string>
+        <plurals name="numberOfFeedsReceived">
+        <item quantity="one">One feed added to your list</item>
+        <item quantity="other">%d feeds added to your list</item>
+    </plurals>
 
 </resources>

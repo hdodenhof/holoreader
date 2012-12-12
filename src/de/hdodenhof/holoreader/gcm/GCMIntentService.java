@@ -103,8 +103,8 @@ public class GCMIntentService extends GCMBaseIntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this);
-        nb.setContentTitle("Received new feeds via Push");
-        nb.setContentText(feeds.length + " feeds have been added to your list.");
+        nb.setContentTitle(getResources().getString(R.string.FeedsAddedViaPush));
+        nb.setContentText(getResources().getQuantityString(R.plurals.numberOfFeedsReceived, feeds.length, feeds.length));
         nb.setSmallIcon(R.drawable.notification);
         nb.setContentIntent(contentIntent);
 

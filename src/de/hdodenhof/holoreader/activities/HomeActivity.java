@@ -187,6 +187,20 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         public void onReceive(Context context, Intent intent) {
             // TODO might get called without user interaction; add user message
             try {
+                mPushItem.setTitle(getResources().getString(R.string.MenuUnregisterFromPush));
+                mSpinner.dismiss();
+            } catch (NullPointerException e) {
+            }
+        }
+    };
+
+    private BroadcastReceiver mGCMUnregisteredReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // TODO might get called without user interaction; add user message
+            try {
+                mPushItem.setTitle(getResources().getString(R.string.MenuRegisterForPush));
+                mPreferences.edit().remove("eMail");
                 mSpinner.dismiss();
             } catch (NullPointerException e) {
             }
@@ -243,6 +257,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
         registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
+        registerReceiver(mGCMUnregisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_UNREGISTERED));
 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
         invalidateOptionsMenu();
@@ -281,6 +296,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         }
 
+		unregisterReceiver(mGCMUnregisteredReceiver);
 		unregisterReceiver(mGCMRegisteredReceiver);
 		unregisterReceiver(mFeedsRefreshingReceiver);        
 		unregisterReceiver(mFeedsRefreshedReceiver);
@@ -498,12 +514,12 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                     protected void onPostExecute(Boolean success) {
                         if (success) {
                             GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
+                            mPushItem.setTitle(getResources().getString(R.string.MenuUnregisterFromPush));
                             // TODO add user message
                         } else {
                             // TODO
                         }
                         // TODO
-                        mPushItem.setTitle(getResources().getString(R.string.MenuUnregisterFromPush));
                         HomeActivity.this.mSpinner.dismiss();
                     }
                 };
@@ -520,33 +536,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         if (registrationId.equals("")) {
             // nothing to do
         } else {
-            if (GCMRegistrar.isRegisteredOnServer(this)) {
-                mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushUnregistrationSpinner), true);
-                AsyncTask<Void, Void, Boolean> unregisterFromPushTask = new AsyncTask<Void, Void, Boolean>() {
-                    @Override
-                    protected Boolean doInBackground(Void... params) {
-                        return GCMServerUtilities.unregisterOnServer(registrationId);
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean success) {
-                        if (success) {
-                            GCMRegistrar.setRegisteredOnServer(HomeActivity.this, false);
-                            GCMRegistrar.unregister(HomeActivity.this);
-                            mPreferences.edit().remove("eMail");
-                            mPushItem.setTitle(getResources().getString(R.string.MenuRegisterForPush));
-                        } else {
-                            // TODO
-                        }
-                        // TODO
-                        HomeActivity.this.mSpinner.dismiss();
-                    }
-                };
-                unregisterFromPushTask.execute();
-            } else {
-                // just to be sure
-                GCMRegistrar.unregister(this);
-            }
+            mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushUnregistrationSpinner), true);
+            // going Async
+            GCMRegistrar.unregister(this);
         }
     }
 

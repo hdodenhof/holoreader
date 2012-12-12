@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.google.android.gcm.GCMBaseIntentService;
+import com.google.android.gcm.GCMRegistrar;
 import com.google.gson.Gson;
 
 import de.hdodenhof.holoreader.R;
@@ -29,6 +30,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     private static final String TAG = GCMIntentService.class.getName();
 
     public static final String BROADCAST_REGISTERED = "de.hdodenhof.holoreader.GCM_REGISTERED";
+    public static final String BROADCAST_UNREGISTERED = "de.hdodenhof.holoreader.GCM_UNREGISTERED";
     public static final String SENDER_ID = "";
 
     private static final String MESSAGETYPE_ADDFEED = "addfeed";
@@ -45,7 +47,10 @@ public class GCMIntentService extends GCMBaseIntentService {
         String eMail = prefs.getString("eMail", null);
 
         if (eMail != null) {
-            GCMServerUtilities.registerOnServer(eMail, registrationId);
+            boolean success = GCMServerUtilities.registerOnServer(eMail, registrationId);
+            if (success) {
+                GCMRegistrar.setRegisteredOnServer(this, true);
+            }
             // TODO use local broadcast manager
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(BROADCAST_REGISTERED);
@@ -56,6 +61,15 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onUnregistered(Context context, String registrationId) {
         Log.v(TAG, "onUnregistered");
+
+        boolean success = GCMServerUtilities.unregisterOnServer(registrationId);
+        if (success) {
+            GCMRegistrar.setRegisteredOnServer(this, false);
+        }
+        // TODO use local broadcast manager
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction(BROADCAST_UNREGISTERED);
+        sendBroadcast(broadcastIntent);
     }
 
     @Override

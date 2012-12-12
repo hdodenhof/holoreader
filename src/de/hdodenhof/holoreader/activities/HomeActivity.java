@@ -28,8 +28,6 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
@@ -172,6 +170,17 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     };
 
+    private BroadcastReceiver mFeedsRefreshingReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            try {
+                mRefreshItem.setActionView(R.layout.actionview_refresh);
+            } catch (NullPointerException e) {
+
+            }
+        }
+    };
+
     private BroadcastReceiver mGCMRegisteredReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -231,6 +240,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         filter.addAction(RefreshFeedService.BROADCAST_REFRESHED);
         registerReceiver(mFeedsRefreshedReceiver, filter);
 
+        registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
         registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
@@ -266,7 +276,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         }
 
-		unregisterReceiver(mGCMRegisteredReceiver);        
+		unregisterReceiver(mGCMRegisteredReceiver);
+		unregisterReceiver(mFeedsRefreshingReceiver);        
 		unregisterReceiver(mFeedsRefreshedReceiver);
         super.onPause();
     }

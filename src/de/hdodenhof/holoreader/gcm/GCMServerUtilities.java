@@ -49,34 +49,4 @@ public class GCMServerUtilities {
             return false;
         }
     }
-
-    public static boolean unregisterOnServer(String regId) {
-        try {
-            HashMap<String, String> entityMap = new HashMap<String, String>();
-            entityMap.put("regId", regId);
-            String entity = new Gson().toJson(entityMap);
-
-            HttpPut request = new HttpPut();
-            request.setURI(new URI(BASEURL + "unregister"));
-            request.setHeader("Content-type", "application/json");
-            request.setEntity(new StringEntity(entity));
-
-            HttpClient client = new DefaultHttpClient();
-            HttpResponse response = client.execute(request);
-            StatusLine responseStatus = response.getStatusLine();
-
-            int statusCode = responseStatus != null ? responseStatus.getStatusCode() : 0;
-
-            // TODO
-            if (!(statusCode == 200 || statusCode == 204)) {
-                return false;
-            } else {
-                return true;
-            }
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
 }

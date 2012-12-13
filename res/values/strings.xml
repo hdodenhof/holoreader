@@ -19,14 +19,12 @@
     <string name="AddDefaultFeedsSpinner">Adding feeds…</string>
     <string name="AddDefaultFeedsToast">Syncing default feeds…</string>
     <string name="PushRegistrationSpinner">Registering for Push…</string>
-    <string name="PushUnregistrationSpinner">Unregistering from Push…</string>
 
     <!-- Menu -->
     <string name="MenuRefresh">Refresh Feeds</string>
     <string name="MenuAdd">Add feed</string>
     <string name="MenuEditFeeds">Edit Feeds</string>
-    <string name="MenuRegisterForPush">Enable Push Messages</string>
-    <string name="MenuUnregisterFromPush">Disable Push Messages</string>
+    <string name="MenuRegisterForPush">Enable FeedToDevice</string>
     <string name="MenuToogleUnread">Toggle unread items</string>
     <string name="MenuMarkRead">Mark all as read</string>
     <string name="MenuWeb">Open link in browser</string>
@@ -80,7 +78,7 @@
     <string name="AddFeedError">Something went wrong</string>
     
     <!-- Pushing feeds -->
-     <string name="FeedsAddedViaPush">New feeds received via Push</string>
+     <string name="FeedsAddedViaPush">New feeds received via FeedToDevice</string>
         <plurals name="numberOfFeedsReceived">
         <item quantity="one">One feed added to your list</item>
         <item quantity="other">%d feeds added to your list</item>

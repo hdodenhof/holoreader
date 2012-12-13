@@ -187,20 +187,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         public void onReceive(Context context, Intent intent) {
             // TODO might get called without user interaction; add user message
             try {
-                mPushItem.setTitle(getResources().getString(R.string.MenuUnregisterFromPush));
-                mSpinner.dismiss();
-            } catch (NullPointerException e) {
-            }
-        }
-    };
-
-    private BroadcastReceiver mGCMUnregisteredReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // TODO might get called without user interaction; add user message
-            try {
-                mPushItem.setTitle(getResources().getString(R.string.MenuRegisterForPush));
-                mPreferences.edit().remove("eMail");
+                mPushItem.setVisible(false);
                 mSpinner.dismiss();
             } catch (NullPointerException e) {
             }
@@ -257,7 +244,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
         registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
-        registerReceiver(mGCMUnregisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_UNREGISTERED));
 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
         invalidateOptionsMenu();
@@ -279,27 +265,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     @Override
     protected void onPause() {
-        // workaround for orientation change issues
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        Fragment addDialog = fm.findFragmentByTag("add_dialog");
-        if (addDialog != null) {
-            ft.remove(addDialog);
-        }
-        ft.commit();
-
-        if (mSpinner != null) {
-            try {
-                mSpinner.dismiss();
-                mSpinner = null;
-            } catch (Exception e) {
-            }
-        }
-
-		unregisterReceiver(mGCMUnregisteredReceiver);
-		unregisterReceiver(mGCMRegisteredReceiver);
-		unregisterReceiver(mFeedsRefreshingReceiver);        
-		unregisterReceiver(mFeedsRefreshedReceiver);
+        unregisterReceiver(mGCMRegisteredReceiver);
+        unregisterReceiver(mFeedsRefreshingReceiver);
+        unregisterReceiver(mFeedsRefreshedReceiver);
         super.onPause();
     }
 
@@ -430,8 +398,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         } else {
             if (manual) {
-                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText),
-                        "refresh_no_conenction");
+                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
             }
         }
     }
@@ -479,14 +446,10 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     }
 
-    private void dispatchRegisterUnregisterGCM() {
-        if (GCMRegistrar.isRegisteredOnServer(this)) {
-            unregisterFromPushMessaging();
-        } else {
-            // TODO Might need a custom implementation here to match the style of the App
-            Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
-            startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
-        }
+    private void startGCMRegistrationFlow() {
+        // TODO Might need a custom implementation here to match the style of the App
+        Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
+        startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
     }
 
     private void registerForPushMessaging(final String eMail) {
@@ -499,7 +462,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         if (registrationId.equals("")) {
             mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
-            // going Async
             GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
         } else {
             if (!GCMRegistrar.isRegisteredOnServer(this)) {
@@ -514,31 +476,18 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                     protected void onPostExecute(Boolean success) {
                         if (success) {
                             GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
-                            mPushItem.setTitle(getResources().getString(R.string.MenuUnregisterFromPush));
+                            mPushItem.setVisible(false);
                             // TODO add user message
                         } else {
                             // TODO
                         }
-                        // TODO
-                        HomeActivity.this.mSpinner.dismiss();
+                        mSpinner.dismiss();
                     }
                 };
                 registerForPushTask.execute();
             } else {
                 // TODO all set
             }
-        }
-    }
-
-    private void unregisterFromPushMessaging() {
-        final String registrationId = GCMRegistrar.getRegistrationId(this);
-
-        if (registrationId.equals("")) {
-            // nothing to do
-        } else {
-            mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushUnregistrationSpinner), true);
-            // going Async
-            GCMRegistrar.unregister(this);
         }
     }
 
@@ -670,7 +619,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             startActivity(new Intent(this, EditFeedsActivity.class));
             return true;
         case R.id.item_regpush:
-            dispatchRegisterUnregisterGCM();
+            startGCMRegistrationFlow();
             return true;
         default:
             return super.onOptionsItemSelected(item);

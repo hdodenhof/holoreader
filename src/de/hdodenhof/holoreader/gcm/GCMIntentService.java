@@ -30,7 +30,6 @@ public class GCMIntentService extends GCMBaseIntentService {
     private static final String TAG = GCMIntentService.class.getName();
 
     public static final String BROADCAST_REGISTERED = "de.hdodenhof.holoreader.GCM_REGISTERED";
-    public static final String BROADCAST_UNREGISTERED = "de.hdodenhof.holoreader.GCM_UNREGISTERED";
     public static final String SENDER_ID = "";
 
     private static final String MESSAGETYPE_ADDFEED = "addfeed";
@@ -61,15 +60,6 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onUnregistered(Context context, String registrationId) {
         Log.v(TAG, "onUnregistered");
-
-        boolean success = GCMServerUtilities.unregisterOnServer(registrationId);
-        if (success) {
-            GCMRegistrar.setRegisteredOnServer(this, false);
-        }
-        // TODO use local broadcast manager
-        Intent broadcastIntent = new Intent();
-        broadcastIntent.setAction(BROADCAST_UNREGISTERED);
-        sendBroadcast(broadcastIntent);
     }
 
     @Override

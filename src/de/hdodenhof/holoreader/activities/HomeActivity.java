@@ -447,9 +447,13 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     }
 
     private void startGCMRegistrationFlow() {
-        // TODO Might need a custom implementation here to match the style of the App
-        Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
-        startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
+        if (Helpers.isConnected(this)) {
+            // TODO Might need a custom implementation here to match the style of the App
+            Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
+            startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
+        } else {
+            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+        }
     }
 
     private void registerForPushMessaging(final String eMail) {

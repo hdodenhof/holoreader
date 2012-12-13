@@ -17,7 +17,7 @@ public class GCMServerUtilities {
     @SuppressWarnings("unused")
     private static final String TAG = GCMServerUtilities.class.getName();
 
-    // public static final String BASEURL = "http://holoreader.appspot.com/api/";
+    // public static final String BASEURL = "https://holoreader.appspot.com/api/";
     public static final String BASEURL = "http://192.168.178.26:8888/api/";
 
     public static boolean registerOnServer(String eMail, String regId) {

@@ -5,7 +5,7 @@
     <string name="LayoutSize">default</string>
     
     <string name="AppName">Holo Reader</string>
-    <string name="AppVersionName">1.0.1</string>
+    <string name="AppVersionName">1.0.2</string>
     <!-- Using unicode to keep whitespaces, it's " - " -->
     <string name="MetaDivider">\u0020\u2013\u0020</string>
 

@@ -240,10 +240,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     protected void onResume() {
         super.onResume();
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(RefreshFeedService.BROADCAST_REFRESHED);
-        registerReceiver(mFeedsRefreshedReceiver, filter);
-
+        registerReceiver(mFeedsRefreshedReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHED));
         registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);

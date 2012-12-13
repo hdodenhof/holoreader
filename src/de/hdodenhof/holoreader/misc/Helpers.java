@@ -44,11 +44,11 @@ public class Helpers {
      * @param message
      *            Dialog message
      */
-    public static void showDialog(Context context, String title, String message) {
+    public static void showDialog(Context context, String title, String message, String tag) {
         DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(context);
         dialogFragment.setTitle(title);
         dialogFragment.setMessage(message);
-        dialogFragment.show(((SherlockFragmentActivity) context).getSupportFragmentManager(), "dialog");
+        dialogFragment.show(((SherlockFragmentActivity) context).getSupportFragmentManager(), tag);
     }
 
     /**

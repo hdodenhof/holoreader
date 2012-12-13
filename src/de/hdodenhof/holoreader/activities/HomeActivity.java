@@ -135,16 +135,16 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
         switch (returnCondition) {
         case AddFeedTask.ERROR_IOEXCEPTION:
-            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorConnection));
+            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorConnection), "add_failed");
             break;
         case AddFeedTask.ERROR_NOFEED:
-            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorNoFeed));
+            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorNoFeed), "add_failed");
             break;
         case AddFeedTask.ERROR_NOCONTENT:
-            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorIncompatibleFeed));
+            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorIncompatibleFeed), "add_failed");
             break;
         case AddFeedTask.ERROR_XMLPULLPARSEREXCEPTION:
-            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorOther));
+            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorOther), "add_failed");
             break;
         default:
             break;
@@ -230,7 +230,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         // workaround for orientation change issues
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
-        Fragment addDialog = fm.findFragmentByTag("dialog");
+        Fragment addDialog = fm.findFragmentByTag("add_dialog");
         if (addDialog != null) {
             ft.remove(addDialog);
         }
@@ -331,7 +331,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             AddFeedTask addFeedTask = new AddFeedTask(mAsyncHandler, this);
             addFeedTask.execute(parsedUrl);
         } else {
-            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorInvalidUrl));
+            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorInvalidUrl),
+                    "add_invalid_url");
         }
     }
 
@@ -355,7 +356,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         } else {
             if (manual) {
-                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText),
+                        "refresh_no_conenction");
             }
         }
     }
@@ -397,9 +399,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 }
             }, mResources.getString(R.string.AddFeedDialogOk));
 
-            dialogFragment.show(getSupportFragmentManager(), "dialog");
+            dialogFragment.show(getSupportFragmentManager(), "add_dialog");
         } else {
-            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "add_no_conenction");
         }
     }
 

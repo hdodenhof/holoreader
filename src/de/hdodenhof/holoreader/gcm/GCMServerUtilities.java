@@ -25,6 +25,7 @@ public class GCMServerUtilities {
             HashMap<String, String> entityMap = new HashMap<String, String>();
             entityMap.put("eMail", eMail);
             entityMap.put("regId", regId);
+            entityMap.put("device", android.os.Build.MODEL);
             String entity = new Gson().toJson(entityMap);
 
             HttpPut request = new HttpPut();

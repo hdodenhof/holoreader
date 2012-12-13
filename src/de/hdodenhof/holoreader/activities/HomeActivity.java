@@ -189,6 +189,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             try {
                 mPushItem.setVisible(false);
                 mSpinner.dismiss();
+                Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
+                        mResources.getString(R.string.FeedsViaPushEnabledText));
             } catch (NullPointerException e) {
             }
         }

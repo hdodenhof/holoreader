@@ -18,7 +18,7 @@
     <string name="AddDefaultFeedsDialogCancel">No, thanks</string>
     <string name="AddDefaultFeedsSpinner">Adding feeds…</string>
     <string name="AddDefaultFeedsToast">Syncing default feeds…</string>
-    <string name="PushRegistrationSpinner">Registering for Push…</string>
+    <string name="PushRegistrationSpinner">Registering for FeedToDevice…</string>
 
     <!-- Menu -->
     <string name="MenuRefresh">Refresh Feeds</string>

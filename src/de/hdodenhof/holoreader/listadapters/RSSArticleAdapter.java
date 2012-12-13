@@ -317,6 +317,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     private static String getUniqueKey(long id, URL extUrl) {
         String filename = "";
         String path = extUrl.getPath();
+
         String[] pathContents = path.split("[\\\\/]");
         if (pathContents != null) {
             String lastPart = pathContents[pathContents.length - 1];
@@ -333,10 +334,13 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                     }
                 }
                 String extension = lastPartContents[lastPartContentLength - 1];
+
+                // remove linebreaks and spaces, fixes #55
+                name = name.replaceAll("\\s", "");
+
                 filename = name + "." + extension;
             }
         }
         return id + "_" + filename;
     }
-
 }

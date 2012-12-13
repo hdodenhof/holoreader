@@ -245,7 +245,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         registerReceiver(mFeedsRefreshedReceiver, filter);
 
         registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
-        registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
         invalidateOptionsMenu();
@@ -261,7 +260,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
 
         if (GCMRegistrar.isRegisteredOnServer(this)) {
-            mPushItem.setTitle(getResources().getString(R.string.MenuUnregisterFromPush));
+            mPushItem.setVisible(false);
+        } else {
+            registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
         }
     }
 

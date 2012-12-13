@@ -265,7 +265,11 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     @Override
     protected void onPause() {
-        unregisterReceiver(mGCMRegisteredReceiver);
+        try {
+            unregisterReceiver(mGCMRegisteredReceiver);
+        } catch (IllegalArgumentException e) {
+            // might not be registered
+        }
         unregisterReceiver(mFeedsRefreshingReceiver);
         unregisterReceiver(mFeedsRefreshedReceiver);
         super.onPause();

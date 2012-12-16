@@ -338,7 +338,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     }
 
     private void maybeShowPushHint() {
-        if (!mPreferences.getBoolean("pushHintShown", false)) {
+        if (!mPreferences.getBoolean("pushHintShown", false) && !GCMRegistrar.isRegisteredOnServer(this)) {
             Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushHintTitle), mResources.getString(R.string.FeedsViaPushHintText),
                     "push_hint");
             mPreferences.edit().putBoolean("pushHintShown", true).commit();

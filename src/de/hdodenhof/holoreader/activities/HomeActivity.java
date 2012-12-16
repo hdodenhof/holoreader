@@ -114,6 +114,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private void callbackFeedAdded(int feedID) {
         try {
             mSpinner.dismiss();
+            mSpinner = null;
         } catch (Exception e) {
         }
         if (mPendingDialogFragment != null) {
@@ -131,6 +132,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private void callbackFeedAddedError(int returnCondition) {
         try {
             mSpinner.dismiss();
+            mSpinner = null;
         } catch (Exception e) {
         }
         switch (returnCondition) {
@@ -236,6 +238,14 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
         ft.commit();
 
+        if (mSpinner != null) {
+            try {
+                mSpinner.dismiss();
+                mSpinner = null;
+            } catch (Exception e) {
+            }
+        }
+
         unregisterReceiver(mFeedsRefreshedReceiver);
         super.onPause();
     }
@@ -310,6 +320,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             @Override
             protected void onPostExecute(Void result) {
                 mSpinner.dismiss();
+                mSpinner = null;
                 Toast.makeText(HomeActivity.this, mResources.getString(R.string.AddDefaultFeedsToast), Toast.LENGTH_LONG).show();
                 refreshFeeds(true);
             }

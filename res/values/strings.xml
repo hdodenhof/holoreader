@@ -82,6 +82,8 @@
     <string name="FeedsViaPushEnableDialogText">To enable FeedToDevice, your eMail address has to be send to our server. Proceed anyway?</string>
     <string name="FeedsViaPushEnableDialogOK">Yes</string>
     <string name="FeedsViaPushEnableDialogNOK">No</string>
+    <string name="FeedsViaPushEnableCanceledTitle">Abort</string>
+    <string name="FeedsViaPushEnableCanceledText">FeedToDevice registration has been canceled.</string>
     <string name="FeedsViaPushEnableErrorTitle">Error</string>
     <string name="FeedsViaPushEnableErrorText">Enabling FeedToDevice failed, please try again later.</string>
     <string name="FeedsViaPushEnabledTitle">FeedToDevice enabled</string>

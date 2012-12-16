@@ -300,7 +300,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
             registerForPushMessaging(accountName);
         } else {
-            // TODO
+            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableCanceledTitle),
+                    mResources.getString(R.string.FeedsViaPushEnableCanceledText), "push_canceled");
         }
     }
 

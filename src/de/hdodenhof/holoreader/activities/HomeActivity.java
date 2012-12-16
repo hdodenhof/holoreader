@@ -262,6 +262,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         } else {
             registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
         }
+
+        mPreferences.edit().remove("newFeeds").commit();
     }
 
     @Override

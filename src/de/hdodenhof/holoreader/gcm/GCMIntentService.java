@@ -108,13 +108,18 @@ public class GCMIntentService extends GCMBaseIntentService {
             WakefulIntentService.sendWakefulWork(this, intent);
         }
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        int newFeedsSoFar = prefs.getInt("newFeeds", 0);
+        int newFeedsSum = newFeedsSoFar + feeds.length;
+        prefs.edit().putInt("newFeeds", newFeedsSum).commit();
+
         Intent notificationIntent = new Intent(this, HomeActivity.class);
         notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this);
         nb.setContentTitle(getResources().getString(R.string.FeedsAddedViaPush));
-        nb.setContentText(getResources().getQuantityString(R.plurals.numberOfFeedsReceived, feeds.length, feeds.length));
+        nb.setContentText(getResources().getQuantityString(R.plurals.numberOfFeedsReceived, newFeedsSum, newFeedsSum));
         nb.setSmallIcon(R.drawable.notification);
         nb.setContentIntent(contentIntent);
 

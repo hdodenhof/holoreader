@@ -27,6 +27,8 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
@@ -110,9 +112,15 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      * 
      */
     private void callbackFeedAdded(int feedID) {
-        mSpinner.dismiss();
+        try {
+            mSpinner.dismiss();
+        } catch (Exception e) {
+        }
         if (mPendingDialogFragment != null) {
-            mPendingDialogFragment.dismiss();
+            try {
+                mPendingDialogFragment.dismiss();
+            } catch (Exception e) {
+            }
         }
         refreshFeed(feedID);
     }
@@ -121,7 +129,10 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      * 
      */
     private void callbackFeedAddedError(int returnCondition) {
-        mSpinner.dismiss();
+        try {
+            mSpinner.dismiss();
+        } catch (Exception e) {
+        }
         switch (returnCondition) {
         case AddFeedTask.ERROR_IOEXCEPTION:
             Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorConnection));
@@ -216,6 +227,15 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     @Override
     protected void onPause() {
+        // workaround for orientation change issues
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        Fragment addDialog = fm.findFragmentByTag("dialog");
+        if (addDialog != null) {
+            ft.remove(addDialog);
+        }
+        ft.commit();
+
         unregisterReceiver(mFeedsRefreshedReceiver);
         super.onPause();
     }

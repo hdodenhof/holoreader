@@ -493,6 +493,10 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     }
 
+    /**
+     * 
+     * @param eMail
+     */
     private void registerForPushMessaging(final String eMail) {
         mPreferences.edit().putString("eMail", eMail).commit();
 

@@ -222,6 +222,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             addFeed(url);
         } else if (mPreferences.getBoolean("firstrun", true)) {
             firstRun();
+        } else {
+            maybeShowPushHint();
         }
 
     }
@@ -333,6 +335,14 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     @Override
     public boolean isPrimaryFragment(Fragment fragment) {
         return fragment instanceof FeedListFragment;
+    }
+
+    private void maybeShowPushHint() {
+        if (!mPreferences.getBoolean("pushHintShown", false)) {
+            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushHintTitle), mResources.getString(R.string.FeedsViaPushHintText),
+                    "push_hint");
+            mPreferences.edit().putBoolean("pushHintShown", true).commit();
+        }
     }
 
     private void firstRun() {

@@ -78,8 +78,12 @@
     <string name="AddFeedError">Something went wrong</string>
 
     <!-- Pushing feeds -->
+    <string name="FeedsViaPushEnableDialogTitle">FeedToDevice</string>
+    <string name="FeedsViaPushEnableDialogText">To enable FeedToDevice, your eMail address has to be send to our server. Proceed anyway?</string>
+    <string name="FeedsViaPushEnableDialogOK">Yes</string>
+    <string name="FeedsViaPushEnableDialogNOK">No</string>
     <string name="FeedsViaPushEnabledTitle">FeedToDevice enabled</string>
-    <string name="FeedsViaPushEnabledText">FeedToDevice has been enabled. You can now go to holoreader.appspot.com and send feeds to your device.</string>
+    <string name="FeedsViaPushEnabledText">FeedToDevice has been enabled for this device and an eMail with intructions has been sent to your account.</string>
     <string name="FeedsAddedViaPush">New feeds received via FeedToDevice</string>
 
     <plurals name="numberOfFeedsReceived">

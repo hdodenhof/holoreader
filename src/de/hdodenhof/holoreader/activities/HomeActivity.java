@@ -471,9 +471,23 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     private void startGCMRegistrationFlow() {
         if (Helpers.isConnected(this)) {
-            // TODO Might need a custom implementation here to match the style of the App
-            Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
-            startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
+            DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(this);
+
+            dialogFragment.setTitle(mResources.getString(R.string.FeedsViaPushEnableDialogTitle));
+            dialogFragment.setMessage(mResources.getString(R.string.FeedsViaPushEnableDialogText));
+            dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
+                @Override
+                public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
+                    df.dismiss();
+
+                    // TODO Might need a custom implementation here to match the style of the App
+                    Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
+                    startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
+                }
+            }, mResources.getString(R.string.FeedsViaPushEnableDialogOK));
+            dialogFragment.setNegativeButtonText(mResources.getString(R.string.FeedsViaPushEnableDialogNOK));
+
+            dialogFragment.show(getSupportFragmentManager(), "enable_push");
         } else {
             Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "no_connection");
         }

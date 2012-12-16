@@ -41,7 +41,7 @@
     <!-- Feed List -->
     <string name="LoadingFeeds">Loading feeds…</string>
     <string name="NoFeeds">No feeds yet.</string>
-    <string name="NoFeedsHint">You haven\'t added any feeds yet. Just go to the menu and choose \"Add feed\" to get started.</string>
+    <string name="NoFeedsHint">You haven\'t added any feeds yet. Just go to the menu and choose \"Add feed\" to get started. Or enable FeedToDevice from the menu for easily adding feeds from your desktop computer.</string>
     <string name="NoUnreadFeeds">No unread feeds.</string>
     <string name="AllFeeds">All feeds</string>
     <string name="LastUpdate">Last Update</string>
@@ -79,7 +79,7 @@
 
     <!-- Pushing feeds -->
     <string name="FeedsViaPushEnableDialogTitle">FeedToDevice</string>
-    <string name="FeedsViaPushEnableDialogText">To enable FeedToDevice, your eMail address has to be send to our server. Proceed anyway?</string>
+    <string name="FeedsViaPushEnableDialogText">With FeedToDevice you can easily add feeds to Holo Reader using your desktop computer. To enable this, your eMail address has to be send to our server. Is that okay?</string>
     <string name="FeedsViaPushEnableDialogOK">Yes</string>
     <string name="FeedsViaPushEnableDialogNOK">No</string>
     <string name="FeedsViaPushEnableCanceledTitle">Abort</string>

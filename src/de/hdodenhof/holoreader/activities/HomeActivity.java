@@ -339,7 +339,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(this);
 
         dialogFragment.setTitle(mResources.getString(R.string.AddDefaultFeedsDialogTitle));
-        dialogFragment.setLayout(R.layout.fragment_firstrun);
+        dialogFragment.setMessage(mResources.getString(R.string.AddDefaultFeedsDialogText));
         dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
             @Override
             public void onClick(DialogFragment df, String tag, SparseArray<String> map) {

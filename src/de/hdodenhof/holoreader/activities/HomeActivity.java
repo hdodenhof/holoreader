@@ -187,7 +187,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private BroadcastReceiver mGCMRegisteredReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // TODO might get called without user interaction; add user message
             try {
                 mPushItem.setVisible(false);
                 mSpinner.dismiss();

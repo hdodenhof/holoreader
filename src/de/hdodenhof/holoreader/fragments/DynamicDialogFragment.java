@@ -172,7 +172,7 @@ public interface DynamicDialogFragment {
 
             title.setText(mTitle);
 
-            if (mPositiveButtonListener != null && mMessage == null) {
+            if (mPositiveButtonListener != null) {
                 buttonOk.setVisibility(View.VISIBLE);
                 buttonCancel.setVisibility(View.VISIBLE);
                 buttonNeutral.setVisibility(View.GONE);
@@ -318,7 +318,7 @@ public interface DynamicDialogFragment {
                 mAlertDialog.setMessage(mMessage);
             }
 
-            if (mPositiveButtonListener != null && mMessage == null) {
+            if (mPositiveButtonListener != null) {
                 mAlertDialog.setPositiveButton(mPositiveButtonText != null ? mPositiveButtonText : mContext.getResources().getString(R.string.PositiveButton),
                         new DialogInterface.OnClickListener() {
                             @Override

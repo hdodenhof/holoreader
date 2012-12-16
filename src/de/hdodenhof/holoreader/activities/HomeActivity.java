@@ -515,6 +515,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
                     @Override
                     protected void onPostExecute(Boolean success) {
+                        mSpinner.dismiss();
+                        mSpinner = null;
                         if (success) {
                             GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
                             mPushItem.setVisible(false);
@@ -524,8 +526,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                             Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
                                     mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
                         }
-                        mSpinner.dismiss();
-                        mSpinner = null;
                     }
                 };
                 registerForPushTask.execute();

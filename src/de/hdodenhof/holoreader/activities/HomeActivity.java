@@ -518,7 +518,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                         if (success) {
                             GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
                             mPushItem.setVisible(false);
-                            // TODO add user message
+                            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
+                                    mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
                         } else {
                             Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
                                     mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");

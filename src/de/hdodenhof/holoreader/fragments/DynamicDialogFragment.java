@@ -84,22 +84,16 @@ public interface DynamicDialogFragment {
         }
     }
 
-    public class HCDialogFragment extends DialogFragment implements DynamicDialogFragment {
+    public abstract class AbstractDynamicDialogFragment extends DialogFragment implements DynamicDialogFragment {
 
-        private int mContentRessource;
-        private OnClickListener mPositiveButtonListener;
-        private String mTitle;
-        private String mMessage;
-        private String mPositiveButtonText;
-        private String mNegativeButtonText;
-        private SparseArray<String> mValues;
-        private String mTag;
-
-        public HCDialogFragment() {
-        }
-
-        public HCDialogFragment(Context context) {
-        }
+        protected int mContentRessource;
+        protected OnClickListener mPositiveButtonListener;
+        protected String mTitle;
+        protected String mMessage;
+        protected String mPositiveButtonText;
+        protected String mNegativeButtonText;
+        protected SparseArray<String> mValues;
+        protected String mTag;
 
         @Override
         public void setTitle(String title) {
@@ -146,19 +140,29 @@ public interface DynamicDialogFragment {
             super.show(fm, tag);
         }
 
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            setStyle(STYLE_NO_TITLE, 0);
-            setRetainInstance(true);
-        }
-
         // workaround for #17423 in AOSP
         @Override
         public void onDestroyView() {
             if (getDialog() != null && getRetainInstance())
                 getDialog().setDismissMessage(null);
             super.onDestroyView();
+        }
+
+    }
+
+    public class HCDialogFragment extends AbstractDynamicDialogFragment {
+
+        public HCDialogFragment() {
+        }
+
+        public HCDialogFragment(Context context) {
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setStyle(STYLE_NO_TITLE, 0);
+            setRetainInstance(true);
         }
 
         @Override
@@ -225,84 +229,22 @@ public interface DynamicDialogFragment {
         }
     }
 
-    public class PreHCDialogFragment extends DialogFragment implements DynamicDialogFragment {
+    public class PreHCDialogFragment extends AbstractDynamicDialogFragment {
 
-        private int mContentRessource;
-        private AlertDialog.Builder mAlertDialog;
-        private OnClickListener mPositiveButtonListener;
         private Context mContext;
+        private AlertDialog.Builder mAlertDialog;
         private View mRootView;
-        private String mTitle;
-        private String mMessage;
-        private String mPositiveButtonText;
-        private String mNegativeButtonText;
-        private SparseArray<String> mValues;
-        private String mTag;
 
         public PreHCDialogFragment() {
         }
 
         public PreHCDialogFragment(Context context) {
-            mContext = context;
-        }
-
-        @Override
-        public void setTitle(String title) {
-            mTitle = title;
-        }
-
-        @Override
-        public void setMessage(String message) {
-            mMessage = message;
-        }
-
-        @Override
-        public void setPositiveButtonListener(OnClickListener listener) {
-            mPositiveButtonListener = listener;
-        }
-
-        @Override
-        public void setPositiveButtonListener(OnClickListener listener, String text) {
-            mPositiveButtonListener = listener;
-            mPositiveButtonText = text;
-        }
-
-        public void setNegativeButtonText(String text) {
-            mNegativeButtonText = text;
-        }
-
-        @Override
-        public void setLayout(int ressourceID) {
-            mContentRessource = ressourceID;
-        }
-
-        @Override
-        public void setInitialValues(SparseArray<String> map) {
-            mValues = map;
-        }
-
-        @Override
-        public void setTag(String tag) {
-            mTag = tag;
-        }
-
-        @Override
-        public void show(FragmentManager fm, String tag) {
-            super.show(fm, tag);
         }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setRetainInstance(true);
-        }
-
-        // workaround for #17423 in AOSP
-        @Override
-        public void onDestroyView() {
-            if (getDialog() != null && getRetainInstance())
-                getDialog().setDismissMessage(null);
-            super.onDestroyView();
         }
 
         @Override

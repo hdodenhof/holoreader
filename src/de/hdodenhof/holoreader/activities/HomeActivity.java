@@ -28,6 +28,8 @@ import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
@@ -190,7 +192,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 mPushItem.setVisible(false);
                 mSpinner.dismiss();
                 Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
-                        mResources.getString(R.string.FeedsViaPushEnabledText));
+                        mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
             } catch (NullPointerException e) {
             }
         }
@@ -265,6 +267,23 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     @Override
     protected void onPause() {
+        // workaround for orientation change issues
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        Fragment addDialog = fm.findFragmentByTag("add_dialog");
+        if (addDialog != null) {
+            ft.remove(addDialog);
+        }
+        ft.commit();
+
+        if (mSpinner != null) {
+            try {
+                mSpinner.dismiss();
+                mSpinner = null;
+            } catch (Exception e) {
+            }
+        }
+
         try {
             unregisterReceiver(mGCMRegisteredReceiver);
         } catch (IllegalArgumentException e) {
@@ -402,7 +421,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         } else {
             if (manual) {
-                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "no_connection");
             }
         }
     }
@@ -446,7 +465,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
             dialogFragment.show(getSupportFragmentManager(), "add_dialog");
         } else {
-            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "add_no_conenction");
+            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "no_connection");
         }
     }
 
@@ -456,7 +475,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
             startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
         } else {
-            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText));
+            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "no_connection");
         }
     }
 
@@ -490,6 +509,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                             // TODO
                         }
                         mSpinner.dismiss();
+                        mSpinner = null;
                     }
                 };
                 registerForPushTask.execute();

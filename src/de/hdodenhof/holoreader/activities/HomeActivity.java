@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 
 import android.accounts.AccountManager;
 import android.annotation.SuppressLint;
+import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -264,6 +265,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
 
         mPreferences.edit().remove("newFeeds").commit();
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(0x1);
     }
 
     @Override

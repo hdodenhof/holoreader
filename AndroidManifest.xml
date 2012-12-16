@@ -84,7 +84,6 @@
         <activity android:name="de.hdodenhof.holoreader.activities.DisplayFeedActivity" />
         <activity android:name="de.hdodenhof.holoreader.activities.DisplayArticleActivity" />
         <activity android:name="de.hdodenhof.holoreader.activities.EditFeedsActivity" />
-        <activity android:name="de.hdodenhof.holoreader.activities.SettingsActivity" />
 
         <service android:name="de.hdodenhof.holoreader.services.RefreshFeedService" />
         <service android:name="de.hdodenhof.holoreader.gcm.GCMIntentService" />

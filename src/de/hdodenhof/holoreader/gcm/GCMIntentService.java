@@ -108,9 +108,8 @@ public class GCMIntentService extends GCMBaseIntentService {
             WakefulIntentService.sendWakefulWork(this, intent);
         }
 
-        // TODO proper flags
         Intent notificationIntent = new Intent(this, HomeActivity.class);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this);

@@ -520,7 +520,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                             mPushItem.setVisible(false);
                             // TODO add user message
                         } else {
-                            // TODO
+                            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
+                                    mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
                         }
                         mSpinner.dismiss();
                         mSpinner = null;

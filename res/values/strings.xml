@@ -82,6 +82,8 @@
     <string name="FeedsViaPushEnableDialogText">To enable FeedToDevice, your eMail address has to be send to our server. Proceed anyway?</string>
     <string name="FeedsViaPushEnableDialogOK">Yes</string>
     <string name="FeedsViaPushEnableDialogNOK">No</string>
+    <string name="FeedsViaPushEnableErrorTitle">Error</string>
+    <string name="FeedsViaPushEnableErrorText">Enabling FeedToDevice failed, please try again later.</string>
     <string name="FeedsViaPushEnabledTitle">FeedToDevice enabled</string>
     <string name="FeedsViaPushEnabledText">FeedToDevice has been enabled for this device and an eMail with intructions has been sent to your account.</string>
     <string name="FeedsAddedViaPush">New feeds received via FeedToDevice</string>

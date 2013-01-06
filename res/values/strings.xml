@@ -79,9 +79,9 @@
 
     <!-- Pushing feeds -->
     <string name="FeedsViaPushHintTitle">FeedToDevice</string>
-    <string name="FeedsViaPushHintText">Have you already discovered the new feature \"FeedToDevice\"? It enables you to easily add feeds to Holo Reader using your desktop computer. To enable it just choose \"Enable FeedToDevice\" from the menu and follow the instructions.</string>
+    <string name="FeedsViaPushHintText">Have you already discovered the new service \"FeedToDevice\"? It enables you to easily add feeds to Holo Reader using your desktop computer. To enable it just choose \"Enable FeedToDevice\" from the menu and follow the instructions.</string>
     <string name="FeedsViaPushEnableDialogTitle">FeedToDevice</string>
-    <string name="FeedsViaPushEnableDialogText">With FeedToDevice you can easily add feeds to Holo Reader using your desktop computer. To enable this, your eMail address has to be send to our server. Is that okay?</string>
+    <string name="FeedsViaPushEnableDialogText">With FeedToDevice (beta) you can easily add feeds to Holo Reader using your desktop computer. To enable this, your eMail address has to be send to our server. Okay?</string>
     <string name="FeedsViaPushEnableDialogOK">Yes</string>
     <string name="FeedsViaPushEnableDialogNOK">No</string>
     <string name="FeedsViaPushEnableCanceledTitle">Abort</string>
@@ -90,7 +90,7 @@
     <string name="FeedsViaPushEnableErrorText">Enabling FeedToDevice failed, please try again later.</string>
     <string name="FeedsViaPushEnabledTitle">FeedToDevice enabled</string>
     <string name="FeedsViaPushEnabledText">FeedToDevice has been enabled for this device and an eMail with intructions has been sent to your account.</string>
-    <string name="FeedsAddedViaPush">New feeds received via FeedToDevice</string>
+    <string name="FeedsAddedViaPush">Feeds received via FeedToDevice</string>
 
     <plurals name="numberOfFeedsReceived">
         <item quantity="one">One feed added to your list</item>

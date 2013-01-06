@@ -189,11 +189,18 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         @Override
         public void onReceive(Context context, Intent intent) {
             try {
-                mPushItem.setVisible(false);
                 mSpinner.dismiss();
+                mSpinner = null;
+            } catch (NullPointerException e) {
+            }
+
+            if (intent.getBooleanExtra("success", false)) {
+                mPushItem.setVisible(false);
                 Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
                         mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
-            } catch (NullPointerException e) {
+            } else {
+                Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
+                        mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
             }
         }
     };

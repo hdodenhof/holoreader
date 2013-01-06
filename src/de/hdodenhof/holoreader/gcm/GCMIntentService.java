@@ -53,6 +53,7 @@ public class GCMIntentService extends GCMBaseIntentService {
             // TODO use local broadcast manager
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(BROADCAST_REGISTERED);
+            broadcastIntent.putExtra("success", success);
             sendBroadcast(broadcastIntent);
         }
     }

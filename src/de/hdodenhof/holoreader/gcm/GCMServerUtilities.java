@@ -18,13 +18,15 @@ public class GCMServerUtilities {
     private static final String TAG = GCMServerUtilities.class.getName();
 
     // public static final String BASEURL = "https://holoreader.appspot.com/api/";
-    public static final String BASEURL = "http://192.168.178.26:8888/api/";
 
-    public static boolean registerOnServer(String eMail, String regId) {
+    public static final String BASEURL = "http://192.168.178.28:8888/api/";
+
+    public static boolean registerOnServer(String eMail, String regId, String uuid) {
         try {
             HashMap<String, String> entityMap = new HashMap<String, String>();
             entityMap.put("eMail", eMail);
             entityMap.put("regId", regId);
+            entityMap.put("uuid", uuid);
             entityMap.put("device", android.os.Build.MODEL);
             String entity = new Gson().toJson(entityMap);
 
@@ -39,8 +41,7 @@ public class GCMServerUtilities {
 
             int statusCode = responseStatus != null ? responseStatus.getStatusCode() : 0;
 
-            // TODO
-            if (!(statusCode == 200 || statusCode == 204)) {
+            if (!(statusCode == 204)) {
                 return false;
             } else {
                 return true;

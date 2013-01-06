@@ -44,9 +44,10 @@ public class GCMIntentService extends GCMBaseIntentService {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
         String eMail = prefs.getString("eMail", null);
+        String uuid = prefs.getString("uuid", null);
 
-        if (eMail != null) {
-            boolean success = GCMServerUtilities.registerOnServer(eMail, registrationId);
+        if (eMail != null && uuid != null) {
+            boolean success = GCMServerUtilities.registerOnServer(eMail, registrationId, uuid);
             if (success) {
                 GCMRegistrar.setRegisteredOnServer(this, true);
             }

@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -492,6 +493,11 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     }
 
     private void startGCMRegistrationFlow() {
+        if (mPreferences.getString("uuid", null) == null) {
+            UUID uuid = UUID.randomUUID();
+            mPreferences.edit().putString("uuid", uuid.toString()).commit();
+        }
+
         if (Helpers.isConnected(this)) {
             DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(this);
 
@@ -520,6 +526,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      * @param eMail
      */
     private void registerForPushMessaging(final String eMail) {
+        final String uuid = mPreferences.getString("uuid", null);
         mPreferences.edit().putString("eMail", eMail).commit();
 
         GCMRegistrar.checkDevice(this);
@@ -536,7 +543,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 AsyncTask<Void, Void, Boolean> registerForPushTask = new AsyncTask<Void, Void, Boolean>() {
                     @Override
                     protected Boolean doInBackground(Void... params) {
-                        return GCMServerUtilities.registerOnServer(eMail, registrationId);
+                        return GCMServerUtilities.registerOnServer(eMail, registrationId, uuid);
                     }
 
                     @Override

@@ -85,6 +85,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private MenuItem mPushItem;
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
+    private boolean mHidePushItem = false;
+    private boolean mEnableActionView = false;
     private int mSelectedFeed = -1;
 
     /**
@@ -265,12 +267,20 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         boolean refreshing = mPreferences.getBoolean("refreshing", false);
         if (refreshing) {
-            mRefreshItem.setActionView(R.layout.actionview_refresh);
+            if (mRefreshItem != null) {
+                mRefreshItem.setActionView(R.layout.actionview_refresh);
+            } else {
+                mEnableActionView = true;
+            }
         }
 
         // TODO mPushItem might not be initialized; isRegisteredOnServer is only valid for a week
         if (GCMRegistrar.isRegisteredOnServer(this)) {
-            mPushItem.setVisible(false);
+            if (mPushItem != null) {
+                mPushItem.setVisible(false);
+            } else {
+                mHidePushItem = true;
+            }
         } else {
             registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
         }
@@ -653,6 +663,14 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         mRefreshItem = menu.getItem(0);
         mPushItem = menu.getItem(5);
+
+        if (mEnableActionView) {
+            mRefreshItem.setActionView(R.layout.actionview_refresh);
+        }
+
+        if (mHidePushItem) {
+            mPushItem.setVisible(false);
+        }
 
         return true;
     }

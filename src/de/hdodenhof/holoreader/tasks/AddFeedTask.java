@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -34,7 +36,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
 
     private Handler mMainUIHandler;
     private Context mContext;
-    private int returnCondition = SUCCESS;
+    private int mReturnCondition = SUCCESS;
 
     public AddFeedTask(Handler mainUIHandler, Context context) {
         mMainUIHandler = mainUIHandler;
@@ -42,14 +44,8 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
     }
 
     protected Integer doInBackground(URL... params) {
-
         URL url = params[0];
-        String name = "";
-        boolean isFeed = false;
-        boolean isArticle = false;
-        boolean hasContent = false;
-        boolean hasSummary = false;
-        boolean foundName = false;
+        String name;
 
         try {
             URLConnection connection = url.openConnection();
@@ -57,12 +53,80 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
                     mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName));
             connection.connect();
             String contentType = connection.getContentType();
-            if (!contentType.contains("xml")) {
-                returnCondition = ERROR_NOFEED;
-                return null;
-            }
-            InputStream inputStream = connection.getInputStream();
+            if (contentType.contains("xml")) {
+                InputStream inputStream = connection.getInputStream();
+                name = validateFeedAndExtractName(inputStream);
+                inputStream.close();
 
+                if (mReturnCondition == SUCCESS && name != null) {
+                    return storeFeed(url.toString(), name);
+                }
+            } else {
+                String alternateUrl = discoverFeed(url);
+                if (alternateUrl == null) {
+                    mReturnCondition = ERROR_NOFEED;
+                } else {
+                    URLConnection secondConnection = new URL(alternateUrl).openConnection();
+                    secondConnection.setRequestProperty("User-agent", mContext.getResources().getString(R.string.AppName) + "/"
+                            + mContext.getResources().getString(R.string.AppVersionName));
+                    secondConnection.setConnectTimeout(2000);
+                    secondConnection.setReadTimeout(2000);
+                    secondConnection.connect();
+
+                    InputStream inputStream = secondConnection.getInputStream();
+                    name = validateFeedAndExtractName(inputStream);
+                    inputStream.close();
+
+                    if (mReturnCondition == SUCCESS && name != null) {
+                        return storeFeed(alternateUrl.toString(), name);
+                    }
+                }
+            }
+
+        } catch (IOException e) {
+            mReturnCondition = ERROR_IOEXCEPTION;
+        }
+        return null;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+    }
+
+    @Override
+    protected void onPostExecute(Integer result) {
+        Message msg = Message.obtain();
+        if (mReturnCondition == SUCCESS) {
+            msg.what = 1;
+            msg.arg1 = result;
+        } else {
+            msg.what = 8;
+            msg.arg1 = mReturnCondition;
+        }
+        mMainUIHandler.sendMessage(msg);
+    }
+
+    private int storeFeed(String url, String name) {
+        ContentResolver contentResolver = mContext.getContentResolver();
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(FeedDAO.NAME, name);
+        contentValues.put(FeedDAO.URL, url.toString());
+
+        Uri newFeed = contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
+        return Integer.parseInt(newFeed.getLastPathSegment());
+    }
+
+    private String validateFeedAndExtractName(InputStream inputStream) {
+        String name = null;
+        boolean isFeed = false;
+        boolean isArticle = false;
+        boolean hasContent = false;
+        boolean hasSummary = false;
+        boolean foundName = false;
+
+        try {
             XmlPullParserFactory parserFactory = XmlPullParserFactory.newInstance();
             parserFactory.setNamespaceAware(true);
             XmlPullParser pullParser = parserFactory.newPullParser();
@@ -102,46 +166,40 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
                 }
                 eventType = pullParser.next();
             }
-            inputStream.close();
 
             if (isFeed && (hasContent || hasSummary)) {
-                ContentResolver contentResolver = mContext.getContentResolver();
-                ContentValues contentValues = new ContentValues();
-
-                contentValues.put(FeedDAO.NAME, name);
-                contentValues.put(FeedDAO.URL, url.toString());
-
-                Uri newFeed = contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
-                return Integer.parseInt(newFeed.getLastPathSegment());
+                return name;
             } else if (isFeed) {
-                returnCondition = ERROR_NOCONTENT;
+                mReturnCondition = ERROR_NOCONTENT;
             } else {
-                returnCondition = ERROR_NOFEED;
+                mReturnCondition = ERROR_NOFEED;
             }
 
-        } catch (IOException e) {
-            returnCondition = ERROR_IOEXCEPTION;
         } catch (XmlPullParserException e) {
-            returnCondition = ERROR_XMLPULLPARSEREXCEPTION;
+            mReturnCondition = ERROR_XMLPULLPARSEREXCEPTION;
+        } catch (IOException e) {
+            mReturnCondition = ERROR_IOEXCEPTION;
         }
         return null;
     }
 
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
+    private String discoverFeed(URL url) {
+        try {
+            Document document = Jsoup.connect(url.toString())
+                    .userAgent(mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName))
+                    .timeout(2000).get();
+            String rssUrl = document.select("link[rel=alternate][type=application/rss+xml]").attr("href");
+            if (rssUrl == null || rssUrl == "") {
+                rssUrl = document.select("link[rel=alternate][type=application/atom+xml]").attr("href");
+            }
 
-    @Override
-    protected void onPostExecute(Integer result) {
-        Message msg = Message.obtain();
-        if (returnCondition == SUCCESS) {
-            msg.what = 1;
-            msg.arg1 = result;
-        } else {
-            msg.what = 8;
-            msg.arg1 = returnCondition;
+            if (rssUrl == null || rssUrl == "") {
+                return null;
+            } else {
+                return rssUrl;
+            }
+        } catch (IOException e) {
+            return null;
         }
-        mMainUIHandler.sendMessage(msg);
     }
 }

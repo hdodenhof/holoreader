@@ -18,8 +18,7 @@ public class GCMServerUtilities {
     private static final String TAG = GCMServerUtilities.class.getName();
 
     // public static final String BASEURL = "https://holoreader.appspot.com/api/";
-
-    public static final String BASEURL = "http://192.168.178.28:8888/api/";
+    public static final String BASEURL = "http://192.168.178.23:8888/api/";
 
     public static boolean registerOnServer(String eMail, String regId, String uuid) {
         try {

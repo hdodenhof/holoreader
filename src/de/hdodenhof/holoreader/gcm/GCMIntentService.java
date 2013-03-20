@@ -18,6 +18,7 @@ import com.google.android.gcm.GCMBaseIntentService;
 import com.google.android.gcm.GCMRegistrar;
 import com.google.gson.Gson;
 
+import de.hdodenhof.holoreader.Config;
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.activities.HomeActivity;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
@@ -30,12 +31,11 @@ public class GCMIntentService extends GCMBaseIntentService {
     private static final String TAG = GCMIntentService.class.getName();
 
     public static final String BROADCAST_REGISTERED = "de.hdodenhof.holoreader.GCM_REGISTERED";
-    public static final String SENDER_ID = "";
 
     private static final String MESSAGETYPE_ADDFEED = "addfeed";
 
     public GCMIntentService() {
-        super(SENDER_ID);
+        super(Config.GCM_SENDER_ID);
     }
 
     @Override

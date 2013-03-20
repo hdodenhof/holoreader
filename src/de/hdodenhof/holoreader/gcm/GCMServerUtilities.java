@@ -12,13 +12,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import com.google.gson.Gson;
 
+import de.hdodenhof.holoreader.Config;
+
 public class GCMServerUtilities {
 
     @SuppressWarnings("unused")
     private static final String TAG = GCMServerUtilities.class.getName();
-
-    // public static final String BASEURL = "https://holoreader.appspot.com/api/";
-    public static final String BASEURL = "http://192.168.178.23:8888/api/";
 
     public static boolean registerOnServer(String eMail, String regId, String uuid) {
         try {
@@ -30,7 +29,7 @@ public class GCMServerUtilities {
             String entity = new Gson().toJson(entityMap);
 
             HttpPut request = new HttpPut();
-            request.setURI(new URI(BASEURL + "register"));
+            request.setURI(new URI(Config.API_BASEURL + "register"));
             request.setHeader("Content-type", "application/json");
             request.setEntity(new StringEntity(entity));
 

@@ -45,6 +45,7 @@ import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.common.AccountPicker;
 
+import de.hdodenhof.holoreader.Config;
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.fragments.ArticleListFragment;
 import de.hdodenhof.holoreader.fragments.DynamicDialogFragment;
@@ -545,7 +546,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         if (registrationId.equals("")) {
             mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
-            GCMRegistrar.register(this, GCMIntentService.SENDER_ID);
+            GCMRegistrar.register(this, Config.GCM_SENDER_ID);
         } else {
             if (!GCMRegistrar.isRegisteredOnServer(this)) {
                 mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);

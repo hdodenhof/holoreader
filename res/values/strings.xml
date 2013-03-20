@@ -41,7 +41,7 @@
     <!-- Feed List -->
     <string name="LoadingFeeds">Loading feeds…</string>
     <string name="NoFeeds">No feeds yet.</string>
-    <string name="NoFeedsHint">You haven\'t added any feeds yet. Just go to the menu and choose \"Add feed\" to get started. Or enable FeedToDevice from the menu for easily adding feeds from your desktop computer.</string>
+    <string name="NoFeedsHint">You haven\'t added any feeds yet. Just go to the menu and choose \"Add feed\" to get started. Or enable FeedPusher from the menu for easily adding feeds from your desktop computer.</string>
     <string name="NoUnreadFeeds">No unread feeds.</string>
     <string name="AllFeeds">All feeds</string>
     <string name="LastUpdate">Last Update</string>
@@ -78,19 +78,19 @@
     <string name="AddFeedError">Something went wrong</string>
 
     <!-- Pushing feeds -->
-    <string name="FeedsViaPushHintTitle">FeedToDevice</string>
-    <string name="FeedsViaPushHintText">Have you already discovered the new service \"FeedToDevice\"? It enables you to easily add feeds to Holo Reader using your desktop computer. To enable it just choose \"Enable FeedToDevice\" from the menu and follow the instructions.</string>
-    <string name="FeedsViaPushEnableDialogTitle">FeedToDevice</string>
-    <string name="FeedsViaPushEnableDialogText">With FeedToDevice (beta) you can easily add feeds to Holo Reader using your desktop computer. To enable this, your eMail address has to be send to our server. Okay?</string>
-    <string name="FeedsViaPushEnableDialogOK">Yes</string>
-    <string name="FeedsViaPushEnableDialogNOK">No</string>
+    <string name="FeedsViaPushHintTitle">FeedPusher</string>
+    <string name="FeedsViaPushHintText">Have you already discovered the new service \"FeedPusher\"? It enables you to easily add feeds to Holo Reader using your desktop computer. To enable it just choose \"Enable FeedPusher\" from the menu and follow the instructions.</string>
+    <string name="FeedsViaPushEnableDialogTitle">FeedPusher</string>
+    <string name="FeedsViaPushEnableDialogText">With FeedPusher (beta) you can easily add feeds to Holo Reader using your desktop computer. To enable this, your eMail address has to be send to our server.</string>
+    <string name="FeedsViaPushEnableDialogOK">Okay!</string>
+    <string name="FeedsViaPushEnableDialogNOK">Abort</string>
     <string name="FeedsViaPushEnableCanceledTitle">Abort</string>
-    <string name="FeedsViaPushEnableCanceledText">FeedToDevice registration has been canceled.</string>
+    <string name="FeedsViaPushEnableCanceledText">FeedPusher registration has been canceled.</string>
     <string name="FeedsViaPushEnableErrorTitle">Error</string>
-    <string name="FeedsViaPushEnableErrorText">Enabling FeedToDevice failed, please try again later.</string>
-    <string name="FeedsViaPushEnabledTitle">FeedToDevice enabled</string>
-    <string name="FeedsViaPushEnabledText">FeedToDevice has been enabled for this device and an eMail with intructions has been sent to your account.</string>
-    <string name="FeedsAddedViaPush">Feeds received via FeedToDevice</string>
+    <string name="FeedsViaPushEnableErrorText">Enabling FeedPusher failed, please try again later.</string>
+    <string name="FeedsViaPushEnabledTitle">FeedPusher enabled</string>
+    <string name="FeedsViaPushEnabledText">FeedPusher has been enabled for this device and an eMail with intructions has been sent to your account.</string>
+    <string name="FeedsAddedViaPush">Feeds received via FeedPusher</string>
 
     <plurals name="numberOfFeedsReceived">
         <item quantity="one">One feed added to your list</item>

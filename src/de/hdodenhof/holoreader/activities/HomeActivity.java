@@ -55,6 +55,7 @@ import de.hdodenhof.holoreader.gcm.GCMServerUtilities;
 import de.hdodenhof.holoreader.listadapters.RSSAdapter;
 import de.hdodenhof.holoreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.holoreader.listadapters.RSSFeedAdapter;
+import de.hdodenhof.holoreader.misc.ChangelogDialog;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
 import de.hdodenhof.holoreader.misc.MarkReadRunnable;
@@ -234,9 +235,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         } else if (mPreferences.getBoolean("firstrun", true)) {
             firstRun();
         } else {
-            maybeShowPushHint();
+            maybeShowChangelog();
         }
-
     }
 
     @Override
@@ -295,9 +295,16 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         // workaround for orientation change issues
         FragmentManager fm = getSupportFragmentManager();
         FragmentTransaction ft = fm.beginTransaction();
+
         Fragment addDialog = fm.findFragmentByTag("add_dialog");
+        Fragment changelogDialog = fm.findFragmentByTag("changelog");
+
         if (addDialog != null) {
             ft.remove(addDialog);
+        }
+
+        if (changelogDialog != null) {
+            ft.remove(changelogDialog);
         }
         ft.commit();
 
@@ -356,11 +363,14 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         return fragment instanceof FeedListFragment;
     }
 
-    private void maybeShowPushHint() {
-        if (!mPreferences.getBoolean("pushHintShown", false) && mPreferences.getString("eMail", null) == null) {
-            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushHintTitle), mResources.getString(R.string.FeedsViaPushHintText),
-                    "push_hint");
-            mPreferences.edit().putBoolean("pushHintShown", true).commit();
+    private void maybeShowChangelog() {
+        int changelogShown = mPreferences.getInt("changelogShown", 0);
+
+        if (changelogShown < getVersion()) {
+            final ChangelogDialog changeLogDialog = new ChangelogDialog(this);
+            changeLogDialog.show();
+
+            mPreferences.edit().putInt("changelogShown", getVersion()).commit();
         }
     }
 
@@ -379,7 +389,11 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         dialogFragment.setNegativeButtonText(mResources.getString(R.string.AddDefaultFeedsDialogCancel));
 
         dialogFragment.show(getSupportFragmentManager(), "firstrun");
-        mPreferences.edit().putBoolean("firstrun", false).commit();
+
+        SharedPreferences.Editor prefsEdit = mPreferences.edit();
+        prefsEdit.putBoolean("firstrun", false);
+        prefsEdit.putInt("changelogShown", getVersion());
+        prefsEdit.commit();
     }
 
     private void addDefaultFeeds() {

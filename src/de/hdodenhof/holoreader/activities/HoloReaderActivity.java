@@ -1,5 +1,6 @@
 package de.hdodenhof.holoreader.activities;
 
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 
@@ -31,6 +32,15 @@ public class HoloReaderActivity extends SherlockFragmentActivity {
     protected void onResume() {
         super.onResume();
         RefreshFeedService.cancelAlarms(this);
+    }
+
+    protected int getVersion() {
+        int version = 0;
+        try {
+            version = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (NameNotFoundException e) {
+        }
+        return version;
     }
 
 }

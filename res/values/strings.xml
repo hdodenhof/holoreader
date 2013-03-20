@@ -29,6 +29,9 @@
     <string name="MenuMarkRead">Mark all as read</string>
     <string name="MenuWeb">Open link in browser</string>
 
+    <!-- Changelog -->
+    <string name="ChangelogTitle">Changelog</string>
+
     <!-- Article -->
     <string name="LoadingArticle">Loading article…</string>
 
@@ -78,8 +81,6 @@
     <string name="AddFeedError">Something went wrong</string>
 
     <!-- Pushing feeds -->
-    <string name="FeedsViaPushHintTitle">FeedPusher</string>
-    <string name="FeedsViaPushHintText">Have you already discovered the new service \"FeedPusher\"? It enables you to easily add feeds to Holo Reader using your desktop computer. To enable it just choose \"Enable FeedPusher\" from the menu and follow the instructions.</string>
     <string name="FeedsViaPushEnableDialogTitle">FeedPusher</string>
     <string name="FeedsViaPushEnableDialogText">With FeedPusher (beta) you can easily add feeds to Holo Reader using your desktop computer. To enable this, your eMail address has to be send to our server.</string>
     <string name="FeedsViaPushEnableDialogOK">Okay!</string>

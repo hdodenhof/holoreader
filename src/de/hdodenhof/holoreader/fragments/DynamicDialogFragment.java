@@ -14,6 +14,7 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -36,6 +37,8 @@ public interface DynamicDialogFragment {
     public void setNegativeButtonText(String text);
 
     public void setLayout(int ressourceID);
+
+    public void setView(View view);
 
     public void setInitialValues(SparseArray<String> map);
 
@@ -87,6 +90,7 @@ public interface DynamicDialogFragment {
     public abstract class AbstractDynamicDialogFragment extends DialogFragment implements DynamicDialogFragment {
 
         protected int mContentRessource;
+        protected View mView;
         protected OnClickListener mPositiveButtonListener;
         protected String mTitle;
         protected String mMessage;
@@ -116,6 +120,7 @@ public interface DynamicDialogFragment {
             mPositiveButtonText = text;
         }
 
+        @Override
         public void setNegativeButtonText(String text) {
             mNegativeButtonText = text;
         }
@@ -123,6 +128,11 @@ public interface DynamicDialogFragment {
         @Override
         public void setLayout(int ressourceID) {
             mContentRessource = ressourceID;
+        }
+
+        @Override
+        public void setView(View view) {
+            mView = view;
         }
 
         @Override
@@ -162,7 +172,6 @@ public interface DynamicDialogFragment {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setStyle(STYLE_NO_TITLE, 0);
-            setRetainInstance(true);
         }
 
         @Override
@@ -214,14 +223,27 @@ public interface DynamicDialogFragment {
             if (mMessage != null) {
                 mContentRessource = R.layout.fragment_dialog_message;
             }
-            View content = inflater.inflate(mContentRessource, null);
+
+            View content;
+            if (mContentRessource != 0) {
+                content = inflater.inflate(mContentRessource, null);
+            } else if (mView != null) {
+                content = mView;
+            } else {
+                throw new IllegalArgumentException();
+            }
+
             if (mMessage != null) {
                 TextView messageView = (TextView) content.findViewById(R.id.message);
                 messageView.setText(mMessage);
-            } else {
+            } else if (mContentRessource != 0) {
                 Helper.writeValues((LinearLayout) content, mValues);
             }
-            contentFrame.addView(content);
+
+            LayoutParams params = contentFrame.getLayoutParams();
+            params.height = LayoutParams.WRAP_CONTENT;
+            params.width = LayoutParams.MATCH_PARENT;
+            contentFrame.addView(content, params);
 
             getDialog().setCanceledOnTouchOutside(false);
 
@@ -239,12 +261,12 @@ public interface DynamicDialogFragment {
         }
 
         public PreHCDialogFragment(Context context) {
+            mContext = context;
         }
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-            setRetainInstance(true);
         }
 
         @Override
@@ -253,9 +275,15 @@ public interface DynamicDialogFragment {
             mAlertDialog.setTitle(mTitle);
 
             if (mMessage == null) {
-                mRootView = ((FragmentActivity) mContext).getLayoutInflater().inflate(mContentRessource, null);
-                mAlertDialog.setView(mRootView);
-                Helper.writeValues((LinearLayout) mRootView, mValues);
+                if (mContentRessource != 0) {
+                    mRootView = ((FragmentActivity) mContext).getLayoutInflater().inflate(mContentRessource, null);
+                    mAlertDialog.setView(mRootView);
+                    Helper.writeValues((LinearLayout) mRootView, mValues);
+                } else if (mView != null) {
+                    mAlertDialog.setView(mView);
+                } else {
+                    throw new IllegalArgumentException();
+                }
             } else {
                 mAlertDialog.setMessage(mMessage);
             }

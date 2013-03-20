@@ -274,8 +274,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         }
 
-        // TODO mPushItem might not be initialized; isRegisteredOnServer is only valid for a week
-        if (GCMRegistrar.isRegisteredOnServer(this)) {
+        if (mPreferences.getString("eMail", null) != null) {
             if (mPushItem != null) {
                 mPushItem.setVisible(false);
             } else {
@@ -538,7 +537,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      */
     private void registerForPushMessaging(final String eMail) {
         final String uuid = mPreferences.getString("uuid", null);
-        mPreferences.edit().putString("eMail", eMail).commit();
 
         GCMRegistrar.checkDevice(this);
         GCMRegistrar.checkManifest(this);
@@ -563,6 +561,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                         mSpinner = null;
                         if (success) {
                             GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
+                            mPreferences.edit().putString("eMail", eMail).commit();
                             mPushItem.setVisible(false);
                             Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
                                     mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");

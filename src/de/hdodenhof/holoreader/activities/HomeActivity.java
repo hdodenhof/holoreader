@@ -268,6 +268,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             mRefreshItem.setActionView(R.layout.actionview_refresh);
         }
 
+        // TODO mPushItem might not be initialized; isRegisteredOnServer is only valid for a week
         if (GCMRegistrar.isRegisteredOnServer(this)) {
             mPushItem.setVisible(false);
         } else {

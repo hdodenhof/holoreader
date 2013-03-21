@@ -147,7 +147,12 @@ public interface DynamicDialogFragment {
 
         @Override
         public void show(FragmentManager fm, String tag) {
-            super.show(fm, tag);
+            // FIXME
+            try {
+                super.show(fm, tag);
+            } catch (IllegalStateException e) {
+                // ignore
+            }
         }
 
         // workaround for #17423 in AOSP

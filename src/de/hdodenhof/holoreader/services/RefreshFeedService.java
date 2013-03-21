@@ -94,7 +94,7 @@ public class RefreshFeedService extends WakefulIntentService {
 
                 Intent broadcastIntent = new Intent();
                 broadcastIntent.setAction(BROADCAST_REFRESHING);
-                sendBroadcast(broadcastIntent);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
             }
             mFeedsUpdating.add(feedID);
         }

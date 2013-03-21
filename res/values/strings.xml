@@ -18,13 +18,13 @@
     <string name="AddDefaultFeedsDialogCancel">No, thanks</string>
     <string name="AddDefaultFeedsSpinner">Adding feeds…</string>
     <string name="AddDefaultFeedsToast">Syncing default feeds…</string>
-    <string name="PushRegistrationSpinner">Registering for FeedToDevice…</string>
+    <string name="PushRegistrationSpinner">Registering for FeedPusher…</string>
 
     <!-- Menu -->
     <string name="MenuRefresh">Refresh Feeds</string>
     <string name="MenuAdd">Add feed</string>
     <string name="MenuEditFeeds">Edit Feeds</string>
-    <string name="MenuRegisterForPush">Enable FeedToDevice</string>
+    <string name="MenuRegisterForPush">Enable FeedPusher</string>
     <string name="MenuToogleUnread">Toggle unread items</string>
     <string name="MenuMarkRead">Mark all as read</string>
     <string name="MenuWeb">Open link in browser</string>

@@ -44,6 +44,7 @@ import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
 import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.AccountPicker;
 
 import de.hdodenhof.holoreader.Config;
@@ -534,7 +535,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
                     df.dismiss();
 
-                    Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
+                    Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE }, false, null, null,
+                            null, null);
                     startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
                 }
             }, mResources.getString(R.string.FeedsViaPushEnableDialogOK));

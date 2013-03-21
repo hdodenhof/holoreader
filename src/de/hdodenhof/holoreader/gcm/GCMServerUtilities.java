@@ -9,6 +9,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import com.google.gson.Gson;
 
@@ -34,6 +36,10 @@ public class GCMServerUtilities {
             request.setEntity(new StringEntity(entity));
 
             HttpClient client = new DefaultHttpClient();
+            HttpParams params = client.getParams();
+            HttpConnectionParams.setConnectionTimeout(params, 2000);
+            HttpConnectionParams.setSoTimeout(params, 10000);
+
             HttpResponse response = client.execute(request);
             StatusLine responseStatus = response.getStatusLine();
 

@@ -30,6 +30,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
 
@@ -203,7 +204,7 @@ public class RefreshFeedService extends WakefulIntentService {
 
                 Intent broadcastIntent = new Intent();
                 broadcastIntent.setAction(BROADCAST_REFRESHED);
-                sendBroadcast(broadcastIntent);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
             }
         }
     }

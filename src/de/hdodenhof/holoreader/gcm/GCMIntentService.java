@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.commonsware.cwac.wakeful.WakefulIntentService;
@@ -51,11 +52,11 @@ public class GCMIntentService extends GCMBaseIntentService {
             if (success) {
                 GCMRegistrar.setRegisteredOnServer(this, true);
             }
-            // TODO use local broadcast manager
+
             Intent broadcastIntent = new Intent();
             broadcastIntent.setAction(BROADCAST_REGISTERED);
             broadcastIntent.putExtra("success", success);
-            sendBroadcast(broadcastIntent);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
         }
     }
 

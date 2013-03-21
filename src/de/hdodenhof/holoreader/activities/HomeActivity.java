@@ -32,6 +32,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
@@ -255,8 +256,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     protected void onResume() {
         super.onResume();
 
-        registerReceiver(mFeedsRefreshedReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHED));
-        registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mFeedsRefreshedReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHED));
+        LocalBroadcastManager.getInstance(this).registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
         invalidateOptionsMenu();
@@ -282,7 +283,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 mHidePushItem = true;
             }
         } else {
-            registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
+            LocalBroadcastManager.getInstance(this).registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
         }
 
         mPreferences.edit().remove("newFeeds").commit();
@@ -317,12 +318,12 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
 
         try {
-            unregisterReceiver(mGCMRegisteredReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(mGCMRegisteredReceiver);
         } catch (IllegalArgumentException e) {
             // might not be registered
         }
-        unregisterReceiver(mFeedsRefreshingReceiver);
-        unregisterReceiver(mFeedsRefreshedReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mFeedsRefreshingReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mFeedsRefreshedReceiver);
         super.onPause();
     }
 

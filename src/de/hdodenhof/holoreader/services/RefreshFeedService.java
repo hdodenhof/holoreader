@@ -53,9 +53,8 @@ public class RefreshFeedService extends WakefulIntentService {
     private static final int KEEP_UNREAD_ARTICLES_DAYS = 7;
 
     private static final int SUMMARY_MAXLENGTH = 250;
-    private static final String DATE_FORMATS[] = { "EEE, dd MMM yyyy HH:mm:ss Z", "EEE, dd MMM yyyy HH:mm:ss z",
-            "yyyy-MM-dd'T'HH:mm:ssz", "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
+    private static final String DATE_FORMATS[] = { "EEE, dd MMM yyyy HH:mm:ss Z", "EEE, dd MMM yyyy HH:mm:ss z", "yyyy-MM-dd'T'HH:mm:ssz",
+            "yyyy-MM-dd'T'HH:mm:ssZ", "yyyy-MM-dd'T'HH:mm:ss'Z'", "yyyy-MM-dd'T'HH:mm:ss.SSSZ" };
     private SimpleDateFormat mSimpleDateFormats[] = new SimpleDateFormat[DATE_FORMATS.length];
 
     private ContentResolver mContentResolver;
@@ -218,8 +217,7 @@ public class RefreshFeedService extends WakefulIntentService {
     }
 
     private boolean isSummaryTag(String currentTag, String currentPrefix) {
-        return (currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description"))
-                && currentPrefix.equalsIgnoreCase("");
+        return (currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && currentPrefix.equalsIgnoreCase("");
     }
 
     private boolean isContentTag(String currentTag, String currentPrefix) {
@@ -232,8 +230,7 @@ public class RefreshFeedService extends WakefulIntentService {
     }
 
     private boolean isDateTag(String currentTag, String currentPrefix) {
-        return currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published")
-                || currentTag.equalsIgnoreCase("date");
+        return currentTag.equalsIgnoreCase("pubdate") || currentTag.equalsIgnoreCase("published") || currentTag.equalsIgnoreCase("date");
     }
 
     private boolean isUpdatedTag(String currentTag, String currentPrefix) {
@@ -258,8 +255,7 @@ public class RefreshFeedService extends WakefulIntentService {
 
     private InputStream getURLInputStream(String feedURL) throws IOException, MalformedURLException {
         URLConnection connection = new URL(feedURL).openConnection();
-        connection.setRequestProperty("User-agent", getResources().getString(R.string.AppName) + "/"
-                + getResources().getString(R.string.AppVersionName));
+        connection.setRequestProperty("User-agent", getResources().getString(R.string.AppName) + "/" + getResources().getString(R.string.AppVersionName));
         connection.connect();
         return connection.getInputStream();
     }
@@ -278,12 +274,10 @@ public class RefreshFeedService extends WakefulIntentService {
     private void deleteOldArticles(int feedID) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(ArticleDAO.ISDELETED, 1);
-        mContentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND "
-                + ArticleDAO.PUBDATE + " < ? AND " + ArticleDAO.READ + " IS NOT NULL",
-                new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_READ_ARTICLES_DAYS)) });
+        mContentResolver.update(RSSContentProvider.URI_ARTICLES, contentValues, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ? AND "
+                + ArticleDAO.READ + " IS NOT NULL", new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_READ_ARTICLES_DAYS)) });
 
-        mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE
-                + " < ?",
+        mContentResolver.delete(RSSContentProvider.URI_ARTICLES, ArticleDAO.FEEDID + " = ? AND " + ArticleDAO.PUBDATE + " < ?",
                 new String[] { String.valueOf(feedID), SQLiteHelper.fromDate(pastDate(KEEP_UNREAD_ARTICLES_DAYS)) });
     }
 
@@ -318,8 +312,7 @@ public class RefreshFeedService extends WakefulIntentService {
             boolean isEncodedContent = false;
             for (int i = 0; i < pullParser.getAttributeCount(); i++) {
                 if (pullParser.getAttributeName(i).equals("type")) {
-                    isEncodedContent = (pullParser.getAttributeValue(i).equals("html") || pullParser.getAttributeValue(
-                            i).equals("xhtml"));
+                    isEncodedContent = (pullParser.getAttributeValue(i).equals("html") || pullParser.getAttributeValue(i).equals("xhtml"));
                     break;
                 }
             }
@@ -428,9 +421,8 @@ public class RefreshFeedService extends WakefulIntentService {
     private ArrayList<String> queryArticles(int feedID) {
         ArrayList<String> articles = new ArrayList<String>();
 
-        Cursor cursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID,
-                ArticleDAO.GUID, ArticleDAO.PUBDATE }, ArticleDAO.FEEDID + " = ?",
-                new String[] { String.valueOf(feedID) }, ArticleDAO.PUBDATE + " DESC");
+        Cursor cursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.GUID, ArticleDAO.PUBDATE },
+                ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) }, ArticleDAO.PUBDATE + " DESC");
 
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -445,9 +437,8 @@ public class RefreshFeedService extends WakefulIntentService {
 
     private Date queryNewestArticleDate(int feedID) {
         Date maxDate = null;
-        Cursor cursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID,
-                ArticleDAO.PUBDATE }, ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) },
-                ArticleDAO.PUBDATE + " DESC");
+        Cursor cursor = mContentResolver.query(RSSContentProvider.URI_ARTICLES, new String[] { ArticleDAO._ID, ArticleDAO.PUBDATE },
+                ArticleDAO.FEEDID + " = ?", new String[] { String.valueOf(feedID) }, ArticleDAO.PUBDATE + " DESC");
 
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
@@ -467,8 +458,8 @@ public class RefreshFeedService extends WakefulIntentService {
     private String queryURL(int feedID) {
         String feedURL = "";
         ContentResolver contentResolver = getContentResolver();
-        Cursor cursor = contentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.URL },
-                FeedDAO._ID + " = ?", new String[] { String.valueOf(feedID) }, null);
+        Cursor cursor = contentResolver.query(RSSContentProvider.URI_FEEDS, new String[] { FeedDAO._ID, FeedDAO.URL }, FeedDAO._ID + " = ?",
+                new String[] { String.valueOf(feedID) }, null);
         if (cursor.getCount() > 0) {
             cursor.moveToFirst();
             feedURL = cursor.getString(cursor.getColumnIndex(FeedDAO.URL));
@@ -492,8 +483,7 @@ public class RefreshFeedService extends WakefulIntentService {
         return parsedDate;
     }
 
-    private ContentValues prepareArticle(int feedID, String guid, String link, Date pubdate, String title,
-            String summary, String content) {
+    private ContentValues prepareArticle(int feedID, String guid, String link, Date pubdate, String title, String summary, String content) {
         boolean missingContent = false;
         boolean missingSummary = false;
 

@@ -86,7 +86,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private FeedListFragment mFeedListFragment;
     private ProgressDialog mSpinner;
     private MenuItem mRefreshItem;
-    private MenuItem mPushItem;
     private boolean mTwoPane = false;
     private boolean mUnreadOnly;
     private boolean mHidePushItem = false;
@@ -175,6 +174,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             try {
                 mRefreshItem.getActionView().clearAnimation();
                 mRefreshItem.setActionView(null);
+                mEnableActionView = false;
             } catch (NullPointerException e) {
 
             }
@@ -202,7 +202,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
 
             if (intent.getBooleanExtra("success", false)) {
-                mPushItem.setVisible(false);
+                mHidePushItem = true;
+                invalidateOptionsMenu();
                 Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
                         mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
             } else {
@@ -261,7 +262,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         LocalBroadcastManager.getInstance(this).registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
 
         mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
-        invalidateOptionsMenu();
 
         mFeedListFragment.setUnreadOnly(mUnreadOnly);
         if (mTwoPane) {
@@ -278,11 +278,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
 
         if (mPreferences.getBoolean("gcmEnabled", false)) {
-            if (mPushItem != null) {
-                mPushItem.setVisible(false);
-            } else {
-                mHidePushItem = true;
-            }
+            mHidePushItem = true;
+            invalidateOptionsMenu();
         }
 
         mPreferences.edit().remove("newFeeds").commit();
@@ -579,7 +576,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                         if (success) {
                             GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
                             mPreferences.edit().putBoolean("gcmEnabled", true).commit();
-                            mPushItem.setVisible(false);
+                            mHidePushItem = true;
+                            HomeActivity.this.invalidateOptionsMenu();
                             Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
                                     mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
                         } else {
@@ -594,6 +592,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 // This is impossible, show a message anyway
                 Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
                         mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
+                mPreferences.edit().putBoolean("gcmEnabled", true).commit();
+                mHidePushItem = true;
+                invalidateOptionsMenu();
             }
         }
     }
@@ -679,14 +680,14 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         menuInflater.inflate(R.menu.main, menu);
 
         mRefreshItem = menu.getItem(0);
-        mPushItem = menu.getItem(5);
+        MenuItem pushItem = menu.getItem(5);
 
         if (mEnableActionView) {
             mRefreshItem.setActionView(R.layout.actionview_refresh);
         }
 
         if (mHidePushItem) {
-            mPushItem.setVisible(false);
+            pushItem.setVisible(false);
         }
 
         return true;

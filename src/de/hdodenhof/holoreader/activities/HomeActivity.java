@@ -283,8 +283,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             } else {
                 mHidePushItem = true;
             }
-        } else {
-            LocalBroadcastManager.getInstance(this).registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
         }
 
         mPreferences.edit().remove("newFeeds").commit();
@@ -554,6 +552,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      */
     private void registerForPushMessaging(final String eMail) {
         final String uuid = mPreferences.getString("uuid", null);
+        mPreferences.edit().putString("eMail", eMail).commit();
 
         GCMRegistrar.checkDevice(this);
         GCMRegistrar.checkManifest(this);
@@ -562,6 +561,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         if (registrationId.equals("")) {
             mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
+            LocalBroadcastManager.getInstance(this).registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
             GCMRegistrar.register(this, Config.GCM_SENDER_ID);
         } else {
             if (!GCMRegistrar.isRegisteredOnServer(this)) {
@@ -578,11 +578,11 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                         mSpinner = null;
                         if (success) {
                             GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
-                            mPreferences.edit().putString("eMail", eMail).commit();
                             mPushItem.setVisible(false);
                             Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
                                     mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
                         } else {
+                            mPreferences.edit().remove("eMail").commit();
                             Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
                                     mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
                         }

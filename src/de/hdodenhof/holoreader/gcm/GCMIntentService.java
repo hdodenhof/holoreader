@@ -1,5 +1,6 @@
 package de.hdodenhof.holoreader.gcm;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -9,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.Build;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -92,6 +94,7 @@ public class GCMIntentService extends GCMBaseIntentService {
         return super.onRecoverableError(context, errorId);
     }
 
+    @SuppressLint("InlinedApi")
     private void handleAddFeedMessage(String data) {
         VOFeed[] feeds = new Gson().fromJson(data, VOFeed[].class);
 
@@ -117,7 +120,12 @@ public class GCMIntentService extends GCMBaseIntentService {
         prefs.edit().putInt("newFeeds", newFeedsSum).commit();
 
         Intent notificationIntent = new Intent(this, HomeActivity.class);
-        notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            notificationIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        } else {
+            notificationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this);

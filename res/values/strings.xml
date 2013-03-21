@@ -70,6 +70,7 @@
 
     <!-- Add feed -->
     <string name="AddFeedDialogTitle">@string/MenuAdd</string>
+    <string name="AddFeedDialogHint">You can either provide a full feed URL or just a website URL (if supported by the website), e.g. just \"cnn.com\" instead of \"http://rss.cnn.com/rss/edition.rss\"</string>
     <string name="AddFeedDialogText">Feed URL</string>
     <string name="AddFeedDialogOk">Add feed</string>
     <string name="AddFeedSpinner">Adding feed…</string>

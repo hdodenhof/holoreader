@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="de.hdodenhof.holoreader"
     android:versionCode="4"
-    android:versionName="@string/AppVersionName" >
+    android:versionName="1.1.0" >
+    <!-- versionName has also to be changed in string_common.xml -->
 
     <uses-sdk
         android:minSdkVersion="8"

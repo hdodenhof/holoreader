@@ -8,6 +8,7 @@ import java.util.Date;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.support.v4.app.FragmentActivity;
@@ -32,6 +33,7 @@ public class ChangelogDialog {
         mContext = context;
     }
 
+    @SuppressLint("SimpleDateFormat")
     private String parseDate(String dateString) {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         try {

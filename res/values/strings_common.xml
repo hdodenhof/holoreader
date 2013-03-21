@@ -5,6 +5,7 @@
     <string name="LayoutSize">default</string>
     
     <string name="AppName">Holo Reader</string>
+    <!-- Has also to be changed in the manifest -->
     <string name="AppVersionName">1.1.0</string>
     
     <!-- Using unicode to keep whitespaces, it's " - " -->

@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" >
 
     <item
         android:id="@+id/item_web"
         android:icon="@drawable/ab_btn_web"
         android:showAsAction="always"
-        android:title="@string/MenuWeb"/>
+        android:title="@string/MenuWeb"
+        tools:ignore="AlwaysShowAction"/>
     <item
         android:id="@+id/item_toggle"
         android:showAsAction="never"

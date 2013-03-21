@@ -80,7 +80,8 @@
                 android:maxLines="2"
                 android:minHeight="48dip"
                 android:text="@string/NeutralButton"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                tools:ignore="ButtonOrder" />
 
             <Button
                 android:id="@+id/buttonOk"

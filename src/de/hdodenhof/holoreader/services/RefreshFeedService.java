@@ -86,11 +86,8 @@ public class RefreshFeedService extends WakefulIntentService {
         if (mFeedsUpdating.contains(feedID)) {
             intent.setAction(NO_ACTION);
         } else {
-            // TODO check if this works in all cases
             if (mFeedsUpdating.size() == 0) {
-                SharedPreferences.Editor editor = mSharedPrefs.edit();
-                editor.putBoolean("refreshing", true);
-                editor.commit();
+                mSharedPrefs.edit().putBoolean("refreshing", true).commit();
 
                 Intent broadcastIntent = new Intent();
                 broadcastIntent.setAction(BROADCAST_REFRESHING);

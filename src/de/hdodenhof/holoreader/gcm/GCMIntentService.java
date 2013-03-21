@@ -53,6 +53,7 @@ public class GCMIntentService extends GCMBaseIntentService {
             boolean success = GCMServerUtilities.registerOnServer(eMail, registrationId, uuid);
             if (success) {
                 GCMRegistrar.setRegisteredOnServer(this, true);
+                prefs.edit().putBoolean("gcmEnabled", true).commit();
             }
 
             Intent broadcastIntent = new Intent();
@@ -65,6 +66,9 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onUnregistered(Context context, String registrationId) {
         Log.v(TAG, "onUnregistered");
+
+        // TODO unregister on server
+        PreferenceManager.getDefaultSharedPreferences(this).edit().remove("gcmEnabled").commit();
     }
 
     @Override

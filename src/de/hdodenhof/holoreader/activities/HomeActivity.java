@@ -277,7 +277,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         }
 
-        if (mPreferences.getString("eMail", null) != null) {
+        if (mPreferences.getBoolean("gcmEnabled", false)) {
             if (mPushItem != null) {
                 mPushItem.setVisible(false);
             } else {
@@ -578,6 +578,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                         mSpinner = null;
                         if (success) {
                             GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
+                            mPreferences.edit().putBoolean("gcmEnabled", true).commit();
                             mPushItem.setVisible(false);
                             Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
                                     mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");

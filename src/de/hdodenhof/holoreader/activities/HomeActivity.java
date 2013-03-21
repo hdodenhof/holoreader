@@ -533,7 +533,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
                     df.dismiss();
 
-                    // TODO Might need a custom implementation here to match the style of the App
                     Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { "com.google" }, false, null, null, null, null);
                     startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
                 }

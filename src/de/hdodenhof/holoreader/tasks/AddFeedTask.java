@@ -53,7 +53,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
                     mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName));
             connection.connect();
             String contentType = connection.getContentType();
-            if (contentType.contains("xml")) {
+            if (contentType != null && contentType.contains("xml")) {
                 InputStream inputStream = connection.getInputStream();
                 name = validateFeedAndExtractName(inputStream);
                 inputStream.close();

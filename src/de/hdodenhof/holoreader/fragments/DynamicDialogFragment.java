@@ -178,10 +178,30 @@ public interface DynamicDialogFragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_dialogframe, container);
 
+            FrameLayout contentFrame = (FrameLayout) rootView.findViewById(R.id.content);
             TextView title = (TextView) rootView.findViewById(R.id.title);
             Button buttonOk = (Button) rootView.findViewById(R.id.buttonOk);
             Button buttonCancel = (Button) rootView.findViewById(R.id.buttonCancel);
             Button buttonNeutral = (Button) rootView.findViewById(R.id.buttonNeutral);
+
+            final View content;
+            if (mContentRessource != 0) {
+                content = inflater.inflate(mContentRessource, null);
+                Helper.writeValues((LinearLayout) content, mValues);
+            } else if (mView != null) {
+                content = mView;
+            } else if (mMessage != null) {
+                content = inflater.inflate(R.layout.fragment_dialog_message, null);
+                TextView messageView = (TextView) content.findViewById(R.id.message);
+                messageView.setText(mMessage);
+            } else {
+                throw new IllegalArgumentException();
+            }
+
+            LayoutParams params = contentFrame.getLayoutParams();
+            params.height = LayoutParams.WRAP_CONTENT;
+            params.width = LayoutParams.MATCH_PARENT;
+            contentFrame.addView(content, params);
 
             title.setText(mTitle);
 
@@ -196,8 +216,10 @@ public interface DynamicDialogFragment {
                 buttonOk.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        FrameLayout mContentFrame = (FrameLayout) v.getRootView().findViewById(R.id.content);
-                        SparseArray<String> map = Helper.readValues((LinearLayout) mContentFrame.getChildAt(0));
+                        SparseArray<String> map = null;
+                        if (mContentRessource != 0) {
+                            map = Helper.readValues((LinearLayout) content);
+                        }
                         mPositiveButtonListener.onClick(HCDialogFragment.this, mTag, map);
                     }
                 });
@@ -218,32 +240,6 @@ public interface DynamicDialogFragment {
                     }
                 });
             }
-
-            FrameLayout contentFrame = (FrameLayout) rootView.findViewById(R.id.content);
-            if (mMessage != null) {
-                mContentRessource = R.layout.fragment_dialog_message;
-            }
-
-            View content;
-            if (mContentRessource != 0) {
-                content = inflater.inflate(mContentRessource, null);
-            } else if (mView != null) {
-                content = mView;
-            } else {
-                throw new IllegalArgumentException();
-            }
-
-            if (mMessage != null) {
-                TextView messageView = (TextView) content.findViewById(R.id.message);
-                messageView.setText(mMessage);
-            } else if (mContentRessource != 0) {
-                Helper.writeValues((LinearLayout) content, mValues);
-            }
-
-            LayoutParams params = contentFrame.getLayoutParams();
-            params.height = LayoutParams.WRAP_CONTENT;
-            params.width = LayoutParams.MATCH_PARENT;
-            contentFrame.addView(content, params);
 
             getDialog().setCanceledOnTouchOutside(false);
 
@@ -274,18 +270,17 @@ public interface DynamicDialogFragment {
             mAlertDialog = new AlertDialog.Builder(mContext);
             mAlertDialog.setTitle(mTitle);
 
-            if (mMessage == null) {
-                if (mContentRessource != 0) {
-                    mRootView = ((FragmentActivity) mContext).getLayoutInflater().inflate(mContentRessource, null);
-                    mAlertDialog.setView(mRootView);
-                    Helper.writeValues((LinearLayout) mRootView, mValues);
-                } else if (mView != null) {
-                    mAlertDialog.setView(mView);
-                } else {
-                    throw new IllegalArgumentException();
-                }
-            } else {
+            if (mContentRessource != 0) {
+                mRootView = ((FragmentActivity) mContext).getLayoutInflater().inflate(mContentRessource, null);
+                Helper.writeValues((LinearLayout) mRootView, mValues);
+                mAlertDialog.setView(mRootView);
+            } else if (mView != null) {
+                mRootView = mView;
+                mAlertDialog.setView(mRootView);
+            } else if (mMessage != null) {
                 mAlertDialog.setMessage(mMessage);
+            } else {
+                throw new IllegalArgumentException();
             }
 
             if (mPositiveButtonListener != null) {
@@ -293,7 +288,10 @@ public interface DynamicDialogFragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                SparseArray<String> map = Helper.readValues((LinearLayout) mRootView);
+                                SparseArray<String> map = null;
+                                if (mContentRessource != 0) {
+                                    map = Helper.readValues((LinearLayout) mRootView);
+                                }
                                 mPositiveButtonListener.onClick(PreHCDialogFragment.this, mTag, map);
                             }
                         });

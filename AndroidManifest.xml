@@ -105,7 +105,7 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
 
-                <category android:name="de.fourinchworks.scotlandyardlive.client" />
+                <category android:name="de.hdodenhof.holoreader" />
             </intent-filter>
         </receiver>
 

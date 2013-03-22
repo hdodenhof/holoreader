@@ -13,7 +13,6 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.support.v4.app.FragmentActivity;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.webkit.WebView;
 
 import de.hdodenhof.holoreader.R;
@@ -82,9 +81,7 @@ public class ChangelogDialog {
                 eventType = xml.next();
             }
         } catch (XmlPullParserException e) {
-            Log.e(TAG, e.getMessage(), e);
         } catch (IOException e) {
-            Log.e(TAG, e.getMessage(), e);
         } finally {
             xml.close();
         }

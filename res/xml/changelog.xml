@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
-    <release version="1.1.0" versioncode="4" date="31/03/2013">
+    <release version="1.1.0" versioncode="4" date="22/03/2013">
         <change>FeedPusher (beta): Easily add feeds to Holo Reader from your desktop computer, just activate it from the menu.</change>
-        <change>Feed discovery: Add feeds by just providing the website URL instead of the full feed URL (has to be supported by the website).</change>
+        <change>Feed discovery: Add feeds by just providing the website's URL instead of the full feed URL (has to be supported by the website).</change>
         <change>Fix crash when resuming activity while feeds are refreshing (Android 4.2 only).</change>
         <change>Fix crash when trying to add feeds (invalid Content-type).</change>
     </release>  

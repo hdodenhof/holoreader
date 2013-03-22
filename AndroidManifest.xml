@@ -43,18 +43,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="feed" />
-                <data android:scheme="rss" />
-            </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="http" />
                 <data android:host="*" />
-                <data android:pathPattern=".*\\.xml" />
                 <data android:pathPattern=".*\\.rss" />
             </intent-filter>
             <intent-filter>
@@ -76,10 +66,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data android:scheme="http" />
-                <data android:mimeType="text/xml" />
                 <data android:mimeType="application/rss+xml" />
                 <data android:mimeType="application/atom+xml" />
-                <data android:mimeType="application/xml" />
             </intent-filter>
         </activity>
         <activity android:name="de.hdodenhof.holoreader.activities.DisplayFeedActivity" />

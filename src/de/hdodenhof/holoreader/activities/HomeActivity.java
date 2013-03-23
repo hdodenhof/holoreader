@@ -33,6 +33,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.LocalBroadcastManager;
+import android.util.Patterns;
 import android.util.SparseArray;
 import android.view.View;
 import android.widget.AdapterView;
@@ -612,7 +613,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             url = "http://" + url;
         }
 
-        Pattern pattern = Helpers.PATTERN_WEB;
+        Pattern pattern = Patterns.WEB_URL;
         Matcher matcher = pattern.matcher(url);
 
         try {

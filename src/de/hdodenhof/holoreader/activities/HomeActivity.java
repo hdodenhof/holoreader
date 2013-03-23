@@ -434,6 +434,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      *            URL of the feed to fetch
      */
     private void addFeed(String url) {
+        url = url.trim();
         URL parsedUrl = parseUrl(url);
 
         if (parsedUrl != null) {

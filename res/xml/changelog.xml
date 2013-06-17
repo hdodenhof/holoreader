@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    <release version="1.1.1" versioncode="5" date="17/06/2013">
+        <change>Holo Reader is now Open Source! If you want to contribute, search for "holoreader" on GitHub or go to the &lt;a href="https://github.com/hdodenhof/holoreader"&gt;project page&lt;/a&gt; directly.</change>
+        <change>Minor improvements.</change>
+    </release> 
     <release version="1.1.0" versioncode="4" date="22/03/2013">
         <change>FeedPusher (beta): Easily add feeds to Holo Reader from your desktop computer, just activate it from the menu.</change>
         <change>Feed discovery: Add feeds by just providing the website's URL instead of the full feed URL (has to be supported by the website).</change>

@@ -242,7 +242,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
             String articleLink = mCursor.getString(mCursor.getColumnIndex(ArticleDAO.LINK));
             mCursor.moveToPosition(cursorPosition);
 
-            return articleLink.equals("") ? null : articleLink;
+            return "".equals(articleLink) ? null : articleLink;
         }
 
     }

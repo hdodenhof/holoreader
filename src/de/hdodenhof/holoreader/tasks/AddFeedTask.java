@@ -2,6 +2,7 @@ package de.hdodenhof.holoreader.tasks;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -48,10 +49,17 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
         String name;
 
         try {
-            URLConnection connection = url.openConnection();
-            connection.setRequestProperty("User-agent",
-                    mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName));
-            connection.connect();
+            URLConnection connection = connect(url);
+
+            HttpURLConnection httpConnection = (HttpURLConnection) connection;
+            int httpResponse = httpConnection.getResponseCode();
+
+            if (httpResponse == HttpURLConnection.HTTP_MOVED_PERM) {
+                String redir = connection.getHeaderField("Location");
+                url = new URL(redir);
+                connection = connect(url);
+            }
+
             String contentType = connection.getContentType();
             if (contentType != null && contentType.contains("xml")) {
                 InputStream inputStream = connection.getInputStream();
@@ -105,6 +113,15 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
             msg.arg1 = mReturnCondition;
         }
         mMainUIHandler.sendMessage(msg);
+    }
+
+    private URLConnection connect(URL url) throws IOException {
+        URLConnection connection = url.openConnection();
+        connection.setRequestProperty("User-agent",
+                mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName));
+        connection.connect();
+
+        return connection;
     }
 
     private int storeFeed(String url, String name) {

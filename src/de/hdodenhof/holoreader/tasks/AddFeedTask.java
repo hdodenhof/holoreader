@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,6 +21,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Patterns;
 
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
@@ -213,7 +216,24 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
             if (rssUrl == null || rssUrl == "") {
                 return null;
             } else {
-                return rssUrl;
+                if (rssUrl.length() < 7 || (!rssUrl.substring(0, 7).equalsIgnoreCase("http://") && !rssUrl.substring(0, 8).equalsIgnoreCase("https://"))) {
+                    String protocol = url.getProtocol();
+                    String host = url.getHost();
+                    if (rssUrl.substring(0, 1).equalsIgnoreCase("/")) {
+                        rssUrl = protocol + "://" + host + rssUrl;
+                    } else {
+                        rssUrl = protocol + "://" + host + "/" + rssUrl;
+                    }
+                }
+
+                Pattern pattern = Patterns.WEB_URL;
+                Matcher matcher = pattern.matcher(rssUrl);
+
+                if (matcher.matches()) {
+                    return rssUrl;
+                } else {
+                    return null;
+                }
             }
         } catch (IOException e) {
             return null;

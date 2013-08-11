@@ -6,7 +6,7 @@
     
     <string name="AppName">Holo Reader</string>
     <!-- Has also to be changed in the manifest -->
-    <string name="AppVersionName">1.1.1</string>
+    <string name="AppVersionName">1.1.2</string>
     
     <!-- Using unicode to keep whitespaces, it's " - " -->
     <string name="MetaDivider">\u0020\u2013\u0020</string>

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog>
+    <release version="1.1.2" versioncode="6" date="11/08/2013">
+        <change>Fix crash when viewing articles without a web link (thanks to azarai).</change>
+        <change>Properly handle SSL encrypted feeds.</change>
+        <change>Make feed discovery more robust.</change>
+    </release> 
     <release version="1.1.1" versioncode="5" date="17/06/2013">
         <change>Holo Reader is now Open Source! If you want to contribute, search for "holoreader" on GitHub or go to the &lt;a href="https://github.com/hdodenhof/holoreader"&gt;project page&lt;/a&gt; directly.</change>
         <change>Minor improvements.</change>

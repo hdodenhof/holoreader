@@ -609,7 +609,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private URL parseUrl(String url) {
         URL parsedUrl = null;
 
-        if (url.length() < 7 || (!url.substring(0, 7).equalsIgnoreCase("http://") && !url.substring(0, 8).equalsIgnoreCase("https://"))) {
+        if (url.length() <= 7 || (!url.substring(0, 7).equalsIgnoreCase("http://") && !url.substring(0, 8).equalsIgnoreCase("https://"))) {
             url = "http://" + url;
         }
 

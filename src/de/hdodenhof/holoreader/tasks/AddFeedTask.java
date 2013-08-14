@@ -216,7 +216,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
             if (rssUrl == null || rssUrl == "") {
                 return null;
             } else {
-                if (rssUrl.length() < 7 || (!rssUrl.substring(0, 7).equalsIgnoreCase("http://") && !rssUrl.substring(0, 8).equalsIgnoreCase("https://"))) {
+                if (rssUrl.length() <= 7 || (!rssUrl.substring(0, 7).equalsIgnoreCase("http://") && !rssUrl.substring(0, 8).equalsIgnoreCase("https://"))) {
                     String protocol = url.getProtocol();
                     String host = url.getHost();
                     if (rssUrl.substring(0, 1).equalsIgnoreCase("/")) {

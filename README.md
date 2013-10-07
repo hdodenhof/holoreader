@@ -7,12 +7,12 @@ A simple RSS/Atom reader, available on [Google Play][1].
 Requirements
 ============
 
-To compile Holo Reader you need to provider three libraries:
-* [ActionBarSherlock][2]
-* [ViewPagerIndicator][3]
-* [GooglePlayServices][4]
+To compile Holo Reader you need Gradle (>= 1.6) and a properly set up Android SDK including:
+* Android SDK Build-tools (18.1.0)
+* Android Support Repository
+* Google Repository
 
-You'll probably have to adjust your project.properties to point to their location.
+For creating signed release builds you have to update signing.properties with your keystore details.
 
 
 API-Access
@@ -40,6 +40,3 @@ License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 [1]: https://play.google.com/store/apps/details?id=de.hdodenhof.holoreader
-[2]: https://github.com/JakeWharton/ActionBarSherlock
-[3]: https://github.com/JakeWharton/Android-ViewPagerIndicator/
-[4]: http://developer.android.com/google/play-services/setup.html

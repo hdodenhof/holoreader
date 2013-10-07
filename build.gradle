@@ -1,0 +1,59 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.5.+'
+    }
+}
+
+apply plugin: 'android'
+
+repositories {
+    mavenCentral()
+
+    maven {
+        url "https://github.com/hdodenhof/viewpagerindicator-aar/raw/master"
+    }
+}
+
+android {
+    compileSdkVersion 18
+    buildToolsVersion "18.1.0"
+
+    sourceSets {
+        main {
+            manifest.srcFile 'AndroidManifest.xml'
+            java.srcDirs = ['src']
+            resources.srcDirs = ['src']
+            res.srcDirs = ['res']
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-v4:18.0.0'
+    compile 'com.google.android.gms:play-services:3.2.65'
+    compile 'com.actionbarsherlock:actionbarsherlock:4.4.0@aar'
+    compile 'com.viewpagerindicator:viewpagerindicator:2.4.2'
+    compile fileTree(dir: 'libs', include: '*.jar')
+}
+
+// Read release signing details from signing.properties if available
+def propFile = new File('signing.properties')
+if (propFile.canRead()){
+    def Properties props = new Properties()
+    props.load(new FileInputStream(propFile))
+
+    if (props != null && props['STORE_FILE'] && props['STORE_PASSWORD'] && props['KEY_ALIAS'] && props['KEY_PASSWORD']) {
+        android.signingConfigs {
+            release {
+                storeFile = file(props['STORE_FILE'])
+                storePassword = props['STORE_PASSWORD']
+                keyAlias = props['KEY_ALIAS']
+                keyPassword = props['KEY_PASSWORD']
+            }
+        }
+        android.buildTypes.release.signingConfig = android.signingConfigs.release
+    }
+}

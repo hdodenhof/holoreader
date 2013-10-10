@@ -16,7 +16,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Environment;
 
-import com.jakewharton.DiskLruCache;
+import com.jakewharton.disklrucache.DiskLruCache;
 
 /*
  * Based on http://stackoverflow.com/a/10235381

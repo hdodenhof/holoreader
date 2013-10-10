@@ -23,16 +23,19 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
+import android.app.AlarmManager;
+import android.app.IntentService;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
-
-import com.commonsware.cwac.wakeful.WakefulIntentService;
 
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
@@ -40,13 +43,18 @@ import de.hdodenhof.holoreader.provider.SQLiteHelper;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
 
-public class RefreshFeedService extends WakefulIntentService {
+public class RefreshFeedService extends IntentService {
 
     @SuppressWarnings("unused")
     private static final String TAG = RefreshFeedService.class.getSimpleName();
 
+    public static final long INTERVAL_MILLIS = 14400000; // 4h
+    public static final long WAIT_MILLIS = 60000; // 1min
+
     public static final String BROADCAST_REFRESHED = "de.hdodenhof.holoreader.FEEDS_REFRESHED";
     public static final String BROADCAST_REFRESHING = "de.hdodenhof.holoreader.FEEDS_REFRESHING";
+
+    public static final String EXTRA_FEEDID = "feedid";
 
     private static final String NO_ACTION = "no_action";
     private static final int KEEP_READ_ARTICLES_DAYS = 3;
@@ -61,8 +69,41 @@ public class RefreshFeedService extends WakefulIntentService {
     private SharedPreferences mSharedPrefs;
     private HashSet<Integer> mFeedsUpdating;
 
+    private static PowerManager.WakeLock wakeLock = null;
+
     public RefreshFeedService() {
         super("RefreshFeedService");
+    }
+
+    private static PowerManager.WakeLock getLock(Context context) {
+        if (wakeLock == null) {
+            PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LoadMessageLock");
+        }
+        return wakeLock;
+    }
+
+    public static void scheduleRefresh(Context context, long waitMillis){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        long lastRefresh = prefs.getLong("lastRefreshed", 0);
+
+        if (lastRefresh == 0|| (System.currentTimeMillis() > lastRefresh
+                && System.currentTimeMillis() - lastRefresh > (INTERVAL_MILLIS + AlarmManager.INTERVAL_FIFTEEN_MINUTES))) {
+            Intent broadcastIntent = new Intent(context, RefreshFeedReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, broadcastIntent, 0);
+
+            AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+            alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, SystemClock.elapsedRealtime()
+                    + ((waitMillis == 0l) ? WAIT_MILLIS : waitMillis), INTERVAL_MILLIS, pendingIntent);
+        }
+    }
+
+    public static void cancelPendingRefresh(Context context){
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        Intent broadcastIntent = new Intent(context, RefreshFeedReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, broadcastIntent, 0);
+
+        alarmManager.cancel(pendingIntent);
     }
 
     @Override
@@ -81,7 +122,12 @@ public class RefreshFeedService extends WakefulIntentService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        int feedID = intent.getIntExtra("feedid", -1);
+        PowerManager.WakeLock wakeLock = getLock(this);
+        if (!wakeLock.isHeld() || (flags & START_FLAG_REDELIVERY) != 0) {
+            wakeLock.acquire();
+        }
+
+        int feedID = intent.getIntExtra(EXTRA_FEEDID, -1);
 
         if (mFeedsUpdating.contains(feedID)) {
             intent.setAction(NO_ACTION);
@@ -100,11 +146,11 @@ public class RefreshFeedService extends WakefulIntentService {
     }
 
     @Override
-    protected void doWakefulWork(Intent intent) {
+    protected void onHandleIntent(Intent intent) {
         if (intent.getAction() == NO_ACTION) {
             return;
         }
-        int feedID = intent.getIntExtra("feedid", -1);
+        int feedID = intent.getIntExtra(EXTRA_FEEDID, -1);
 
         ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
 
@@ -201,6 +247,11 @@ public class RefreshFeedService extends WakefulIntentService {
                 Intent broadcastIntent = new Intent();
                 broadcastIntent.setAction(BROADCAST_REFRESHED);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
+
+                PowerManager.WakeLock wakeLock = getLock(this);
+                if (wakeLock.isHeld()) {
+                    wakeLock.release();
+                }
             }
         }
     }

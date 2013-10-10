@@ -16,7 +16,6 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.commonsware.cwac.wakeful.WakefulIntentService;
 import com.google.android.gcm.GCMBaseIntentService;
 import com.google.android.gcm.GCMRegistrar;
 import com.google.gson.Gson;
@@ -115,7 +114,7 @@ public class GCMIntentService extends GCMBaseIntentService {
             Intent intent = new Intent(this, RefreshFeedService.class);
             intent.putExtra("feedid", feedId);
 
-            WakefulIntentService.sendWakefulWork(this, intent);
+            startService(intent);
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);

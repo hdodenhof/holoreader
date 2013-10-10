@@ -487,7 +487,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         Intent intent = new Intent(this, RefreshFeedService.class);
 
-        intent.putExtra("feedid", feedID);
+        intent.putExtra(RefreshFeedService.EXTRA_FEEDID, feedID);
         startService(intent);
     }
 

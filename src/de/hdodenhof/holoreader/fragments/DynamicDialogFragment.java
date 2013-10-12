@@ -289,7 +289,7 @@ public interface DynamicDialogFragment {
             }
 
             if (mPositiveButtonListener != null) {
-                mAlertDialog.setPositiveButton(mPositiveButtonText != null ? mPositiveButtonText : mContext.getResources().getString(R.string.PositiveButton),
+                mAlertDialog.setPositiveButton(mPositiveButtonText != null ? mPositiveButtonText : getString(R.string.PositiveButton),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -301,7 +301,7 @@ public interface DynamicDialogFragment {
                             }
                         });
 
-                mAlertDialog.setNegativeButton(mNegativeButtonText != null ? mNegativeButtonText : mContext.getResources().getString(R.string.NegativeButton),
+                mAlertDialog.setNegativeButton(mNegativeButtonText != null ? mNegativeButtonText : getString(R.string.NegativeButton),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -309,7 +309,7 @@ public interface DynamicDialogFragment {
                             }
                         });
             } else {
-                mAlertDialog.setNeutralButton(mContext.getResources().getString(R.string.NeutralButton), new DialogInterface.OnClickListener() {
+                mAlertDialog.setNeutralButton(getString(R.string.NeutralButton), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         PreHCDialogFragment.this.dismiss();

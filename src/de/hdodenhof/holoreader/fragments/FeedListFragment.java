@@ -57,7 +57,7 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
         mFeedsListView.setOnItemClickListener((OnItemClickListener) getActivity());
 
         this.setListAdapter(mFeedAdapter);
-        this.setLoadingText(getResources().getString(R.string.LoadingFeeds));
+        this.setLoadingText(getString(R.string.LoadingFeeds));
 
         ((FragmentCallback) getActivity()).onFragmentReady(this);
     }
@@ -74,7 +74,7 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
         TextView updatedView = (TextView) headerView.findViewById(R.id.list_item_feed_updated);
         TextView titleView = (TextView) headerView.findViewById(R.id.list_item_feed_name);
 
-        titleView.setText(getResources().getString(R.string.AllFeeds));
+        titleView.setText(getString(R.string.AllFeeds));
         updatedView.setVisibility(View.GONE);
         return Helpers.addBackgroundIndicator(getActivity(), headerView, R.attr.customActivatedBackgroundIndicator);
     }
@@ -104,11 +104,11 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
 
         if (mFirstrun) {
             mFirstrun = false;
-            setEmptyText(getResources().getString(R.string.NoFeedsHint));
+            setEmptyText(getString(R.string.NoFeedsHint));
         } else if (mUnreadOnly) {
-            setEmptyText(getResources().getString(R.string.NoUnreadFeeds));
+            setEmptyText(getString(R.string.NoUnreadFeeds));
         } else {
-            setEmptyText(getResources().getString(R.string.NoFeeds));
+            setEmptyText(getString(R.string.NoFeeds));
         }
 
         setLoadingFinished();

@@ -70,7 +70,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
         mFeedsListView.setOnItemClickListener(new FeedOnItemClickListener());
 
         this.setListAdapter(mFeedAdapter);
-        this.setLoadingText(getResources().getString(R.string.LoadingFeeds));
+        this.setLoadingText(getString(R.string.LoadingFeeds));
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getBooleanArray(BUNDLE_CHECKEDITEMS) != null) {
@@ -142,7 +142,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mFeedAdapter.swapCursor(data);
 
-        setEmptyText(getResources().getString(R.string.EditFeedsNoFeeds));
+        setEmptyText(getString(R.string.EditFeedsNoFeeds));
         setLoadingFinished();
     }
 
@@ -177,7 +177,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.editfeed_context, menu);
 
-            mode.setTitle(getResources().getString(R.string.EditFeedsCABTitle));
+            mode.setTitle(getString(R.string.EditFeedsCABTitle));
 
             return true;
         }
@@ -192,7 +192,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
             long[] checkedFeedIDs = mFeedsListView.getCheckedItemIds();
             switch (item.getItemId()) {
             case R.id.item_delete:
-                mSpinner = ProgressDialog.show(getActivity(), "", getResources().getString(R.string.EditFeedDeleteSpinner), true);
+                mSpinner = ProgressDialog.show(getActivity(), "", getString(R.string.EditFeedDeleteSpinner), true);
                 (new DeleteFeedsTask()).execute(checkedFeedIDs);
                 return true;
             case R.id.item_edit:
@@ -204,7 +204,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
 
                 DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(getActivity());
                 dialogFragment.setLayout(R.layout.fragment_dialog_edit);
-                dialogFragment.setTitle(getResources().getString(R.string.EditFeedDialogTitle));
+                dialogFragment.setTitle(getString(R.string.EditFeedDialogTitle));
                 dialogFragment.setInitialValues(initialValues);
                 dialogFragment.setTag(feed.getString(feed.getColumnIndex(FeedDAO._ID)));
                 dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {

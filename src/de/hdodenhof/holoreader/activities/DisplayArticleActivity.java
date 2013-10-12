@@ -55,7 +55,7 @@ public class DisplayArticleActivity extends HoloReaderActivity implements Fragme
         if (mFeedID != -1) {
             actionBar.setTitle(Helpers.queryFeedName(getContentResolver(), mFeedID));
         } else {
-            actionBar.setTitle(getResources().getText(R.string.AllFeeds));
+            actionBar.setTitle(getText(R.string.AllFeeds));
         }
         actionBar.setDisplayHomeAsUpEnabled(true);
     }

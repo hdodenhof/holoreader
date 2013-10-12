@@ -46,7 +46,6 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
 
     private ArticleViewPager mViewPager;
     private SharedPreferences mPreferences;
-    private Resources mResources;
     private MenuItem mWebLink;
     private boolean mWebLinkHide = false;
     private boolean mTwoPane = false;
@@ -67,8 +66,6 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
         mUnreadOnly = mPreferences.getBoolean(Prefs.UNREAD_ONLY, true);
         mUnreadAfter = new Date();
 
-        mResources = getResources();
-
         setContentView(R.layout.activity_feed);
 
         if (findViewById(R.id.viewpager_article) != null) {
@@ -80,7 +77,7 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
         if (mFeedID != -1) {
             actionBar.setTitle(Helpers.queryFeedName(getContentResolver(), mFeedID));
         } else {
-            actionBar.setTitle(mResources.getText(R.string.AllFeeds));
+            actionBar.setTitle(getText(R.string.AllFeeds));
         }
         actionBar.setDisplayHomeAsUpEnabled(true);
     }
@@ -139,10 +136,10 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
             editor.commit();
 
             if (mUnreadOnly) {
-                Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
                 mUnreadAfter = new Date();
             } else {
-                Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
             }
             ArticleListFragment articleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
             articleListFragment.setUnreadOnly(mUnreadOnly);

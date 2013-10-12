@@ -104,7 +104,7 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
         mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
         mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
 
-        String layoutSize = getResources().getString(R.string.LayoutSize);
+        String layoutSize = getString(R.string.LayoutSize);
         mIsLargeDevice = layoutSize.equals("large") || layoutSize.equals("xlarge");
 
         String[] uiBindFrom = { ArticleDAO.TITLE, ArticleDAO.IMAGE, ArticleDAO.READ };
@@ -118,7 +118,7 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
                 : false);
 
         this.setListAdapter(mArticleAdapter);
-        this.setLoadingText(getResources().getString(R.string.LoadingArticles));
+        this.setLoadingText(getString(R.string.LoadingArticles));
 
         mArticlesListView = getListView();
         mArticlesListView.setOnItemClickListener((OnItemClickListener) getActivity());
@@ -162,9 +162,9 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
         }
 
         if (mUnreadOnly) {
-            setEmptyText(getResources().getString(R.string.NoUnreadArticles));
+            setEmptyText(getString(R.string.NoUnreadArticles));
         } else {
-            setEmptyText(getResources().getString(R.string.NoArticles));
+            setEmptyText(getString(R.string.NoArticles));
         }
 
         setLoadingFinished();

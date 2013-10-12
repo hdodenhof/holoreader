@@ -17,7 +17,7 @@ public class EditFeedsActivity extends HoloReaderActivity {
         setContentView(R.layout.activity_editfeeds);
 
         ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle(getResources().getString(R.string.EditFeedsTitle));
+        actionBar.setTitle(getString(R.string.EditFeedsTitle));
     }
 
     @Override

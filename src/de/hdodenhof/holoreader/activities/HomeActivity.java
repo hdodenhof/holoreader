@@ -88,7 +88,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private static final String BUNDLE_SELECTED_FEED = "selectedFeed";
 
     private SharedPreferences mPreferences;
-    private Resources mResources;
     private ArticleListFragment mArticleListFragment;
     private DialogFragment mPendingDialogFragment;
     private FeedListFragment mFeedListFragment;
@@ -160,16 +159,16 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
         switch (returnCondition) {
         case AddFeedTask.ERROR_IOEXCEPTION:
-            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorConnection), "add_failed");
+            Helpers.showDialog(this, getString(R.string.AddFeedError), getString(R.string.AddFeedErrorConnection), "add_failed");
             break;
         case AddFeedTask.ERROR_NOFEED:
-            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorNoFeed), "add_failed");
+            Helpers.showDialog(this, getString(R.string.AddFeedError), getString(R.string.AddFeedErrorNoFeed), "add_failed");
             break;
         case AddFeedTask.ERROR_NOCONTENT:
-            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorIncompatibleFeed), "add_failed");
+            Helpers.showDialog(this, getString(R.string.AddFeedError), getString(R.string.AddFeedErrorIncompatibleFeed), "add_failed");
             break;
         case AddFeedTask.ERROR_XMLPULLPARSEREXCEPTION:
-            Helpers.showDialog(this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorOther), "add_failed");
+            Helpers.showDialog(this, getString(R.string.AddFeedError), getString(R.string.AddFeedErrorOther), "add_failed");
             break;
         default:
             break;
@@ -208,8 +207,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mUnreadOnly = mPreferences.getBoolean(Prefs.UNREAD_ONLY, true);
-
-        mResources = getResources();
 
         mFeedListFragment = (FeedListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_feedlist);
         mArticleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);
@@ -318,16 +315,16 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                     mPreferences.edit().putString(Prefs.EMAIL, accountName).commit();
                     registerForPushMessaging(accountName);
                 } else {
-                    Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableCanceledTitle),
-                            mResources.getString(R.string.FeedsViaPushEnableCanceledText), "push_canceled");
+                    Helpers.showDialog(HomeActivity.this, getString(R.string.FeedsViaPushEnableCanceledTitle),
+                            getString(R.string.FeedsViaPushEnableCanceledText), "push_canceled");
                 }
                 break;
             case PLAY_SERVICES_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     startGCMRegistrationFlow();
                 } else {
-                    Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableCanceledTitle),
-                            mResources.getString(R.string.FeedsViaPushEnableCanceledText), "push_canceled");
+                    Helpers.showDialog(HomeActivity.this, getString(R.string.FeedsViaPushEnableCanceledTitle),
+                            getString(R.string.FeedsViaPushEnableCanceledText), "push_canceled");
                 }
                 break;
 
@@ -374,16 +371,16 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private void firstRun() {
         DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(this);
 
-        dialogFragment.setTitle(mResources.getString(R.string.AddDefaultFeedsDialogTitle));
-        dialogFragment.setMessage(mResources.getString(R.string.AddDefaultFeedsDialogText));
+        dialogFragment.setTitle(getString(R.string.AddDefaultFeedsDialogTitle));
+        dialogFragment.setMessage(getString(R.string.AddDefaultFeedsDialogText));
         dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
             @Override
             public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
                 addDefaultFeeds();
                 df.dismiss();
             }
-        }, mResources.getString(R.string.AddDefaultFeedsDialogOk));
-        dialogFragment.setNegativeButtonText(mResources.getString(R.string.AddDefaultFeedsDialogCancel));
+        }, getString(R.string.AddDefaultFeedsDialogOk));
+        dialogFragment.setNegativeButtonText(getString(R.string.AddDefaultFeedsDialogCancel));
 
         dialogFragment.show(getSupportFragmentManager(), Prefs.FIRSTRUN);
 
@@ -394,7 +391,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     }
 
     private void addDefaultFeeds() {
-        mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.AddDefaultFeedsSpinner), true);
+        mSpinner = ProgressDialog.show(this, "", getString(R.string.AddDefaultFeedsSpinner), true);
 
         AsyncTask<Void, Void, Void> addDefaultFeedsTask = new AsyncTask<Void, Void, Void>() {
             @Override
@@ -420,7 +417,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             protected void onPostExecute(Void result) {
                 mSpinner.dismiss();
                 mSpinner = null;
-                Toast.makeText(HomeActivity.this, mResources.getString(R.string.AddDefaultFeedsToast), Toast.LENGTH_LONG).show();
+                Toast.makeText(HomeActivity.this, getString(R.string.AddDefaultFeedsToast), Toast.LENGTH_LONG).show();
                 refreshFeeds(true);
             }
         };
@@ -438,11 +435,11 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         URL parsedUrl = parseUrl(url);
 
         if (parsedUrl != null) {
-            mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.AddFeedSpinner), true);
+            mSpinner = ProgressDialog.show(this, "", getString(R.string.AddFeedSpinner), true);
             AddFeedTask addFeedTask = new AddFeedTask(mAsyncHandler, this);
             addFeedTask.execute(parsedUrl);
         } else {
-            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.AddFeedError), mResources.getString(R.string.AddFeedErrorInvalidUrl),
+            Helpers.showDialog(HomeActivity.this, getString(R.string.AddFeedError), getString(R.string.AddFeedErrorInvalidUrl),
                     "add_invalid_url");
         }
     }
@@ -462,11 +459,11 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                     refreshFeed(mFeedID);
                 }
             else {
-                Toast.makeText(this, mResources.getString(R.string.ToastNothingToRefresh), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.ToastNothingToRefresh), Toast.LENGTH_SHORT).show();
             }
         } else {
             if (manual) {
-                Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "no_connection");
+                Helpers.showDialog(this, getString(R.string.NoConnectionTitle), getString(R.string.NoConnectionText), "no_connection");
             }
         }
     }
@@ -498,7 +495,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         if (isConnected) {
             DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(this);
 
-            dialogFragment.setTitle(mResources.getString(R.string.AddFeedDialogTitle));
+            dialogFragment.setTitle(getString(R.string.AddFeedDialogTitle));
             dialogFragment.setLayout(R.layout.fragment_dialog_add);
             dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
                 @Override
@@ -506,11 +503,11 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                     mPendingDialogFragment = df;
                     addFeed(map.get(R.id.enterUrl));
                 }
-            }, mResources.getString(R.string.AddFeedDialogOk));
+            }, getString(R.string.AddFeedDialogOk));
 
             dialogFragment.show(getSupportFragmentManager(), "add_dialog");
         } else {
-            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "no_connection");
+            Helpers.showDialog(this, getString(R.string.NoConnectionTitle), getString(R.string.NoConnectionText), "no_connection");
         }
     }
 
@@ -528,8 +525,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_REQUEST_CODE).show();
             } else {
-                Helpers.showDialog(this, mResources.getString(R.string.FeedsViaPushGmsUnavailableTitle),
-                        mResources.getString(R.string.FeedsViaPushGmsUnavailableText), "playservices_unavailable");
+                Helpers.showDialog(this, getString(R.string.FeedsViaPushGmsUnavailableTitle),
+                        getString(R.string.FeedsViaPushGmsUnavailableText), "playservices_unavailable");
                 return;
             }
         }
@@ -537,8 +534,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         if (Helpers.isConnected(this)) {
             DynamicDialogFragment dialogFragment = DynamicDialogFragment.Factory.getInstance(this);
 
-            dialogFragment.setTitle(mResources.getString(R.string.FeedsViaPushEnableDialogTitle));
-            dialogFragment.setMessage(mResources.getString(R.string.FeedsViaPushEnableDialogText));
+            dialogFragment.setTitle(getString(R.string.FeedsViaPushEnableDialogTitle));
+            dialogFragment.setMessage(getString(R.string.FeedsViaPushEnableDialogText));
             dialogFragment.setPositiveButtonListener(new DynamicDialogFragment.OnClickListener() {
                 @Override
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
@@ -548,12 +545,12 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                             null, null);
                     startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
                 }
-            }, mResources.getString(R.string.FeedsViaPushEnableDialogOK));
-            dialogFragment.setNegativeButtonText(mResources.getString(R.string.FeedsViaPushEnableDialogNOK));
+            }, getString(R.string.FeedsViaPushEnableDialogOK));
+            dialogFragment.setNegativeButtonText(getString(R.string.FeedsViaPushEnableDialogNOK));
 
             dialogFragment.show(getSupportFragmentManager(), "enable_push");
         } else {
-            Helpers.showDialog(this, mResources.getString(R.string.NoConnectionTitle), mResources.getString(R.string.NoConnectionText), "no_connection");
+            Helpers.showDialog(this, getString(R.string.NoConnectionTitle), getString(R.string.NoConnectionText), "no_connection");
         }
     }
 
@@ -564,7 +561,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private void registerForPushMessaging(final String eMail) {
         final String uuid = mPreferences.getString(Prefs.UUID, null);
 
-        mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
+        mSpinner = ProgressDialog.show(this, "", getString(R.string.PushRegistrationSpinner), true);
         new AsyncTask<Void, Void, Boolean>() {
             @Override
             protected Boolean doInBackground(Void... params) {
@@ -579,12 +576,12 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                     mPreferences.edit().putBoolean(Prefs.GCM_ENABLED, true).commit();
                     mHidePushItem = true;
                     HomeActivity.this.invalidateOptionsMenu();
-                    Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
-                            mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
+                    Helpers.showDialog(HomeActivity.this, getString(R.string.FeedsViaPushEnabledTitle),
+                            getString(R.string.FeedsViaPushEnabledText), "push_registered");
                 } else {
                     mPreferences.edit().remove(Prefs.EMAIL).commit();
-                    Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
-                            mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
+                    Helpers.showDialog(HomeActivity.this, getString(R.string.FeedsViaPushEnableErrorTitle),
+                            getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
                 }
             }
 
@@ -610,7 +607,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                     mPreferences.edit().putBoolean(Prefs.GCM_ENABLED, false);
                     mHidePushItem = false;
                     invalidateOptionsMenu();
-                    Toast.makeText(HomeActivity.this, mResources.getString(R.string.FeedsViaPushRefreshFailed), Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeActivity.this, getString(R.string.FeedsViaPushRefreshFailed), Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -777,9 +774,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             editor.commit();
 
             if (mUnreadOnly) {
-                Toast.makeText(this, mResources.getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.ToastUnreadArticles), Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, mResources.getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.ToastAllArticles), Toast.LENGTH_SHORT).show();
             }
             mFeedListFragment.setUnreadOnly(mUnreadOnly);
             if (mTwoPane) {

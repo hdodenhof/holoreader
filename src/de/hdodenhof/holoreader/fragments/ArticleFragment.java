@@ -79,7 +79,7 @@ public class ArticleFragment extends SherlockFragment {
         Document doc = Jsoup.parse(mContent);
         doc.head().append(customStyleElement());
 
-        String layoutSize = getActivity().getResources().getString(R.string.LayoutSize);
+        String layoutSize = getString(R.string.LayoutSize);
         if (layoutSize.equals("large") || layoutSize.equals("xlarge")) {
             WebSettings webSettings = contentView.getSettings();
             webSettings.setDefaultFontSize(20); // default is 16

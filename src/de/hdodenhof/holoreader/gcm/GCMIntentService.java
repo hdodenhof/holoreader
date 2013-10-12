@@ -100,7 +100,7 @@ public class GCMIntentService extends IntentService {
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
         NotificationCompat.Builder nb = new NotificationCompat.Builder(this);
-        nb.setContentTitle(getResources().getString(R.string.FeedsAddedViaPush));
+        nb.setContentTitle(getString(R.string.FeedsAddedViaPush));
         nb.setContentText(getResources().getQuantityString(R.plurals.numberOfFeedsReceived, newFeedsSum, newFeedsSum));
         nb.setSmallIcon(R.drawable.notification);
         nb.setContentIntent(contentIntent);

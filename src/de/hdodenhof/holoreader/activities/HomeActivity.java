@@ -64,6 +64,7 @@ import de.hdodenhof.holoreader.misc.ChangelogDialog;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
 import de.hdodenhof.holoreader.misc.MarkReadRunnable;
+import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
@@ -82,9 +83,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     private static final int ACCOUNT_REQUEST_CODE = 0x1;
     private static final int PLAY_SERVICES_REQUEST_CODE = 0x2;
-
-    private static final String PROPERTY_GCM_REGID = "registrationId";
-    private static final String PROPERTY_GCM_APP_VERSION = "appVersion";
 
     private SharedPreferences mPreferences;
     private Resources mResources;
@@ -206,7 +204,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         setContentView(R.layout.activity_home);
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+        mUnreadOnly = mPreferences.getBoolean(Prefs.UNREAD_ONLY, true);
 
         mResources = getResources();
 
@@ -221,7 +219,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         if (action == Intent.ACTION_VIEW) {
             String url = intent.getData().toString();
             addFeed(url);
-        } else if (mPreferences.getBoolean("firstrun", true)) {
+        } else if (mPreferences.getBoolean(Prefs.FIRSTRUN, true)) {
             firstRun();
         } else {
             maybeShowChangelog();
@@ -247,14 +245,14 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         LocalBroadcastManager.getInstance(this).registerReceiver(mFeedsRefreshedReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHED));
         LocalBroadcastManager.getInstance(this).registerReceiver(mFeedsRefreshingReceiver, new IntentFilter(RefreshFeedService.BROADCAST_REFRESHING));
 
-        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+        mUnreadOnly = mPreferences.getBoolean(Prefs.UNREAD_ONLY, true);
 
         mFeedListFragment.setUnreadOnly(mUnreadOnly);
         if (mTwoPane) {
             mArticleListFragment.setUnreadOnly(mUnreadOnly);
         }
 
-        boolean refreshing = mPreferences.getBoolean("refreshing", false);
+        boolean refreshing = mPreferences.getBoolean(Prefs.REFRESHING, false);
         if (refreshing) {
             if (mRefreshItem != null) {
                 mRefreshItem.setActionView(R.layout.actionview_refresh);
@@ -263,7 +261,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         }
 
-        if (mPreferences.getBoolean("gcmEnabled", false)) {
+        if (mPreferences.getBoolean(Prefs.GCM_ENABLED, false)) {
             mHidePushItem = true;
             invalidateOptionsMenu();
 
@@ -272,7 +270,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         }
 
-        mPreferences.edit().remove("newFeeds").commit();
+        mPreferences.edit().remove(Prefs.NEW_FEEDS).commit();
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(0x1);
     }
@@ -314,7 +312,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             case ACCOUNT_REQUEST_CODE:
                 if (resultCode == RESULT_OK) {
                     String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                    mPreferences.edit().putString("eMail", accountName).commit();
+                    mPreferences.edit().putString(Prefs.EMAIL, accountName).commit();
                     registerForPushMessaging(accountName);
                 } else {
                     Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableCanceledTitle),
@@ -360,13 +358,13 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     }
 
     private void maybeShowChangelog() {
-        int changelogShown = mPreferences.getInt("changelogShown", 0);
+        int changelogShown = mPreferences.getInt(Prefs.CHANGELOG_SHOWN, 0);
 
         if (changelogShown < getVersion()) {
             final ChangelogDialog changeLogDialog = new ChangelogDialog(this);
             changeLogDialog.show();
 
-            mPreferences.edit().putInt("changelogShown", getVersion()).commit();
+            mPreferences.edit().putInt(Prefs.CHANGELOG_SHOWN, getVersion()).commit();
         }
     }
 
@@ -384,11 +382,11 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }, mResources.getString(R.string.AddDefaultFeedsDialogOk));
         dialogFragment.setNegativeButtonText(mResources.getString(R.string.AddDefaultFeedsDialogCancel));
 
-        dialogFragment.show(getSupportFragmentManager(), "firstrun");
+        dialogFragment.show(getSupportFragmentManager(), Prefs.FIRSTRUN);
 
         SharedPreferences.Editor prefsEdit = mPreferences.edit();
-        prefsEdit.putBoolean("firstrun", false);
-        prefsEdit.putInt("changelogShown", getVersion());
+        prefsEdit.putBoolean(Prefs.FIRSTRUN, false);
+        prefsEdit.putInt(Prefs.CHANGELOG_SHOWN, getVersion());
         prefsEdit.commit();
     }
 
@@ -478,7 +476,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      */
     @SuppressLint("NewApi")
     private void refreshFeed(int feedID) {
-        boolean refreshing = mPreferences.getBoolean("refreshing", false);
+        boolean refreshing = mPreferences.getBoolean(Prefs.REFRESHING, false);
         if (!refreshing) {
             mRefreshItem.setActionView(R.layout.actionview_refresh);
         }
@@ -518,9 +516,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      *
      */
     private void startGCMRegistrationFlow() {
-        if (mPreferences.getString("uuid", null) == null) {
+        if (mPreferences.getString(Prefs.UUID, null) == null) {
             UUID uuid = UUID.randomUUID();
-            mPreferences.edit().putString("uuid", uuid.toString()).commit();
+            mPreferences.edit().putString(Prefs.UUID, uuid.toString()).commit();
         }
 
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -562,7 +560,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      * @param eMail
      */
     private void registerForPushMessaging(final String eMail) {
-        final String uuid = mPreferences.getString("uuid", null);
+        final String uuid = mPreferences.getString(Prefs.UUID, null);
 
         mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
         new AsyncTask<Void, Void, Boolean>() {
@@ -576,13 +574,13 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 mSpinner.dismiss();
                 mSpinner = null;
                 if (success) {
-                    mPreferences.edit().putBoolean("gcmEnabled", true).commit();
+                    mPreferences.edit().putBoolean(Prefs.GCM_ENABLED, true).commit();
                     mHidePushItem = true;
                     HomeActivity.this.invalidateOptionsMenu();
                     Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
                             mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
                 } else {
-                    mPreferences.edit().remove("eMail").commit();
+                    mPreferences.edit().remove(Prefs.EMAIL).commit();
                     Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
                             mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
                 }
@@ -595,8 +593,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      *
      */
     private void refreshRegId(){
-        final String uuid = mPreferences.getString("uuid", null);
-        final String eMail = mPreferences.getString("email", null);
+        final String uuid = mPreferences.getString(Prefs.UUID, null);
+        final String eMail = mPreferences.getString(Prefs.EMAIL, null);
 
         new AsyncTask<Void, Void, Boolean>() {
             @Override
@@ -607,7 +605,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             @Override
             protected void onPostExecute(Boolean success) {
                 if (!success) {
-                    mPreferences.edit().putBoolean("gcmEnabled", false);
+                    mPreferences.edit().putBoolean(Prefs.GCM_ENABLED, false);
                     mHidePushItem = false;
                     invalidateOptionsMenu();
                     Toast.makeText(HomeActivity.this, mResources.getString(R.string.FeedsViaPushRefreshFailed), Toast.LENGTH_LONG).show();
@@ -644,8 +642,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      */
     private void storeRegistrationId(String regId) {
         SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(PROPERTY_GCM_REGID, regId);
-        editor.putInt(PROPERTY_GCM_APP_VERSION, getVersion());
+        editor.putString(Prefs.GCM_REGID, regId);
+        editor.putInt(Prefs.GCM_APP_VERSION, getVersion());
         editor.commit();
     }
 
@@ -654,12 +652,12 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      * @return
      */
     private boolean validateGcmRegistration(){
-        int registeredVersion = mPreferences.getInt(PROPERTY_GCM_APP_VERSION, 0);
+        int registeredVersion = mPreferences.getInt(Prefs.GCM_APP_VERSION, 0);
 
         if (registeredVersion != getVersion()) {
             SharedPreferences.Editor editor = mPreferences.edit();
-            editor.remove(PROPERTY_GCM_REGID);
-            editor.remove(PROPERTY_GCM_APP_VERSION);
+            editor.remove(Prefs.GCM_REGID);
+            editor.remove(Prefs.GCM_APP_VERSION);
             editor.commit();
             return false;
         }
@@ -773,7 +771,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             mUnreadOnly = !mUnreadOnly;
 
             SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putBoolean("unreadonly", mUnreadOnly);
+            editor.putBoolean(Prefs.UNREAD_ONLY, mUnreadOnly);
             editor.commit();
 
             if (mUnreadOnly) {

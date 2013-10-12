@@ -38,6 +38,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
 import de.hdodenhof.holoreader.R;
+import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
@@ -85,7 +86,7 @@ public class RefreshFeedService extends IntentService {
 
     public static void scheduleRefresh(Context context, long waitMillis){
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        long lastRefresh = prefs.getLong("lastRefreshed", 0);
+        long lastRefresh = prefs.getLong(Prefs.LAST_REFRESHED, 0);
 
         if (lastRefresh == 0|| (System.currentTimeMillis() > lastRefresh
                 && System.currentTimeMillis() - lastRefresh > (INTERVAL_MILLIS + AlarmManager.INTERVAL_FIFTEEN_MINUTES))) {
@@ -133,7 +134,7 @@ public class RefreshFeedService extends IntentService {
             intent.setAction(NO_ACTION);
         } else {
             if (mFeedsUpdating.size() == 0) {
-                mSharedPrefs.edit().putBoolean("refreshing", true).commit();
+                mSharedPrefs.edit().putBoolean(Prefs.REFRESHING, true).commit();
 
                 Intent broadcastIntent = new Intent();
                 broadcastIntent.setAction(BROADCAST_REFRESHING);
@@ -240,8 +241,8 @@ public class RefreshFeedService extends IntentService {
             mFeedsUpdating.remove(feedID);
             if (mFeedsUpdating.size() == 0) {
                 SharedPreferences.Editor editor = mSharedPrefs.edit();
-                editor.putBoolean("refreshing", false);
-                editor.putLong("lastRefreshed", SystemClock.elapsedRealtime());
+                editor.putBoolean(Prefs.REFRESHING, false);
+                editor.putLong(Prefs.LAST_REFRESHED, SystemClock.elapsedRealtime());
                 editor.commit();
 
                 Intent broadcastIntent = new Intent();

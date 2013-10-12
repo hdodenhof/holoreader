@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import de.hdodenhof.holoreader.Config;
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.activities.HomeActivity;
+import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
 import de.hdodenhof.holoreader.services.RefreshFeedService;
@@ -84,9 +85,9 @@ public class GCMIntentService extends IntentService {
         }
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        int newFeedsSoFar = prefs.getInt("newFeeds", 0);
+        int newFeedsSoFar = prefs.getInt(Prefs.NEW_FEEDS, 0);
         int newFeedsSum = newFeedsSoFar + feeds.length;
-        prefs.edit().putInt("newFeeds", newFeedsSum).commit();
+        prefs.edit().putInt(Prefs.NEW_FEEDS, newFeedsSum).commit();
 
         Intent notificationIntent = new Intent(this, HomeActivity.class);
 

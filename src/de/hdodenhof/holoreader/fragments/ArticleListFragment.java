@@ -20,6 +20,7 @@ import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
+import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
@@ -94,7 +95,7 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
         }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mUnreadOnly = preferences.getBoolean("unreadonly", true);
+        mUnreadOnly = preferences.getBoolean(Prefs.UNREAD_ONLY, true);
 
         mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
         mTwoPane = ((FragmentCallback) getActivity()).isDualPane();

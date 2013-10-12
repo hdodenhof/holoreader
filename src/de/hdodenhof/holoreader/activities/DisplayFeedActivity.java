@@ -30,6 +30,7 @@ import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
 import de.hdodenhof.holoreader.misc.MarkReadRunnable;
 import de.hdodenhof.holoreader.misc.OnArticleChangedListener;
+import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
 
 /**
@@ -62,7 +63,7 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
         }
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mUnreadOnly = mPreferences.getBoolean("unreadonly", true);
+        mUnreadOnly = mPreferences.getBoolean(Prefs.UNREAD_ONLY, true);
         mUnreadAfter = new Date();
 
         mResources = getResources();

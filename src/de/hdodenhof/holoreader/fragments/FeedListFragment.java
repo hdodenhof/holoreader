@@ -20,6 +20,7 @@ import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
+import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
 
@@ -43,7 +44,7 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mUnreadOnly = preferences.getBoolean("unreadonly", true);
+        mUnreadOnly = preferences.getBoolean(Prefs.UNREAD_ONLY, true);
 
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
@@ -64,7 +65,7 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // has to be checked before activity is created
-        mFirstrun = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean("firstrun", true);
+        mFirstrun = PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(Prefs.FIRSTRUN, true);
         return super.onCreateView(inflater, container, savedInstanceState);
     }
 

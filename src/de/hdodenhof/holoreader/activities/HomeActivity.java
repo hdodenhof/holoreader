@@ -427,7 +427,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     /**
      * Starts an AsyncTask to fetch a new feed and add it to the database
      * 
-     * @param feedUrl
+     * @param url
      *            URL of the feed to fetch
      */
     private void addFeed(String url) {
@@ -447,8 +447,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     /**
      * Spawns AsyncTasks to refresh all feeds
      * 
-     * @param item
-     *            MenuItem that holds the refresh animation
+     * @param manual
      */
     private void refreshFeeds(boolean manual) {
         boolean isConnected = Helpers.isConnected(this);

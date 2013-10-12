@@ -212,7 +212,7 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
     }
 
     /**
-     * @see de.hdodenhof.holoreader.misc.OnArticleChangedListener#onArticleChanged(int)
+     * @see de.hdodenhof.holoreader.misc.OnArticleChangedListener#onArticleChanged(int, int, int)
      */
     public void onArticleChanged(int oldArticle, int currentArticle, int position) {
         ArticleListFragment articleListFragment = (ArticleListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_articlelist);

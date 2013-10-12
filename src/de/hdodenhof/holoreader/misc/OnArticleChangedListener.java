@@ -8,12 +8,12 @@ package de.hdodenhof.holoreader.misc;
 public interface OnArticleChangedListener {
     /**
      * Is called from within the ArticlePagerFragment after the visible article changed
-     * 
-     * @param article
-     *            Article that has been activated
+     *
+     * @param oldArticle
+     * @param currentArticle
      * @param position
      *            Position of the article within a list
-     * 
+     *
      */
     public void onArticleChanged(int oldArticle, int currentArticle, int position);
 }

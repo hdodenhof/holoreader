@@ -79,7 +79,7 @@ public class RefreshFeedService extends IntentService {
     private static PowerManager.WakeLock getLock(Context context) {
         if (wakeLock == null) {
             PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "LoadMessageLock");
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "FeedRefreshLock");
         }
         return wakeLock;
     }

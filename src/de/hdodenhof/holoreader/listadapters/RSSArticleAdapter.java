@@ -338,7 +338,14 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
                 // remove linebreaks and spaces, fixes #55
                 name = name.replaceAll("\\s", "");
 
-                filename = name + "." + extension;
+                // make sure keys match [a-z0-9_-]{1,64} (DiskLruCache restriction since 1.3.0)
+                name = name.toLowerCase().replaceAll("[^a-z0-9_-]", "");
+                int nameMaxLength = 64 - (extension.length() + 1) - (String.valueOf(id).length() + 1);
+                if (name.length() > nameMaxLength){
+                    name = name.substring(0, nameMaxLength);
+                }
+
+                filename = name + "-" + extension;
             }
         }
         return id + "_" + filename;

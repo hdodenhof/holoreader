@@ -1,6 +1,5 @@
 package de.hdodenhof.holoreader.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,7 +28,7 @@ public class DisplayArticleActivity extends HoloReaderActivity implements Fragme
     @SuppressWarnings("unused")
     private static final String TAG = DisplayArticleActivity.class.getSimpleName();
 
-    ArticleViewPager mViewPager;
+    private ArticleViewPager mViewPager;
     private MenuItem mWebLink;
     private boolean mWebLinkHide = false;
     private int mFeedID;
@@ -64,7 +63,7 @@ public class DisplayArticleActivity extends HoloReaderActivity implements Fragme
     protected void onPause() {
         super.onPause();
         if (mArticleID != -1) {
-            MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+            MarkReadRunnable markReadRunnable = new MarkReadRunnable(this);
             markReadRunnable.setArticle(mArticleID);
             new Thread(markReadRunnable).start();
         }
@@ -130,7 +129,7 @@ public class DisplayArticleActivity extends HoloReaderActivity implements Fragme
      */
     public void onArticleChanged(int oldArticle, int currentArticle, int position) {
         if (oldArticle != -1) {
-            MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+            MarkReadRunnable markReadRunnable = new MarkReadRunnable(this);
             markReadRunnable.setArticle(oldArticle);
             new Thread(markReadRunnable).start();
         }

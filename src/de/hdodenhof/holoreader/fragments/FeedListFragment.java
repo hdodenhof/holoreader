@@ -95,8 +95,7 @@ public class FeedListFragment extends CustomListFragment implements LoaderCallba
             selection = FeedDAO.UNREAD + " > 0";
         }
         // for some reason using SelectionArgs in this query won't work
-        CursorLoader cursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, projection, selection, null, FeedDAO.UPDATED + " DESC");
-        return cursorLoader;
+        return new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, projection, selection, null, FeedDAO.UPDATED + " DESC");
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {

@@ -123,20 +123,4 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     }
 
-    public static int fromBoolean(boolean bool) {
-        if (bool == true) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
-    public static boolean toBoolean(int integer) {
-        if (integer == 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 }

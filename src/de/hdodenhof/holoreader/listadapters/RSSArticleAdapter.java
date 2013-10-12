@@ -50,8 +50,9 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     private static final int ALPHA_STATE_DIMMED = 128;
     private static final int ALPHA_STATE_FULL = 255;
 
-    private LruCache<String, Bitmap> mImageCache;
-    private DiskLruImageCache mDiskImageCache;
+    private final LruCache<String, Bitmap> mImageCache;
+    private final DiskLruImageCache mDiskImageCache;
+
     private Context mContext;
     private boolean mIsModeExtendedPossible;
     private int mMode;
@@ -117,7 +118,7 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
         if (articleImage != null) {
             setInvisible(articleImage);
 
-            if (imageURL != null && imageURL != "") {
+            if (imageURL != null && !imageURL.equals("")) {
                 prepareImage(id, imageURL, articleImage);
             }
         }
@@ -166,11 +167,6 @@ public class RSSArticleAdapter extends SimpleCursorAdapter implements RSSAdapter
     private void lightup(TextView view) {
         ColorStateList colors = view.getTextColors();
         view.setTextColor(colors.withAlpha(ALPHA_STATE_FULL));
-    }
-
-    @Override
-    public Cursor swapCursor(Cursor c) {
-        return super.swapCursor(c);
     }
 
     @Override

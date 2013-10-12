@@ -56,7 +56,7 @@ public class ChangelogDialog {
         while ((eventType != XmlPullParser.END_TAG) || (resourceParser.getName().equals("change"))) {
             if ((eventType == XmlPullParser.START_TAG) && (resourceParser.getName().equals("change"))) {
                 eventType = resourceParser.next();
-                changelogBuilder.append("<li>" + resourceParser.getText() + "</li>");
+                changelogBuilder.append("<li>").append(resourceParser.getText()).append("</li>");
             }
             eventType = resourceParser.next();
         }
@@ -64,14 +64,14 @@ public class ChangelogDialog {
         changelogBuilder.append("</ul>");
     }
 
-    private String getHTMLChangelog(int resourceId) {
+    private String getHTMLChangelog() {
         final StringBuilder changelogBuilder = new StringBuilder();
 
         changelogBuilder.append("<html>");
         changelogBuilder.append("<head>").append("<style type=\"text/css\">").append(STYLE).append("</style>").append("</head>");
         changelogBuilder.append("<body>");
 
-        final XmlResourceParser xml = mContext.getResources().getXml(resourceId);
+        final XmlResourceParser xml = mContext.getResources().getXml(R.xml.changelog);
         try {
             int eventType = xml.getEventType();
             while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -94,7 +94,7 @@ public class ChangelogDialog {
 
     public void show() {
         String title = mContext.getString(R.string.ChangelogTitle);
-        String htmlChangelog = getHTMLChangelog(R.xml.changelog);
+        String htmlChangelog = getHTMLChangelog();
 
         if (htmlChangelog.length() == 0) {
             return;

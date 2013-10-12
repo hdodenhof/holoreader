@@ -2,10 +2,8 @@ package de.hdodenhof.holoreader.activities;
 
 import java.util.Date;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -87,7 +85,7 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
         super.onPause();
         // dual pane only
         if (mArticleID != -1) {
-            MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+            MarkReadRunnable markReadRunnable = new MarkReadRunnable(this);
             markReadRunnable.setArticle(mArticleID);
             new Thread(markReadRunnable).start();
         }
@@ -146,9 +144,9 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
             return true;
         case R.id.item_markread:
             if (mFeedID == -1) {
-                new Thread(new MarkReadRunnable((Context) this)).start();
+                new Thread(new MarkReadRunnable(this)).start();
             } else {
-                MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+                MarkReadRunnable markReadRunnable = new MarkReadRunnable(this);
                 markReadRunnable.setFeed(mFeedID);
                 new Thread(markReadRunnable).start();
             }
@@ -218,7 +216,7 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
         }
 
         if (oldArticle != -1) {
-            MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+            MarkReadRunnable markReadRunnable = new MarkReadRunnable(this);
             markReadRunnable.setArticle(oldArticle);
             new Thread(markReadRunnable).start();
         }

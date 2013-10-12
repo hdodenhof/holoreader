@@ -89,7 +89,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
                     inputStream.close();
 
                     if (mReturnCondition == SUCCESS && name != null) {
-                        return storeFeed(alternateUrl.toString(), name);
+                        return storeFeed(alternateUrl, name);
                     }
                 }
             }
@@ -98,11 +98,6 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
             mReturnCondition = ERROR_IOEXCEPTION;
         }
         return null;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
     }
 
     @Override
@@ -132,7 +127,7 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
         ContentValues contentValues = new ContentValues();
 
         contentValues.put(FeedDAO.NAME, name);
-        contentValues.put(FeedDAO.URL, url.toString());
+        contentValues.put(FeedDAO.URL, url);
 
         Uri newFeed = contentResolver.insert(RSSContentProvider.URI_FEEDS, contentValues);
         return Integer.parseInt(newFeed.getLastPathSegment());
@@ -165,15 +160,15 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
 
                     if (currentTag.equalsIgnoreCase("rss") || currentTag.equalsIgnoreCase("feed") || currentTag.equalsIgnoreCase("rdf")) {
                         isFeed = true;
-                    } else if (currentTag.equalsIgnoreCase("title") && isFeed && foundName == false) {
+                    } else if (currentTag.equalsIgnoreCase("title") && isFeed && !foundName) {
                         name = pullParser.nextText();
                         foundName = true;
                     } else if ((currentTag.equalsIgnoreCase("item") || currentTag.equalsIgnoreCase("entry")) && isFeed) {
                         isArticle = true;
                     } else if (((currentTag.equalsIgnoreCase("encoded") && currentPrefix.equalsIgnoreCase("content")) || (currentTag
-                            .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle == true) {
+                            .equalsIgnoreCase("content") && currentPrefix.equalsIgnoreCase(""))) && isArticle) {
                         hasContent = true;
-                    } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && isArticle == true
+                    } else if ((currentTag.equalsIgnoreCase("summary") || currentTag.equalsIgnoreCase("description")) && isArticle
                             && currentPrefix.equalsIgnoreCase("")) {
                         hasSummary = true;
                     }
@@ -209,11 +204,11 @@ public class AddFeedTask extends AsyncTask<URL, Void, Integer> {
                     .userAgent(mContext.getResources().getString(R.string.AppName) + "/" + mContext.getResources().getString(R.string.AppVersionName))
                     .timeout(2000).get();
             String rssUrl = document.select("link[rel=alternate][type=application/rss+xml]").attr("href");
-            if (rssUrl == null || rssUrl == "") {
+            if (rssUrl == null || rssUrl.equals("")) {
                 rssUrl = document.select("link[rel=alternate][type=application/atom+xml]").attr("href");
             }
 
-            if (rssUrl == null || rssUrl == "") {
+            if (rssUrl == null || rssUrl.equals("")) {
                 return null;
             } else {
                 if (rssUrl.length() <= 7 || (!rssUrl.substring(0, 7).equalsIgnoreCase("http://") && !rssUrl.substring(0, 8).equalsIgnoreCase("https://"))) {

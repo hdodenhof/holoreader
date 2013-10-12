@@ -2,7 +2,6 @@ package de.hdodenhof.holoreader.services;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.ParseException;
@@ -147,7 +146,7 @@ public class RefreshFeedService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent.getAction() == NO_ACTION) {
+        if (intent.getAction().equals(NO_ACTION)) {
             return;
         }
         int feedID = intent.getIntExtra(Extras.FEEDID, -1);
@@ -301,7 +300,7 @@ public class RefreshFeedService extends IntentService {
         return pullParser;
     }
 
-    private InputStream getURLInputStream(String feedURL) throws IOException, MalformedURLException {
+    private InputStream getURLInputStream(String feedURL) throws IOException {
         URLConnection connection = new URL(feedURL).openConnection();
         connection.setRequestProperty("User-agent", getString(R.string.AppName) + "/" + getResources().getString(R.string.AppVersionName));
         connection.connect();
@@ -448,11 +447,7 @@ public class RefreshFeedService extends IntentService {
             return false;
         }
 
-        if (pullParser.getName().equals("content")) {
-            return true;
-        }
-
-        return false;
+        return pullParser.getName().equals("content");
     }
 
     /*

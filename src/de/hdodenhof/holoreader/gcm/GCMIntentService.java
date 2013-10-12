@@ -13,16 +13,13 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.Gson;
 
-import de.hdodenhof.holoreader.Config;
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.activities.HomeActivity;
 import de.hdodenhof.holoreader.misc.Extras;

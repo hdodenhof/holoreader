@@ -15,7 +15,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.View;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.actionbarsherlock.app.SherlockFragment;
@@ -127,9 +126,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
             selectionArgs = Helpers.addSelectionArg(selectionArgs, String.valueOf(mFeedID));
         }
 
-        CursorLoader cursorLoader = new CursorLoader(mContext, RSSContentProvider.URI_ARTICLES, mProjection, selection, selectionArgs, ArticleDAO.PUBDATE
-                + " DESC");
-        return cursorLoader;
+        return new CursorLoader(mContext, RSSContentProvider.URI_ARTICLES, mProjection, selection, selectionArgs, ArticleDAO.PUBDATE + " DESC");
     }
 
     @Override
@@ -148,7 +145,7 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
             }
             mCurrentState = STATE_LOADED;
         }
-        ((LinearLayout) mContext.findViewById(R.id.loadingContainer)).setVisibility(View.GONE);
+        mContext.findViewById(R.id.loadingContainer).setVisibility(View.GONE);
     }
 
     @Override

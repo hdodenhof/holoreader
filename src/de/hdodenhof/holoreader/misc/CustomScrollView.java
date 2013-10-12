@@ -25,9 +25,7 @@ public class CustomScrollView extends ScrollView {
      */
     @Override
     public void requestChildFocus(View child, View focused) {
-        if (focused instanceof WebView) {
-            return;
-        } else {
+        if (!(focused instanceof WebView)) {
             super.requestChildFocus(child, focused);
         }
     }

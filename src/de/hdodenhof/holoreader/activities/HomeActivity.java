@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -128,7 +127,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 break;
             }
         }
-    };
+    }
 
     /**
      * 
@@ -216,7 +215,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
         Intent intent = getIntent();
         String action = intent.getAction();
-        if (action == Intent.ACTION_VIEW) {
+        if (action.equals(Intent.ACTION_VIEW)) {
             String url = intent.getData().toString();
             addFeed(url);
         } else if (mPreferences.getBoolean(Prefs.FIRSTRUN, true)) {
@@ -541,7 +540,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
                     df.dismiss();
 
-                    Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null,
+                    Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE }, false, null, null,
                             null, null);
                     startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
                 }
@@ -785,14 +784,14 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             return true;
         case R.id.item_markread:
             if (mTwoPane && mSelectedFeed != -1) {
-                MarkReadRunnable markReadRunnable = new MarkReadRunnable((Context) this);
+                MarkReadRunnable markReadRunnable = new MarkReadRunnable(this);
                 markReadRunnable.setFeed(mSelectedFeed);
                 new Thread(markReadRunnable).start();
                 if (mUnreadOnly) {
                     mArticleListFragment.selectFeed(-1);
                 }
             } else {
-                new Thread(new MarkReadRunnable((Context) this)).start();
+                new Thread(new MarkReadRunnable(this)).start();
             }
             return true;
         case R.id.item_editfeeds:

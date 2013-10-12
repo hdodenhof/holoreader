@@ -120,7 +120,7 @@ public class ArticleFragment extends SherlockFragment {
 
         if (((FragmentCallback) getActivity()).isDualPane()) {
             float factor = ((float) getResources().getInteger(R.integer.dualpane_feedactivity_article_weight)) / 100;
-            viewWidth = (int) Math.round(displayMetrics.widthPixels * factor);
+            viewWidth = Math.round(displayMetrics.widthPixels * factor);
         } else {
             viewWidth = displayMetrics.widthPixels;
         }
@@ -131,7 +131,7 @@ public class ArticleFragment extends SherlockFragment {
         StringBuilder styleStringBuilder = new StringBuilder();
         styleStringBuilder.append("<style type=\"text/css\">");
         styleStringBuilder.append("body { padding: 0; margin: 0; }");
-        styleStringBuilder.append("img { max-width: " + String.valueOf(contentWidth) + "; height: auto; }");
+        styleStringBuilder.append("img { max-width: ").append(String.valueOf(contentWidth)).append("; height: auto; }");
         styleStringBuilder.append("figure { margin: 0 !important; }");
         styleStringBuilder.append("p { line-height: 1.5; }");
         styleStringBuilder.append("</style>");

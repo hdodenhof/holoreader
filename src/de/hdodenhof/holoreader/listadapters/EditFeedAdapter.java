@@ -45,17 +45,9 @@ public class EditFeedAdapter extends SimpleCursorAdapter {
     }
 
     @Override
-    public Cursor swapCursor(Cursor c) {
-        return super.swapCursor(c);
-    }
-
-    @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-
         final LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(mLayout, parent, false);
-
-        return view;
+        return inflater.inflate(mLayout, parent, false);
     }
 
     @Override

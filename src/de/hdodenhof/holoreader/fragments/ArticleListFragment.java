@@ -17,7 +17,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import de.hdodenhof.holoreader.R;
-import de.hdodenhof.holoreader.activities.DisplayFeedActivity;
 import de.hdodenhof.holoreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.holoreader.misc.Extras;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
@@ -45,8 +44,6 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
     private ListView mArticlesListView;
     private RSSArticleAdapter mArticleAdapter;
     private boolean mUnreadOnly = true;
-    private boolean mTwoPane = false;
-    private boolean mThisIsPrimaryFragment = false;
     private boolean mScrollTop = false;
     private boolean mIsLargeDevice = false;
     private int mChangeToPosition = -1;
@@ -101,8 +98,8 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         mUnreadOnly = preferences.getBoolean(Prefs.UNREAD_ONLY, true);
 
-        mThisIsPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
-        mTwoPane = ((FragmentCallback) getActivity()).isDualPane();
+        boolean isPrimaryFragment = ((FragmentCallback) getActivity()).isPrimaryFragment(this);
+        boolean isTwoPane = ((FragmentCallback) getActivity()).isDualPane();
 
         String layoutSize = getString(R.string.LayoutSize);
         mIsLargeDevice = layoutSize.equals("large") || layoutSize.equals("xlarge");
@@ -113,9 +110,8 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
         getActivity().getSupportLoaderManager().initLoader(LOADER, null, this);
 
         boolean isLargeDeviceInPortrait = (mIsLargeDevice && (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT));
-        mArticleAdapter = new RSSArticleAdapter(getActivity(), null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (mTwoPane
-                && !mThisIsPrimaryFragment && !isLargeDeviceInPortrait) ? RSSArticleAdapter.MODE_EXTENDED : RSSArticleAdapter.MODE_COMPACT, mTwoPane ? true
-                : false);
+        mArticleAdapter = new RSSArticleAdapter(getActivity(), null, uiBindFrom, uiBindTo, CursorAdapter.FLAG_REGISTER_CONTENT_OBSERVER, (isTwoPane
+                && !isPrimaryFragment && !isLargeDeviceInPortrait) ? RSSArticleAdapter.MODE_EXTENDED : RSSArticleAdapter.MODE_COMPACT, isTwoPane);
 
         this.setListAdapter(mArticleAdapter);
         this.setLoadingText(getString(R.string.LoadingArticles));

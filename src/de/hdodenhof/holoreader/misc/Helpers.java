@@ -32,7 +32,7 @@ public class Helpers {
     public static boolean isConnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return networkInfo == null ? false : networkInfo.isAvailable();
+        return networkInfo != null && networkInfo.isAvailable();
     }
 
     /**
@@ -148,9 +148,7 @@ public class Helpers {
 
         String newSA[] = new String[newLength];
 
-        for (int i = 0; i < selectionArgs.length; i++) {
-            newSA[i] = selectionArgs[i];
-        }
+        System.arraycopy(selectionArgs, 0, newSA, 0, selectionArgs.length);
 
         newSA[newPosition] = newArg;
         return newSA;

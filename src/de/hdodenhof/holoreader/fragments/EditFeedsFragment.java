@@ -108,7 +108,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
      * checkedCount (this is only the case when called from onCreate() to restore state, all other calls are done using updateActionMode() without parameters)
      */
     private void updateActionMode(int checkedCount) {
-        if (mActionMode == null || mActionViewVisible == false) {
+        if (mActionMode == null || !mActionViewVisible) {
             mActionMode = ((SherlockFragmentActivity) getActivity()).startActionMode(new FeedCallback());
             mActionViewVisible = true;
         }
@@ -135,8 +135,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
 
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String[] projection = { FeedDAO._ID, FeedDAO.NAME, FeedDAO.URL, FeedDAO.UPDATED, FeedDAO.UNREAD };
-        CursorLoader cursorLoader = new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, projection, null, null, FeedDAO.NAME + " ASC");
-        return cursorLoader;
+        return new CursorLoader(getActivity(), RSSContentProvider.URI_FEEDS, projection, null, null, FeedDAO.NAME + " ASC");
     }
 
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {

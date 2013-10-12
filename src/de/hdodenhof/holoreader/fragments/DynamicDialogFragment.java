@@ -266,11 +266,6 @@ public interface DynamicDialogFragment {
         }
 
         @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-        }
-
-        @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             mAlertDialog = new AlertDialog.Builder(mContext);
             mAlertDialog.setTitle(mTitle);

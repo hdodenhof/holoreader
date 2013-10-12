@@ -12,9 +12,10 @@ import de.hdodenhof.holoreader.provider.SQLiteHelper;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.ArticleDAO;
 
 public class MarkReadRunnable implements Runnable {
-    Context mContext;
-    int mArticleID = -1;
-    int mFeedID = -1;
+
+    private Context mContext;
+    private int mArticleID = -1;
+    private int mFeedID = -1;
 
     public MarkReadRunnable(Context context) {
         mContext = context;

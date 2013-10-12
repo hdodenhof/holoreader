@@ -3,7 +3,6 @@ package de.hdodenhof.holoreader.misc;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,9 +25,10 @@ public class DiskLruImageCache {
     private static final int APP_VERSION = 1;
     private static final int VALUE_COUNT = 1;
 
+    private static final int COMPRESSION_QUALITY = 70;
+
     private DiskLruCache mDiskCache;
     private CompressFormat mCompressFormat = CompressFormat.JPEG;
-    private int mCompressQuality = 70;
 
     public DiskLruImageCache(Context context, String uniqueName, int diskCacheSize) {
         try {
@@ -39,11 +39,11 @@ public class DiskLruImageCache {
         }
     }
 
-    private boolean writeBitmapToFile(Bitmap bitmap, DiskLruCache.Editor editor) throws IOException, FileNotFoundException {
+    private boolean writeBitmapToFile(Bitmap bitmap, DiskLruCache.Editor editor) throws IOException {
         OutputStream out = null;
         try {
             out = new BufferedOutputStream(editor.newOutputStream(0));
-            return bitmap.compress(mCompressFormat, mCompressQuality, out);
+            return bitmap.compress(mCompressFormat, COMPRESSION_QUALITY, out);
         } finally {
             if (out != null) {
                 out.close();
@@ -54,7 +54,7 @@ public class DiskLruImageCache {
     private File getDiskCacheDir(Context context, String uniqueName) {
         File cacheDir;
 
-        if (Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED || !isExternalStorageRemovable()) {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) || !isExternalStorageRemovable()) {
             if (context.getExternalCacheDir() != null) {
                 cacheDir = context.getExternalCacheDir();
             } else {

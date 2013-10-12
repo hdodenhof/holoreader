@@ -43,11 +43,7 @@ public class GCMServerUtilities {
 
             int statusCode = responseStatus != null ? responseStatus.getStatusCode() : 0;
 
-            if (!(statusCode == 204)) {
-                return false;
-            } else {
-                return true;
-            }
+            return statusCode == 204;
 
         } catch (Exception e) {
             return false;

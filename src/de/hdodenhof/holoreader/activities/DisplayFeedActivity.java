@@ -135,7 +135,7 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
             mUnreadOnly = !mUnreadOnly;
 
             SharedPreferences.Editor editor = mPreferences.edit();
-            editor.putBoolean("unreadonly", mUnreadOnly);
+            editor.putBoolean(Prefs.UNREAD_ONLY, mUnreadOnly);
             editor.commit();
 
             if (mUnreadOnly) {

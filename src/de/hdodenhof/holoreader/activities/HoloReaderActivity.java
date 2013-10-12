@@ -6,6 +6,7 @@ import android.preference.PreferenceManager;
 
 import com.actionbarsherlock.app.SherlockFragmentActivity;
 
+import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.services.RefreshFeedService;
 
 public class HoloReaderActivity extends SherlockFragmentActivity {
@@ -17,7 +18,7 @@ public class HoloReaderActivity extends SherlockFragmentActivity {
     protected void onPause() {
         long waitMillis;
         long millisSinceBoot = SystemClock.elapsedRealtime();
-        long lastRefreshed = PreferenceManager.getDefaultSharedPreferences(this).getLong("lastRefreshed", millisSinceBoot);
+        long lastRefreshed = PreferenceManager.getDefaultSharedPreferences(this).getLong(Prefs.LAST_REFRESHED, millisSinceBoot);
         if (lastRefreshed + RefreshFeedService.INTERVAL_MILLIS < millisSinceBoot) {
             waitMillis = RefreshFeedService.WAIT_MILLIS;
         } else {

@@ -1,6 +1,7 @@
 package de.hdodenhof.holoreader.gcm;
 
 import android.annotation.SuppressLint;
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,13 +12,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.android.gcm.GCMBaseIntentService;
-import com.google.android.gcm.GCMRegistrar;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.gson.Gson;
 
 import de.hdodenhof.holoreader.Config;
@@ -27,74 +29,38 @@ import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
 import de.hdodenhof.holoreader.services.RefreshFeedService;
 
-public class GCMIntentService extends GCMBaseIntentService {
+public class GCMIntentService extends IntentService {
 
     @SuppressWarnings("unused")
     private static final String TAG = GCMIntentService.class.getName();
 
-    public static final String BROADCAST_REGISTERED = "de.hdodenhof.holoreader.GCM_REGISTERED";
-
     private static final String MESSAGETYPE_ADDFEED = "addfeed";
 
     public GCMIntentService() {
-        super(Config.GCM_SENDER_ID);
+        super("GCMIntentService");
     }
 
     @Override
-    protected void onRegistered(Context context, String registrationId) {
-        Log.v(TAG, "onRegistered");
+    protected void onHandleIntent(Intent intent) {
+        Bundle extras = intent.getExtras();
+        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+        String gcmMessageType = gcm.getMessageType(intent);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String eMail = prefs.getString("eMail", null);
-        String uuid = prefs.getString("uuid", null);
+        if (!extras.isEmpty()) {
+            if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(gcmMessageType)) {
+                Log.v(TAG, "Error: " + extras.toString());
+            } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(gcmMessageType)) {
+                Log.v(TAG, "Message received");
 
-        if (eMail != null && uuid != null) {
-            boolean success = GCMServerUtilities.registerOnServer(eMail, registrationId, uuid);
-            if (success) {
-                GCMRegistrar.setRegisteredOnServer(this, true);
-                prefs.edit().putBoolean("gcmEnabled", true).commit();
+                String messageType = intent.getStringExtra("type");
+                if (messageType.equals(MESSAGETYPE_ADDFEED)) {
+                    Log.v(TAG, "... handling addFeed message");
+                    handleAddFeedMessage(intent.getStringExtra("data"));
+                }
+                Log.i(TAG, "Received: " + extras.toString());
             }
-
-            Intent broadcastIntent = new Intent();
-            broadcastIntent.setAction(BROADCAST_REGISTERED);
-            broadcastIntent.putExtra("success", success);
-            LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
         }
-    }
-
-    @Override
-    protected void onUnregistered(Context context, String registrationId) {
-        Log.v(TAG, "onUnregistered");
-
-        // TODO unregister on server
-        PreferenceManager.getDefaultSharedPreferences(this).edit().remove("gcmEnabled").commit();
-    }
-
-    @Override
-    protected void onMessage(Context context, Intent intent) {
-        Log.v(TAG, "onMessage");
-
-        String messageType = intent.getStringExtra("type");
-        if (messageType.equals(MESSAGETYPE_ADDFEED)) {
-            Log.v(TAG, "... handling addFeed message");
-            handleAddFeedMessage(intent.getStringExtra("data"));
-        }
-    }
-
-    @Override
-    protected void onDeletedMessages(Context context, int total) {
-        Log.v(TAG, "onDeletedMessages");
-    }
-
-    @Override
-    public void onError(Context context, String errorId) {
-        Log.v(TAG, "onError, errorId: " + errorId);
-    }
-
-    @Override
-    protected boolean onRecoverableError(Context context, String errorId) {
-        Log.v(TAG, "onRecoverableError, errorId: " + errorId);
-        return super.onRecoverableError(context, errorId);
+        GCMReceiver.completeWakefulIntent(intent);
     }
 
     @SuppressLint("InlinedApi")
@@ -137,6 +103,8 @@ public class GCMIntentService extends GCMBaseIntentService {
         nb.setSmallIcon(R.drawable.notification);
         nb.setContentIntent(contentIntent);
 
+        // TODO use updated API
+        @SuppressWarnings("deprecation")
         Notification notification = nb.getNotification();
         notification.flags |= Notification.FLAG_AUTO_CANCEL;
 

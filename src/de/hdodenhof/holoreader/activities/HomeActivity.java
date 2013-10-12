@@ -1,5 +1,6 @@
 package de.hdodenhof.holoreader.activities;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,16 +45,17 @@ import android.widget.Toast;
 import com.actionbarsherlock.view.Menu;
 import com.actionbarsherlock.view.MenuInflater;
 import com.actionbarsherlock.view.MenuItem;
-import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.AccountPicker;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import de.hdodenhof.holoreader.Config;
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.fragments.ArticleListFragment;
 import de.hdodenhof.holoreader.fragments.DynamicDialogFragment;
 import de.hdodenhof.holoreader.fragments.FeedListFragment;
-import de.hdodenhof.holoreader.gcm.GCMIntentService;
 import de.hdodenhof.holoreader.gcm.GCMServerUtilities;
 import de.hdodenhof.holoreader.listadapters.RSSAdapter;
 import de.hdodenhof.holoreader.listadapters.RSSArticleAdapter;
@@ -79,6 +81,10 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     private static final String TAG = HomeActivity.class.getSimpleName();
 
     private static final int ACCOUNT_REQUEST_CODE = 0x1;
+    private static final int PLAY_SERVICES_REQUEST_CODE = 0x2;
+
+    private static final String PROPERTY_GCM_REGID = "registrationId";
+    private static final String PROPERTY_GCM_APP_VERSION = "appVersion";
 
     private SharedPreferences mPreferences;
     private Resources mResources;
@@ -193,27 +199,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     };
 
-    private BroadcastReceiver mGCMRegisteredReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            try {
-                mSpinner.dismiss();
-                mSpinner = null;
-            } catch (NullPointerException e) {
-            }
-
-            if (intent.getBooleanExtra("success", false)) {
-                mHidePushItem = true;
-                invalidateOptionsMenu();
-                Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
-                        mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
-            } else {
-                Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
-                        mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
-            }
-        }
-    };
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -281,6 +266,10 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         if (mPreferences.getBoolean("gcmEnabled", false)) {
             mHidePushItem = true;
             invalidateOptionsMenu();
+
+            if (!validateGcmRegistration()){
+                refreshRegId();
+            }
         }
 
         mPreferences.edit().remove("newFeeds").commit();
@@ -314,11 +303,6 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             }
         }
 
-        try {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mGCMRegisteredReceiver);
-        } catch (IllegalArgumentException e) {
-            // might not be registered
-        }
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mFeedsRefreshingReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mFeedsRefreshedReceiver);
         super.onPause();
@@ -326,12 +310,26 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     @Override
     protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-        if (requestCode == ACCOUNT_REQUEST_CODE && resultCode == RESULT_OK) {
-            String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-            registerForPushMessaging(accountName);
-        } else {
-            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableCanceledTitle),
-                    mResources.getString(R.string.FeedsViaPushEnableCanceledText), "push_canceled");
+        switch (requestCode){
+            case ACCOUNT_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    String accountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                    mPreferences.edit().putString("eMail", accountName).commit();
+                    registerForPushMessaging(accountName);
+                } else {
+                    Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableCanceledTitle),
+                            mResources.getString(R.string.FeedsViaPushEnableCanceledText), "push_canceled");
+                }
+                break;
+            case PLAY_SERVICES_REQUEST_CODE:
+                if (resultCode == RESULT_OK) {
+                    startGCMRegistrationFlow();
+                } else {
+                    Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableCanceledTitle),
+                            mResources.getString(R.string.FeedsViaPushEnableCanceledText), "push_canceled");
+                }
+                break;
+
         }
     }
 
@@ -516,10 +514,24 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
         }
     }
 
+    /**
+     *
+     */
     private void startGCMRegistrationFlow() {
         if (mPreferences.getString("uuid", null) == null) {
             UUID uuid = UUID.randomUUID();
             mPreferences.edit().putString("uuid", uuid.toString()).commit();
+        }
+
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
+                GooglePlayServicesUtil.getErrorDialog(resultCode, this, PLAY_SERVICES_REQUEST_CODE).show();
+            } else {
+                Helpers.showDialog(this, mResources.getString(R.string.FeedsViaPushGmsUnavailableTitle),
+                        mResources.getString(R.string.FeedsViaPushGmsUnavailableText), "playservices_unavailable");
+                return;
+            }
         }
 
         if (Helpers.isConnected(this)) {
@@ -532,7 +544,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 public void onClick(DialogFragment df, String tag, SparseArray<String> map) {
                     df.dismiss();
 
-                    Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE }, false, null, null,
+                    Intent intent = AccountPicker.newChooseAccountIntent(null, null, new String[] { GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE}, false, null, null,
                             null, null);
                     startActivityForResult(intent, ACCOUNT_REQUEST_CODE);
                 }
@@ -551,54 +563,107 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
      */
     private void registerForPushMessaging(final String eMail) {
         final String uuid = mPreferences.getString("uuid", null);
-        mPreferences.edit().putString("eMail", eMail).commit();
 
-        GCMRegistrar.checkDevice(this);
-        GCMRegistrar.checkManifest(this);
-
-        final String registrationId = GCMRegistrar.getRegistrationId(this);
-
-        if (registrationId.equals("")) {
-            mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
-            LocalBroadcastManager.getInstance(this).registerReceiver(mGCMRegisteredReceiver, new IntentFilter(GCMIntentService.BROADCAST_REGISTERED));
-            GCMRegistrar.register(this, Config.GCM_SENDER_ID);
-        } else {
-            if (!GCMRegistrar.isRegisteredOnServer(this)) {
-                mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
-                AsyncTask<Void, Void, Boolean> registerForPushTask = new AsyncTask<Void, Void, Boolean>() {
-                    @Override
-                    protected Boolean doInBackground(Void... params) {
-                        return GCMServerUtilities.registerOnServer(eMail, registrationId, uuid);
-                    }
-
-                    @Override
-                    protected void onPostExecute(Boolean success) {
-                        mSpinner.dismiss();
-                        mSpinner = null;
-                        if (success) {
-                            GCMRegistrar.setRegisteredOnServer(HomeActivity.this, true);
-                            mPreferences.edit().putBoolean("gcmEnabled", true).commit();
-                            mHidePushItem = true;
-                            HomeActivity.this.invalidateOptionsMenu();
-                            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
-                                    mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
-                        } else {
-                            mPreferences.edit().remove("eMail").commit();
-                            Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
-                                    mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
-                        }
-                    }
-                };
-                registerForPushTask.execute();
-            } else {
-                // This is impossible, show a message anyway
-                Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
-                        mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
-                mPreferences.edit().putBoolean("gcmEnabled", true).commit();
-                mHidePushItem = true;
-                invalidateOptionsMenu();
+        mSpinner = ProgressDialog.show(this, "", mResources.getString(R.string.PushRegistrationSpinner), true);
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                return doGcmRegistration(eMail, uuid);
             }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                mSpinner.dismiss();
+                mSpinner = null;
+                if (success) {
+                    mPreferences.edit().putBoolean("gcmEnabled", true).commit();
+                    mHidePushItem = true;
+                    HomeActivity.this.invalidateOptionsMenu();
+                    Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnabledTitle),
+                            mResources.getString(R.string.FeedsViaPushEnabledText), "push_registered");
+                } else {
+                    mPreferences.edit().remove("eMail").commit();
+                    Helpers.showDialog(HomeActivity.this, mResources.getString(R.string.FeedsViaPushEnableErrorTitle),
+                            mResources.getString(R.string.FeedsViaPushEnableErrorText), "push_failed");
+                }
+            }
+
+        }.execute(null, null, null);
+    }
+
+    /**
+     *
+     */
+    private void refreshRegId(){
+        final String uuid = mPreferences.getString("uuid", null);
+        final String eMail = mPreferences.getString("email", null);
+
+        new AsyncTask<Void, Void, Boolean>() {
+            @Override
+            protected Boolean doInBackground(Void... params) {
+                return doGcmRegistration(eMail, uuid);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean success) {
+                if (!success) {
+                    mPreferences.edit().putBoolean("gcmEnabled", false);
+                    mHidePushItem = false;
+                    invalidateOptionsMenu();
+                    Toast.makeText(HomeActivity.this, mResources.getString(R.string.FeedsViaPushRefreshFailed), Toast.LENGTH_LONG).show();
+                }
+            }
+
+        }.execute(null, null, null);
+    }
+
+    /**
+     *
+     * @param eMail
+     * @param uuid
+     * @return
+     */
+    private boolean doGcmRegistration(String eMail, String uuid){
+        try {
+            GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+            String regid = gcm.register(Config.GCM_SENDER_ID);
+
+            if (!GCMServerUtilities.registerOnServer(eMail, regid, uuid)){
+                return false;
+            }
+            storeRegistrationId(regid);
+            return true;
+        } catch (IOException ex) {
+            return false;
         }
+    }
+
+    /**
+     *
+     * @param regId
+     */
+    private void storeRegistrationId(String regId) {
+        SharedPreferences.Editor editor = mPreferences.edit();
+        editor.putString(PROPERTY_GCM_REGID, regId);
+        editor.putInt(PROPERTY_GCM_APP_VERSION, getVersion());
+        editor.commit();
+    }
+
+    /**
+     *
+     * @return
+     */
+    private boolean validateGcmRegistration(){
+        int registeredVersion = mPreferences.getInt(PROPERTY_GCM_APP_VERSION, 0);
+
+        if (registeredVersion != getVersion()) {
+            SharedPreferences.Editor editor = mPreferences.edit();
+            editor.remove(PROPERTY_GCM_REGID);
+            editor.remove(PROPERTY_GCM_APP_VERSION);
+            editor.commit();
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -82,6 +82,8 @@
     <string name="AddFeedError">Something went wrong</string>
 
     <!-- Pushing feeds -->
+    <string name="FeedsViaPushGmsUnavailableTitle">Error</string>
+    <string name="FeedsViaPushGmsUnavailableText">Google Play Services are not available for this device, but these are necessary for FeedPusher.</string>
     <string name="FeedsViaPushEnableDialogTitle">FeedPusher</string>
     <string name="FeedsViaPushEnableDialogText">With FeedPusher (beta) you can easily add feeds to Holo Reader using your desktop computer. To enable this, your Gmail address has to be send to our server.</string>
     <string name="FeedsViaPushEnableDialogOK">Okay!</string>
@@ -92,6 +94,7 @@
     <string name="FeedsViaPushEnableErrorText">Enabling FeedPusher failed, please try again later.</string>
     <string name="FeedsViaPushEnabledTitle">FeedPusher enabled</string>
     <string name="FeedsViaPushEnabledText">FeedPusher has been enabled for this device and an eMail with intructions has been sent to your account.</string>
+    <string name="FeedsViaPushRefreshFailed">FeedPusher has been disabled, please re-enable from the menu.</string>
     <string name="FeedsAddedViaPush">Feeds received via FeedPusher</string>
 
     <plurals name="numberOfFeedsReceived">

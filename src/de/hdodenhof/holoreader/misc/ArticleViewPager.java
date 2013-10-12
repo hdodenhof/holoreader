@@ -66,9 +66,9 @@ public class ArticleViewPager implements OnPageChangeListener, LoaderCallbacks<C
         mContext = context;
         mCurrentState = STATE_LOADING;
 
-        mPreselectedArticleID = mContext.getIntent().getIntExtra("articleid", 0);
-        mFeedID = mContext.getIntent().getIntExtra("feedid", 0);
-        mUnreadAfter = (Date) mContext.getIntent().getSerializableExtra("unreadAfter");
+        mPreselectedArticleID = mContext.getIntent().getIntExtra(Extras.ARTICLEID, 0);
+        mFeedID = mContext.getIntent().getIntExtra(Extras.FEEDID, 0);
+        mUnreadAfter = (Date) mContext.getIntent().getSerializableExtra(Extras.UNREAD_AFTER);
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
         mUnreadOnly = preferences.getBoolean(Prefs.UNREAD_ONLY, true);

@@ -38,6 +38,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 
 import de.hdodenhof.holoreader.R;
+import de.hdodenhof.holoreader.misc.Extras;
 import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper;
@@ -54,8 +55,6 @@ public class RefreshFeedService extends IntentService {
 
     public static final String BROADCAST_REFRESHED = "de.hdodenhof.holoreader.FEEDS_REFRESHED";
     public static final String BROADCAST_REFRESHING = "de.hdodenhof.holoreader.FEEDS_REFRESHING";
-
-    public static final String EXTRA_FEEDID = "feedid";
 
     private static final String NO_ACTION = "no_action";
     private static final int KEEP_READ_ARTICLES_DAYS = 3;
@@ -128,7 +127,7 @@ public class RefreshFeedService extends IntentService {
             wakeLock.acquire();
         }
 
-        int feedID = intent.getIntExtra(EXTRA_FEEDID, -1);
+        int feedID = intent.getIntExtra(Extras.FEEDID, -1);
 
         if (mFeedsUpdating.contains(feedID)) {
             intent.setAction(NO_ACTION);
@@ -151,7 +150,7 @@ public class RefreshFeedService extends IntentService {
         if (intent.getAction() == NO_ACTION) {
             return;
         }
-        int feedID = intent.getIntExtra(EXTRA_FEEDID, -1);
+        int feedID = intent.getIntExtra(Extras.FEEDID, -1);
 
         ArrayList<ContentValues> contentValuesArrayList = new ArrayList<ContentValues>();
 

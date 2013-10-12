@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import de.hdodenhof.holoreader.misc.Extras;
 import de.hdodenhof.holoreader.misc.Helpers;
 
 public class RefreshFeedReceiver extends BroadcastReceiver {
@@ -29,7 +30,7 @@ public class RefreshFeedReceiver extends BroadcastReceiver {
             if (!feedIDs.isEmpty()) {
                 for (Integer mFeedID : feedIDs) {
                     Intent serviceIntent = new Intent(context, RefreshFeedService.class);
-                    serviceIntent.putExtra(RefreshFeedService.EXTRA_FEEDID, mFeedID);
+                    serviceIntent.putExtra(Extras.FEEDID, mFeedID);
 
                     context.startService(serviceIntent);
                 }

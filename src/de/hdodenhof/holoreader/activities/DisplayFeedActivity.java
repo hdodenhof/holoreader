@@ -26,6 +26,7 @@ import de.hdodenhof.holoreader.fragments.ArticleListFragment;
 import de.hdodenhof.holoreader.listadapters.RSSAdapter;
 import de.hdodenhof.holoreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.holoreader.misc.ArticleViewPager;
+import de.hdodenhof.holoreader.misc.Extras;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
 import de.hdodenhof.holoreader.misc.MarkReadRunnable;
@@ -58,8 +59,8 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (getIntent().hasExtra("feedid")) {
-            mFeedID = getIntent().getIntExtra("feedid", -1);
+        if (getIntent().hasExtra(Extras.FEEDID)) {
+            mFeedID = getIntent().getIntExtra(Extras.FEEDID, -1);
         }
 
         mPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -199,9 +200,9 @@ public class DisplayFeedActivity extends HoloReaderActivity implements FragmentC
                 int articleID = cursor.getInt(cursor.getColumnIndex(ArticleDAO._ID));
 
                 Intent intent = new Intent(this, DisplayArticleActivity.class);
-                intent.putExtra("articleid", articleID);
-                intent.putExtra("feedid", mFeedID);
-                intent.putExtra("unreadAfter", mUnreadAfter);
+                intent.putExtra(Extras.ARTICLEID, articleID);
+                intent.putExtra(Extras.FEEDID, mFeedID);
+                intent.putExtra(Extras.UNREAD_AFTER, mUnreadAfter);
                 startActivity(intent);
             }
             break;

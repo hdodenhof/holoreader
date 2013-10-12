@@ -61,6 +61,7 @@ import de.hdodenhof.holoreader.listadapters.RSSAdapter;
 import de.hdodenhof.holoreader.listadapters.RSSArticleAdapter;
 import de.hdodenhof.holoreader.listadapters.RSSFeedAdapter;
 import de.hdodenhof.holoreader.misc.ChangelogDialog;
+import de.hdodenhof.holoreader.misc.Extras;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
 import de.hdodenhof.holoreader.misc.MarkReadRunnable;
@@ -83,6 +84,8 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
 
     private static final int ACCOUNT_REQUEST_CODE = 0x1;
     private static final int PLAY_SERVICES_REQUEST_CODE = 0x2;
+
+    private static final String BUNDLE_SELECTED_FEED = "selectedFeed";
 
     private SharedPreferences mPreferences;
     private Resources mResources;
@@ -229,13 +232,13 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt("selectedFeed", mSelectedFeed);
+        savedInstanceState.putInt(BUNDLE_SELECTED_FEED, mSelectedFeed);
     }
 
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mSelectedFeed = savedInstanceState.getInt("selectedFeed");
+        mSelectedFeed = savedInstanceState.getInt(BUNDLE_SELECTED_FEED);
     }
 
     @Override
@@ -714,7 +717,7 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
                 mArticleListFragment.selectFeed(mSelectedFeed);
             } else {
                 Intent intent = new Intent(this, DisplayFeedActivity.class);
-                intent.putExtra("feedid", mSelectedFeed);
+                intent.putExtra(Extras.FEEDID, mSelectedFeed);
                 startActivity(intent);
             }
 
@@ -727,9 +730,9 @@ public class HomeActivity extends HoloReaderActivity implements FragmentCallback
             int articleID = cursor.getInt(cursor.getColumnIndex(ArticleDAO._ID));
 
             Intent intent = new Intent(this, DisplayFeedActivity.class);
-            intent.putExtra("articleid", articleID);
-            intent.putExtra("feedid", mSelectedFeed);
-            intent.putExtra("unreadAfter", new Date());
+            intent.putExtra(Extras.ARTICLEID, articleID);
+            intent.putExtra(Extras.FEEDID, mSelectedFeed);
+            intent.putExtra(Extras.UNREAD_AFTER, new Date());
             startActivity(intent);
             break;
 

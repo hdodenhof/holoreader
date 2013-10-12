@@ -13,6 +13,7 @@ import com.actionbarsherlock.view.MenuItem;
 
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.misc.ArticleViewPager;
+import de.hdodenhof.holoreader.misc.Extras;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
 import de.hdodenhof.holoreader.misc.MarkReadRunnable;
@@ -40,12 +41,12 @@ public class DisplayArticleActivity extends HoloReaderActivity implements Fragme
 
         setContentView(R.layout.activity_article);
 
-        if (!getIntent().hasExtra("articleid")) {
+        if (!getIntent().hasExtra(Extras.ARTICLEID)) {
             Intent intent = new Intent(this, HomeActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(intent);
         } else {
-            mFeedID = getIntent().getIntExtra("feedid", -1);
+            mFeedID = getIntent().getIntExtra(Extras.FEEDID, -1);
         }
 
         mViewPager = new ArticleViewPager(this);
@@ -98,7 +99,7 @@ public class DisplayArticleActivity extends HoloReaderActivity implements Fragme
         case android.R.id.home:
             Intent intent = new Intent(this, DisplayFeedActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            intent.putExtra("feedid", mFeedID);
+            intent.putExtra(Extras.FEEDID, mFeedID);
             startActivity(intent);
             return true;
         case R.id.item_web:

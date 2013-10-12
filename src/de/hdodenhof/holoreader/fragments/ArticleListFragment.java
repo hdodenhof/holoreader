@@ -17,7 +17,9 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
 import de.hdodenhof.holoreader.R;
+import de.hdodenhof.holoreader.activities.DisplayFeedActivity;
 import de.hdodenhof.holoreader.listadapters.RSSArticleAdapter;
+import de.hdodenhof.holoreader.misc.Extras;
 import de.hdodenhof.holoreader.misc.FragmentCallback;
 import de.hdodenhof.holoreader.misc.Helpers;
 import de.hdodenhof.holoreader.misc.Prefs;
@@ -37,6 +39,8 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
     private static final int LOADER = 20;
     private static final int STATE_LOADING = 1;
     private static final int STATE_LOADED = 2;
+
+    private static final String BUNDLE_SELECTED_FEED = "selectedFeed";
 
     private ListView mArticlesListView;
     private RSSArticleAdapter mArticleAdapter;
@@ -89,9 +93,9 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
         mCurrentState = STATE_LOADING;
 
         if (savedInstanceState != null) {
-            mFeedID = savedInstanceState.getInt("selectedFeed");
-        } else if (getActivity().getIntent().hasExtra("feedid")) {
-            mFeedID = getActivity().getIntent().getIntExtra("feedid", mFeedID);
+            mFeedID = savedInstanceState.getInt(BUNDLE_SELECTED_FEED);
+        } else if (getActivity().getIntent().hasExtra(Extras.FEEDID)) {
+            mFeedID = getActivity().getIntent().getIntExtra(Extras.FEEDID, mFeedID);
         }
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -125,7 +129,7 @@ public class ArticleListFragment extends CustomListFragment implements LoaderCal
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putInt("selectedFeed", mFeedID);
+        savedInstanceState.putInt(BUNDLE_SELECTED_FEED, mFeedID);
     }
 
     @Override

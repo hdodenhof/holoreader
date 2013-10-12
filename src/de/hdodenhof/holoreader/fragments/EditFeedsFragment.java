@@ -45,6 +45,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
     @SuppressWarnings("unused")
     private static final String TAG = EditFeedsFragment.class.getSimpleName();
     private static final int LOADER = 10;
+
     private static final String BUNDLE_CHECKEDITEMS = "checkeditems";
 
     private ProgressDialog mSpinner;
@@ -73,7 +74,7 @@ public class EditFeedsFragment extends CustomListFragment implements LoaderCallb
 
         if (savedInstanceState != null) {
             if (savedInstanceState.getBooleanArray(BUNDLE_CHECKEDITEMS) != null) {
-                boolean[] checkedItems = savedInstanceState.getBooleanArray("checkeditems");
+                boolean[] checkedItems = savedInstanceState.getBooleanArray(BUNDLE_CHECKEDITEMS);
                 int checkedItemsCount = 0;
 
                 for (int i = 0; i < checkedItems.length; i++) {

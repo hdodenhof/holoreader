@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import de.hdodenhof.holoreader.Config;
 import de.hdodenhof.holoreader.R;
 import de.hdodenhof.holoreader.activities.HomeActivity;
+import de.hdodenhof.holoreader.misc.Extras;
 import de.hdodenhof.holoreader.misc.Prefs;
 import de.hdodenhof.holoreader.provider.RSSContentProvider;
 import de.hdodenhof.holoreader.provider.SQLiteHelper.FeedDAO;
@@ -79,7 +80,7 @@ public class GCMIntentService extends IntentService {
             int feedId = Integer.parseInt(newFeed.getLastPathSegment());
 
             Intent intent = new Intent(this, RefreshFeedService.class);
-            intent.putExtra("feedid", feedId);
+            intent.putExtra(Extras.FEEDID, feedId);
 
             startService(intent);
         }
